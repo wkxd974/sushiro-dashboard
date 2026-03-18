@@ -105,7 +105,7 @@ tr:hover td{background:#fef5f5}
 <script>
 var COLORS=['#e74c3c','#e67e22','#3498db','#2ecc71','#9b59b6','#1abc9c','#f39c12','#34495e','#e84393','#00cec9','#6c5ce7','#fdcb6e'];
 var cityData=[],storeData=[],dailyData=[];
-var curTab='city',supabaseUrl='',supabaseKey='',dbOk=false;
+var curTab='city',supabaseUrl='https://wvqvrefqtvjohersxviv.supabase.co',supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2cXZyZWZxdHZqb2hlcnN4dml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjM4MzUsImV4cCI6MjA4OTM5OTgzNX0.kt_Xf6vK_Ulhkfb_izEDM9Vd8JXSaPxCK9y8ojiQKNQ',dbOk=false;
 
 // === Config ===
 function saveConfig(){
@@ -117,7 +117,9 @@ function saveConfig(){
   loadData();
 }
 function loadConfig(){
-  try{var c=JSON.parse(localStorage.getItem('sushiro_cfg'));if(c&&c.u&&c.k){supabaseUrl=c.u;supabaseKey=c.k;document.getElementById('cfgUrl').value=c.u;document.getElementById('cfgKey').value=c.k;return true;}}catch(e){}return false;
+  try{var c=JSON.parse(localStorage.getItem('sushiro_cfg'));if(c&&c.u&&c.k){supabaseUrl=c.u;supabaseKey=c.k;}}catch(e){}
+  if(supabaseUrl&&supabaseKey){document.getElementById('cfgUrl').value=supabaseUrl;document.getElementById('cfgKey').value=supabaseKey;return true;}
+  return false;
 }
 
 // === Supabase fetch ===
