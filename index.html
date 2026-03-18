@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寿司郎数据看板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans CJK SC', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            min-width: 140px;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e0e0e0;
+            background: white;
+            padding: 0 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab {
+            padding: 16px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 15px;
+            font-weight: 500;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            margin-bottom: -2px;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border-left: 4px solid #667eea;
+        }
+
+        .kpi-card.alt1 {
+            border-left-color: #764ba2;
+        }
+
+        .kpi-card.alt2 {
+            border-left-color: #f093fb;
+        }
+
+        .kpi-card.alt3 {
+            border-left-color: #4facfe;
+        }
+
+        .kpi-card.alt4 {
+            border-left-color: #43e97b;
+        }
+
+        .kpi-card.alt5 {
+            border-left-color: #fa709a;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .kpi-unit {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #f0f0f0;
+        }
+
+        th .sort-indicator {
+            font-size: 10px;
+            margin-left: 4px;
+            opacity: 0.5;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 16px;
+            border-radius: 6px;
+            border-left: 4px solid #c33;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 16px;
+            border-radius: 6px;
+            border-left: 4px solid #3c3;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .demo-badge {
+            background: #ff9800;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-indicator.online {
+            background: #43e97b;
+        }
+
+        .status-indicator.offline {
+            background: #fa709a;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-1 { margin-bottom: 8px; }
+        .mb-2 { margin-bottom: 16px; }
+        .mb-3 { margin-bottom: 24px; }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group input,
+            .filter-group select {
+                width: 100%;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>🍣 寿司郎数据看板</h1>
+            <div class="header-controls">
+                <span id="demo-mode" class="demo-badge" style="display: none;">演示模式</span>
+                <span id="connection-status">
+                    <span class="status-indicator offline"></span>
+                    <span id="status-text">连接中...</span>
+                </span>
+                <button class="btn" onclick="showSettings()">⚙️ 设置</button>
+                <button class="btn btn-primary" onclick="refreshData()">🔄 刷新</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>月份</label>
+                <input type="month" id="month-filter" onchange="applyFilters()">
+            </div>
+            <div class="filter-group">
+                <label>城市</label>
+                <select id="city-filter" onchange="applyFilters()">
+                    <option value="">全部</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>开始日期</label>
+                <input type="date" id="date-from-filter" onchange="applyFilters()">
+            </div>
+            <div class="filter-group">
+                <label>结束日期</label>
+                <input type="date" id="date-to-filter" onchange="applyFilters()">
+            </div>
+        </div>
+
+        <div id="message-container"></div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('city')">城市看板</button>
+            <button class="tab" onclick="switchTab('store')">门店看板</button>
+            <button class="tab" onclick="switchTab('daily')">每日明细</button>
+            <button class="tab" onclick="switchTab('trend')">趋势分析</button>
+        </div>
+
+        <!-- 城市看板 -->
+        <div id="city" class="tab-content active">
+            <div class="kpi-grid" id="city-kpi"></div>
+            <div class="chart-container">
+                <div class="chart-title">城市销售收入对比</div>
+                <svg id="city-revenue-chart" width="100%" height="350"></svg>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">翻台率分布</div>
+                <svg id="city-turnover-chart" width="100%" height="350"></svg>
+            </div>
+            <div class="table-container">
+                <div class="chart-title">城市详细数据</div>
+                <table id="city-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('city', 0)">月份 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('city', 1)">城市 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('city', 2)">门店数 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('city', 3)">日均销售桌数 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('city', 4)">日均销售收入 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('city', 5)">翻台率 <span class="sort-indicator"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="city-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 门店看板 -->
+        <div id="store" class="tab-content">
+            <div class="kpi-grid" id="store-kpi"></div>
+            <div class="chart-container">
+                <div class="chart-title">门店销售收入分布</div>
+                <svg id="store-revenue-chart" width="100%" height="350"></svg>
+            </div>
+            <div class="table-container">
+                <div class="chart-title">门店详细数据</div>
+                <table id="store-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('store', 0)">月份 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('store', 1)">城市 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('store', 2)">门店 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('store', 3)">座位数 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('store', 4)">日均销售桌数 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('store', 5)">日均销售收入 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('store', 6)">翻台率 <span class="sort-indicator"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="store-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 每日明细 -->
+        <div id="daily" class="tab-content">
+            <div class="kpi-grid" id="daily-kpi"></div>
+            <div class="table-container">
+                <div class="chart-title">每日销售明细</div>
+                <table id="daily-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('daily', 0)">日期 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('daily', 1)">门店 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('daily', 2)">城市 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('daily', 3)">销售桌数 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('daily', 4)">销售收入 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('daily', 5)">翻台率 <span class="sort-indicator"></span></th>
+                            <th onclick="sortTable('daily', 6)">排队时段 <span class="sort-indicator"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="daily-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 趋势分析 -->
+        <div id="trend" class="tab-content">
+            <div class="chart-container">
+                <div class="chart-title">销售收入趋势 (按日期)</div>
+                <svg id="trend-revenue-chart" width="100%" height="350"></svg>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">翻台率趋势 (按日期)</div>
+                <svg id="trend-turnover-chart" width="100%" height="350"></svg>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">排队占比趋势</div>
+                <svg id="trend-queue-chart" width="100%" height="350"></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置模态框 -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Supabase 配置</div>
+            <div class="modal-body">
+                <div class="filter-group mb-2">
+                    <label>Supabase URL</label>
+                    <input type="text" id="supabase-url" placeholder="https://xxxxx.supabase.co">
+                </div>
+                <div class="filter-group mb-3">
+                    <label>匿名密钥</label>
+                    <input type="password" id="supabase-key" placeholder="eyJhbGc...">
+                </div>
+                <div class="filter-group mb-3">
+                    <label>
+                        <input type="checkbox" id="demo-toggle"> 演示模式 (使用测试数据)
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeSettings()">取消</button>
+                <button class="btn btn-primary" onclick="saveSettings()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 配置 ====================
+        const CONFIG_KEY = 'sushiro_cfg';
+        const DEFAULT_CONFIG = {
+            supabaseUrl: 'https://wvqvrefqtvjohersxviv.supabase.co',
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2cXZyZWZxdHZqb2hlcnN4dml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjM4MzUsImV4cCI6MjA4OTM5OTgzNX0.kt_Xf6vK_Ulhkfb_izEDM9Vd8JXSaPxCK9y8ojiQKNQ',
+            demoMode: false
+        };
+
+        let config = loadConfig();
+        let data = {
+            cityMonthly: [],
+            storeMonthly: [],
+            storeDaily: [],
+            cities: [],
+            months: []
+        };
+        let filteredData = { ...data };
+        let sortState = {};
+        let refreshInterval = null;
+
+        // ==================== 工具函数 ====================
+        function loadConfig() {
+            const saved = localStorage.getItem(CONFIG_KEY);
+            return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : { ...DEFAULT_CONFIG };
+        }
+
+        function saveConfig() {
+            localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+        }
+
+        function showMessage(message, type = 'info') {
+            const container = document.getElementById('message-container');
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            container.innerHTML = `<div class="${className}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 4000);
+        }
+
+        function updateConnectionStatus(online) {
+            const status = document.getElementById('connection-status');
+            const statusText = document.getElementById('status-text');
+            if (online) {
+                status.querySelector('.status-indicator').className = 'status-indicator online';
+                statusText.textContent = '已连接';
+            } else {
+                status.querySelector('.status-indicator').className = 'status-indicator offline';
+                statusText.textContent = '离线';
+            }
+        }
+
+        // ==================== Supabase API ====================
+        async function fetchFromSupabase(table) {
+            if (config.demoMode) {
+                return generateDemoData(table);
+            }
+
+            try {
+                const url = `${config.supabaseUrl}/rest/v1/${table}?select=*`;
+                const response = await fetch(url, {
+                    headers: {
+                        'apikey': config.supabaseKey,
+                        'Authorization': `Bearer ${config.supabaseKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                updateConnectionStatus(true);
+                return result || [];
+            } catch (error) {
+                console.error(`Failed to fetch ${table}:`, error);
+                updateConnectionStatus(false);
+                showMessage(`无法加载 ${table} 数据: ${error.message}`, 'error');
+                return [];
+            }
+        }
+
+        function generateDemoData(table) {
+            const cities = ['北京', '上海', '深圳', '杭州', '成都'];
+            const months = ['2025-01', '2025-02', '2025-03'];
+            const stores = {};
+
+            cities.forEach(city => {
+                for (let i = 1; i <= 3; i++) {
+                    stores[`${city}-${i}`] = `${city}店${i}`;
+                }
+            });
+
+            if (table === 'city_monthly') {
+                return months.flatMap(month =>
+                    cities.map(city => ({
+                        month,
+                        city,
+                        store_count: Math.floor(Math.random() * 5) + 3,
+                        avg_tables_per_store: Math.floor(Math.random() * 20) + 20,
+                        data_days: 28,
+                        daily_avg_sales_tables: Math.floor(Math.random() * 100) + 200,
+                        daily_avg_sales_revenue: Math.floor(Math.random() * 50000) + 100000,
+                        monthly_turnover_rate: (Math.random() * 0.5 + 0.5).toFixed(2),
+                        queue_hour_pct: (Math.random() * 0.4 + 0.2).toFixed(2),
+                        queue50_hour_pct: (Math.random() * 0.2 + 0.05).toFixed(2),
+                        total_sales_tables: Math.floor(Math.random() * 10000) + 5000,
+                        total_sales_revenue: Math.floor(Math.random() * 5000000) + 2000000,
+                        remark: ''
+                    }))
+                );
+            }
+
+            if (table === 'store_monthly') {
+                const result = [];
+                months.forEach(month => {
+                    Object.entries(stores).forEach(([storeId, storeName]) => {
+                        const [city] = storeId.split('-');
+                        result.push({
+                            month,
+                            city,
+                            store_id: storeId,
+                            store_name: storeName,
+                            tables: Math.floor(Math.random() * 30) + 20,
+                            unit_price: Math.floor(Math.random() * 200) + 100,
+                            data_days: 28,
+                            biz_hours: 12,
+                            daily_avg_sales_tables: Math.floor(Math.random() * 80) + 50,
+                            daily_avg_sales_revenue: Math.floor(Math.random() * 30000) + 30000,
+                            queue_hour_pct: (Math.random() * 0.4 + 0.2).toFixed(2),
+                            queue50_hour_pct: (Math.random() * 0.2 + 0.05).toFixed(2),
+                            monthly_turnover_rate: (Math.random() * 0.5 + 0.5).toFixed(2),
+                            total_sales_tables: Math.floor(Math.random() * 2500) + 1000,
+                            total_sales_revenue: Math.floor(Math.random() * 1000000) + 500000
+                        });
+                    });
+                });
+                return result;
+            }
+
+            if (table === 'store_daily') {
+                const result = [];
+                const startDate = new Date('2025-01-01');
+                const endDate = new Date('2025-03-31');
+
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    Object.entries(stores).forEach(([storeId, storeName]) => {
+                        const [city] = storeId.split('-');
+                        result.push({
+                            date: d.toISOString().split('T')[0],
+                            store_id: storeId,
+                            store_name: storeName,
+                            city,
+                            tables: Math.floor(Math.random() * 30) + 20,
+                            unit_price: Math.floor(Math.random() * 200) + 100,
+                            queue_hours: Math.random() * 3,
+                            queue50_hours: Math.random() * 1,
+                            biz_hours: 12,
+                            daily_sales_tables: Math.floor(Math.random() * 80) + 30,
+                            daily_turnover_rate: (Math.random() * 0.5 + 0.5).toFixed(2),
+                            daily_sales_revenue: Math.floor(Math.random() * 30000) + 20000
+                        });
+                    });
+                }
+                return result;
+            }
+
+            return [];
+        }
+
+        // ==================== 数据加载 ====================
+        async function loadData() {
+            document.getElementById('message-container').innerHTML = '<div class="loading"><span class="spinner"></span> 加载数据中...</div>';
+
+            const [cityData, storeData, dailyData] = await Promise.all([
+                fetchFromSupabase('city_monthly'),
+                fetchFromSupabase('store_monthly'),
+                fetchFromSupabase('store_daily')
+            ]);
+
+            data = {
+                cityMonthly: cityData,
+                storeMonthly: storeData,
+                storeDaily: dailyData,
+                cities: [...new Set(cityData.map(d => d.city).filter(c => c))],
+                months: [...new Set(cityData.map(d => d.month).filter(m => m))].sort()
+            };
+
+            initFilters();
+            applyFilters();
+            document.getElementById('message-container').innerHTML = '';
+            showMessage('数据加载成功', 'success');
+        }
+
+        function initFilters() {
+            const monthInput = document.getElementById('month-filter');
+            const citySelect = document.getElementById('city-filter');
+
+            if (data.months.length > 0) {
+                monthInput.value = data.months[data.months.length - 1];
+            }
+
+            citySelect.innerHTML = '<option value="">全部</option>' +
+                data.cities.map(city => `<option value="${city}">${city}</option>`).join('');
+        }
+
+        function applyFilters() {
+            const month = document.getElementById('month-filter').value;
+            const city = document.getElementById('city-filter').value;
+            const dateFrom = document.getElementById('date-from-filter').value;
+            const dateTo = document.getElementById('date-to-filter').value;
+
+            filteredData = {
+                cityMonthly: data.cityMonthly.filter(d => {
+                    if (month && d.month !== month) return false;
+                    if (city && d.city !== city) return false;
+                    return true;
+                }),
+                storeMonthly: data.storeMonthly.filter(d => {
+                    if (month && d.month !== month) return false;
+                    if (city && d.city !== city) return false;
+                    return true;
+                }),
+                storeDaily: data.storeDaily.filter(d => {
+                    if (dateFrom && d.date < dateFrom) return false;
+                    if (dateTo && d.date > dateTo) return false;
+                    if (city && d.city !== city) return false;
+                    return true;
+                })
+            };
+
+            renderCity();
+            renderStore();
+            renderDaily();
+            renderTrend();
+        }
+
+        // ==================== 标签页切换 ====================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // ==================== 渲染城市看板 ====================
+        function renderCity() {
+            const data = filteredData.cityMonthly;
+
+            // KPI卡片
+            const minRevenue = Math.min(...data.map(d => d.total_sales_revenue || 0)) || 0;
+            const avgTurnover = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.monthly_turnover_rate || 0), 0) / data.length).toFixed(2) : 0;
+            const avgQueuePct = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.queue_hour_pct || 0), 0) / data.length * 100).toFixed(1) : 0;
+            const avgQueue50Pct = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.queue50_hour_pct || 0), 0) / data.length * 100).toFixed(1) : 0;
+            const totalStores = [...new Set(data.map(d => d.store_count))][0] || 0;
+            const avgDailyTables = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.daily_avg_sales_tables || 0), 0) / data.length).toFixed(0) : 0;
+
+            document.getElementById('city-kpi').innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-label">累计最低销售净额</div>
+                    <div class="kpi-value">¥${(minRevenue / 10000).toFixed(1)}</div>
+                    <div class="kpi-unit">万元</div>
+                </div>
+                <div class="kpi-card alt1">
+                    <div class="kpi-label">平均翻台率</div>
+                    <div class="kpi-value">${(avgTurnover * 100).toFixed(1)}%</div>
+                </div>
+                <div class="kpi-card alt2">
+                    <div class="kpi-label">排队时段占比</div>
+                    <div class="kpi-value">${avgQueuePct}%</div>
+                </div>
+                <div class="kpi-card alt3">
+                    <div class="kpi-label">排50号以上占比</div>
+                    <div class="kpi-value">${avgQueue50Pct}%</div>
+                </div>
+                <div class="kpi-card alt4">
+                    <div class="kpi-label">总门店数</div>
+                    <div class="kpi-value">${totalStores}</div>
+                </div>
+                <div class="kpi-card alt5">
+                    <div class="kpi-label">日均单店销售桌数</div>
+                    <div class="kpi-value">${avgDailyTables}</div>
+                </div>
+            `;
+
+            // 表格数据
+            const tbody = document.getElementById('city-tbody');
+            tbody.innerHTML = data.map(d => `
+                <tr>
+                    <td>${d.month || '-'}</td>
+                    <td>${d.city || '-'}</td>
+                    <td>${d.store_count || '-'}</td>
+                    <td>${parseFloat(d.daily_avg_sales_tables || 0).toFixed(0)}</td>
+                    <td>¥${(parseFloat(d.daily_avg_sales_revenue || 0) / 10000).toFixed(1)}万</td>
+                    <td>${(parseFloat(d.monthly_turnover_rate || 0) * 100).toFixed(1)}%</td>
+                </tr>
+            `).join('');
+
+            drawBarChart('city-revenue-chart', data, 'city', 'daily_avg_sales_revenue', 'city');
+            drawBarChart('city-turnover-chart', data, 'city', 'monthly_turnover_rate', 'city');
+        }
+
+        // ==================== 渲染门店看板 ====================
+        function renderStore() {
+            const data = filteredData.storeMonthly;
+
+            const minRevenue = Math.min(...data.map(d => d.total_sales_revenue || 0)) || 0;
+            const avgTurnover = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.monthly_turnover_rate || 0), 0) / data.length).toFixed(2) : 0;
+            const avgQueuePct = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.queue_hour_pct || 0), 0) / data.length * 100).toFixed(1) : 0;
+            const avgQueue50Pct = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.queue50_hour_pct || 0), 0) / data.length * 100).toFixed(1) : 0;
+            const totalStores = data.length;
+            const avgDailyTables = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.daily_avg_sales_tables || 0), 0) / data.length).toFixed(0) : 0;
+
+            document.getElementById('store-kpi').innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-label">累计最低销售净额</div>
+                    <div class="kpi-value">¥${(minRevenue / 10000).toFixed(1)}</div>
+                    <div class="kpi-unit">万元</div>
+                </div>
+                <div class="kpi-card alt1">
+                    <div class="kpi-label">平均翻台率</div>
+                    <div class="kpi-value">${(avgTurnover * 100).toFixed(1)}%</div>
+                </div>
+                <div class="kpi-card alt2">
+                    <div class="kpi-label">排队时段占比</div>
+                    <div class="kpi-value">${avgQueuePct}%</div>
+                </div>
+                <div class="kpi-card alt3">
+                    <div class="kpi-label">排50号以上占比</div>
+                    <div class="kpi-value">${avgQueue50Pct}%</div>
+                </div>
+                <div class="kpi-card alt4">
+                    <div class="kpi-label">总门店数</div>
+                    <div class="kpi-value">${totalStores}</div>
+                </div>
+                <div class="kpi-card alt5">
+                    <div class="kpi-label">日均单店销售桌数</div>
+                    <div class="kpi-value">${avgDailyTables}</div>
+                </div>
+            `;
+
+            const tbody = document.getElementById('store-tbody');
+            tbody.innerHTML = data.map(d => `
+                <tr>
+                    <td>${d.month || '-'}</td>
+                    <td>${d.city || '-'}</td>
+                    <td>${d.store_name || '-'}</td>
+                    <td>${d.tables || '-'}</td>
+                    <td>${parseFloat(d.daily_avg_sales_tables || 0).toFixed(0)}</td>
+                    <td>¥${(parseFloat(d.daily_avg_sales_revenue || 0) / 10000).toFixed(1)}万</td>
+                    <td>${(parseFloat(d.monthly_turnover_rate || 0) * 100).toFixed(1)}%</td>
+                </tr>
+            `).join('');
+
+            drawBarChart('store-revenue-chart', data.slice(0, 20), 'store_name', 'daily_avg_sales_revenue', 'store');
+        }
+
+        // ==================== 渲染每日明细 ====================
+        function renderDaily() {
+            const data = filteredData.storeDaily;
+
+            const minRevenue = Math.min(...data.map(d => d.daily_sales_revenue || 0)) || 0;
+            const avgTurnover = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.daily_turnover_rate || 0), 0) / data.length).toFixed(2) : 0;
+            const avgQueueHours = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.queue_hours || 0), 0) / data.length).toFixed(2) : 0;
+            const avgQueue50Hours = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.queue50_hours || 0), 0) / data.length).toFixed(2) : 0;
+            const totalStores = [...new Set(data.map(d => d.store_id))].length;
+            const avgDailyTables = data.length > 0 ? (data.reduce((s, d) => s + parseFloat(d.daily_sales_tables || 0), 0) / data.length).toFixed(0) : 0;
+
+            document.getElementById('daily-kpi').innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-label">累计最低销售净额</div>
+                    <div class="kpi-value">¥${(minRevenue / 10000).toFixed(1)}</div>
+                    <div class="kpi-unit">万元</div>
+                </div>
+                <div class="kpi-card alt1">
+                    <div class="kpi-label">平均翻台率</div>
+                    <div class="kpi-value">${(avgTurnover * 100).toFixed(1)}%</div>
+                </div>
+                <div class="kpi-card alt2">
+                    <div class="kpi-label">平均排队时段</div>
+                    <div class="kpi-value">${avgQueueHours}</div>
+                    <div class="kpi-unit">小时</div>
+                </div>
+                <div class="kpi-card alt3">
+                    <div class="kpi-label">平均排50号时段</div>
+                    <div class="kpi-value">${avgQueue50Hours}</div>
+                    <div class="kpi-unit">小时</div>
+                </div>
+                <div class="kpi-card alt4">
+                    <div class="kpi-label">涉及门店数</div>
+                    <div class="kpi-value">${totalStores}</div>
+                </div>
+                <div class="kpi-card alt5">
+                    <div class="kpi-label">日均单店销售桌数</div>
+                    <div class="kpi-value">${avgDailyTables}</div>
+                </div>
+            `;
+
+            const tbody = document.getElementById('daily-tbody');
+            tbody.innerHTML = data.slice(0, 100).map(d => `
+                <tr>
+                    <td>${d.date || '-'}</td>
+                    <td>${d.store_name || '-'}</td>
+                    <td>${d.city || '-'}</td>
+                    <td>${parseFloat(d.daily_sales_tables || 0).toFixed(0)}</td>
+                    <td>¥${(parseFloat(d.daily_sales_revenue || 0) / 10000).toFixed(1)}万</td>
+                    <td>${(parseFloat(d.daily_turnover_rate || 0) * 100).toFixed(1)}%</td>
+                    <td>${parseFloat(d.queue_hours || 0).toFixed(1)}h</td>
+                </tr>
+            `).join('');
+        }
+
+        // ==================== 渲染趋势分析 ====================
+        function renderTrend() {
+            const data = filteredData.storeDaily.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (data.length === 0) {
+                document.getElementById('trend-revenue-chart').parentElement.innerHTML += '<div class="no-data">暂无数据</div>';
+                return;
+            }
+
+            drawLineChart('trend-revenue-chart', data, 'date', 'daily_sales_revenue');
+            drawLineChart('trend-turnover-chart', data, 'date', 'daily_turnover_rate');
+            drawLineChart('trend-queue-chart', data, 'date', 'queue_hours');
+        }
+
+        // ==================== SVG 图表绘制 ====================
+        function drawBarChart(elementId, data, xKey, yKey, type) {
+            const svg = document.getElementById(elementId);
+            if (!svg || data.length === 0) return;
+
+            const width = svg.parentElement.offsetWidth;
+            const height = 350;
+            const padding = { top: 20, right: 20, bottom: 60, left: 60 };
+
+            let labels = [];
+            let values = [];
+
+            if (type === 'city') {
+                const grouped = {};
+                data.forEach(d => {
+                    if (!grouped[d.city]) grouped[d.city] = [];
+                    grouped[d.city].push(d);
+                });
+                Object.entries(grouped).forEach(([city, items]) => {
+                    labels.push(city);
+                    const avg = items.reduce((s, d) => s + parseFloat(d[yKey] || 0), 0) / items.length;
+                    values.push(avg);
+                });
+            } else {
+                data.forEach(d => {
+                    labels.push(d[xKey]?.substring(0, 10) || '');
+                    values.push(parseFloat(d[yKey] || 0));
+                });
+            }
+
+            const maxValue = Math.max(...values, 1);
+            const barWidth = (width - padding.left - padding.right) / labels.length;
+            const scaleY = (height - padding.top - padding.bottom) / maxValue;
+
+            svg.innerHTML = '';
+            svg.setAttribute('width', width);
+            svg.setAttribute('height', height);
+
+            // 背景网格
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (i * (height - padding.top - padding.bottom) / 5);
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', padding.left);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', width - padding.right);
+                line.setAttribute('y2', y);
+                line.setAttribute('stroke', '#e0e0e0');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', padding.left - 10);
+                text.setAttribute('y', y + 4);
+                text.setAttribute('font-size', '12');
+                text.setAttribute('fill', '#999');
+                text.setAttribute('text-anchor', 'end');
+                text.textContent = ((maxValue * (5 - i)) / 5).toFixed(0);
+                svg.appendChild(text);
+            }
+
+            // 柱子
+            values.forEach((value, idx) => {
+                const x = padding.left + idx * barWidth + barWidth / 4;
+                const barHeight = value * scaleY;
+                const y = height - padding.bottom - barHeight;
+
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', y);
+                rect.setAttribute('width', barWidth / 2);
+                rect.setAttribute('height', barHeight);
+                rect.setAttribute('fill', `hsl(${220 + idx * 5}, 70%, 60%)`);
+                rect.setAttribute('rx', '4');
+                svg.appendChild(rect);
+
+                // 数值标签
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x + barWidth / 4);
+                text.setAttribute('y', y - 5);
+                text.setAttribute('font-size', '12');
+                text.setAttribute('fill', '#333');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = value.toFixed(yKey.includes('rate') ? 2 : 0);
+                svg.appendChild(text);
+            });
+
+            // X轴标签
+            labels.forEach((label, idx) => {
+                const x = padding.left + idx * barWidth + barWidth / 2;
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x);
+                text.setAttribute('y', height - padding.bottom + 20);
+                text.setAttribute('font-size', '12');
+                text.setAttribute('fill', '#666');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = label;
+                svg.appendChild(text);
+            });
+
+            // 坐标轴
+            const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line1.setAttribute('x1', padding.left);
+            line1.setAttribute('y1', padding.top);
+            line1.setAttribute('x2', padding.left);
+            line1.setAttribute('y2', height - padding.bottom);
+            line1.setAttribute('stroke', '#333');
+            line1.setAttribute('stroke-width', '2');
+            svg.appendChild(line1);
+
+            const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line2.setAttribute('x1', padding.left);
+            line2.setAttribute('y1', height - padding.bottom);
+            line2.setAttribute('x2', width - padding.right);
+            line2.setAttribute('y2', height - padding.bottom);
+            line2.setAttribute('stroke', '#333');
+            line2.setAttribute('stroke-width', '2');
+            svg.appendChild(line2);
+        }
+
+        function drawLineChart(elementId, data, xKey, yKey) {
+            const svg = document.getElementById(elementId);
+            if (!svg || data.length === 0) return;
+
+            const width = svg.parentElement.offsetWidth;
+            const height = 350;
+            const padding = { top: 20, right: 20, bottom: 60, left: 60 };
+
+            let values = data.map(d => parseFloat(d[yKey] || 0));
+            const maxValue = Math.max(...values, 1);
+            const minValue = Math.min(...values, 0);
+            const range = maxValue - minValue || 1;
+
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            const pointSpacing = chartWidth / Math.max(data.length - 1, 1);
+
+            svg.innerHTML = '';
+            svg.setAttribute('width', width);
+            svg.setAttribute('height', height);
+
+            // 背景网格
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (i * chartHeight / 5);
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', padding.left);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', width - padding.right);
+                line.setAttribute('y2', y);
+                line.setAttribute('stroke', '#e0e0e0');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', padding.left - 10);
+                text.setAttribute('y', y + 4);
+                text.setAttribute('font-size', '12');
+                text.setAttribute('fill', '#999');
+                text.setAttribute('text-anchor', 'end');
+                text.textContent = (minValue + ((5 - i) / 5) * range).toFixed(yKey.includes('rate') ? 2 : 0);
+                svg.appendChild(text);
+            }
+
+            // 曲线路径
+            let pathData = '';
+            values.forEach((value, idx) => {
+                const x = padding.left + idx * pointSpacing;
+                const y = padding.top + chartHeight - ((value - minValue) / range * chartHeight);
+                if (idx === 0) {
+                    pathData += `M ${x} ${y}`;
+                } else {
+                    pathData += ` L ${x} ${y}`;
+                }
+            });
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', '#667eea');
+            path.setAttribute('stroke-width', '3');
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke-linejoin', 'round');
+            svg.appendChild(path);
+
+            // 数据点
+            values.forEach((value, idx) => {
+                const x = padding.left + idx * pointSpacing;
+                const y = padding.top + chartHeight - ((value - minValue) / range * chartHeight);
+
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', '4');
+                circle.setAttribute('fill', '#667eea');
+                svg.appendChild(circle);
+            });
+
+            // X轴标签 (采样)
+            const labelStep = Math.max(1, Math.floor(data.length / 10));
+            data.forEach((d, idx) => {
+                if (idx % labelStep === 0) {
+                    const x = padding.left + idx * pointSpacing;
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', x);
+                    text.setAttribute('y', height - padding.bottom + 20);
+                    text.setAttribute('font-size', '12');
+                    text.setAttribute('fill', '#666');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.textContent = d[xKey]?.substring(5) || '';
+                    svg.appendChild(text);
+                }
+            });
+
+            // 坐标轴
+            const axisY = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            axisY.setAttribute('x1', padding.left);
+            axisY.setAttribute('y1', padding.top);
+            axisY.setAttribute('x2', padding.left);
+            axisY.setAttribute('y2', height - padding.bottom);
+            axisY.setAttribute('stroke', '#333');
+            axisY.setAttribute('stroke-width', '2');
+            svg.appendChild(axisY);
+
+            const axisX = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            axisX.setAttribute('x1', padding.left);
+            axisX.setAttribute('y1', height - padding.bottom);
+            axisX.setAttribute('x2', width - padding.right);
+            axisX.setAttribute('y2', height - padding.bottom);
+            axisX.setAttribute('stroke', '#333');
+            axisX.setAttribute('stroke-width', '2');
+            svg.appendChild(axisX);
+        }
+
+        // ==================== 表格排序 ====================
+        function sortTable(tableId, colIndex) {
+            const table = document.getElementById(`${tableId}-table`);
+            const tbody = document.getElementById(`${tableId}-tbody`);
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            const key = `${tableId}-${colIndex}`;
+            const isAsc = sortState[key] !== true;
+            sortState = { [key]: isAsc };
+
+            rows.sort((a, b) => {
+                let aVal = a.cells[colIndex].textContent.trim();
+                let bVal = b.cells[colIndex].textContent.trim();
+
+                const aNum = parseFloat(aVal);
+                const bNum = parseFloat(bVal);
+
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return isAsc ? aNum - bNum : bNum - aNum;
+                }
+
+                return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+            });
+
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+
+            table.querySelectorAll('th .sort-indicator').forEach(ind => ind.textContent = '');
+            const th = table.querySelectorAll('th')[colIndex];
+            th.querySelector('.sort-indicator').textContent = isAsc ? '↑' : '↓';
+        }
+
+        // ==================== 设置模态框 ====================
+        function showSettings() {
+            document.getElementById('supabase-url').value = config.supabaseUrl;
+            document.getElementById('supabase-key').value = config.supabaseKey;
+            document.getElementById('demo-toggle').checked = config.demoMode;
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function saveSettings() {
+            config.supabaseUrl = document.getElementById('supabase-url').value || DEFAULT_CONFIG.supabaseUrl;
+            config.supabaseKey = document.getElementById('supabase-key').value || DEFAULT_CONFIG.supabaseKey;
+            config.demoMode = document.getElementById('demo-toggle').checked;
+
+            saveConfig();
+            document.getElementById('demo-mode').style.display = config.demoMode ? 'inline-block' : 'none';
+            closeSettings();
+            refreshData();
+        }
+
+        function refreshData() {
+            loadData();
+        }
+
+        // ==================== 初始化 ====================
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('demo-mode').style.display = config.demoMode ? 'inline-block' : 'none';
+            loadData();
+
+            refreshInterval = setInterval(loadData, 5 * 60 * 1000);
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+
+        // 点击模态框外关闭
+        document.getElementById('settingsModal').addEventListener('click', (e) => {
+            if (e.target.id === 'settingsModal') closeSettings();
+        });
+    </script>
+</body>
+</html>
