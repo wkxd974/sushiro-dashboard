@@ -88,8 +88,9 @@ tr:hover td{background:#fef5f5}
   <div class="filters">
     <div class="fg"><label>月份</label><select id="fMonth" onchange="render()"><option>全部</option><option>2026-02</option><option>2026-03</option></select></div>
     <div class="fg"><label>城市</label><select id="fCity" onchange="render()"><option>全部</option><option>上海</option><option>东莞</option><option>佛山</option><option>北京</option><option>厦门</option><option>天津</option><option>宁波</option><option>广州</option><option>总计</option><option>惠州</option><option>成都</option><option>无锡</option><option>杭州</option><option>武汉</option><option>江门</option><option>济南</option><option>深圳</option><option>珠海</option><option>苏州</option><option>重庆</option><option>金华</option></select></div>
-    <div class="fg"><label>开始日期</label><input type="date" id="fDateFrom" onchange="render()"></div>
-    <div class="fg"><label>结束日期</label><input type="date" id="fDateTo" onchange="render()"></div>
+    <div class="fg date-filter" id="fgDateFrom" style="display:none"><label>开始日期</label><input type="date" id="fDateFrom" onchange="render()"></div>
+    <div class="fg date-filter" id="fgDateTo" style="display:none"><label>结束日期</label><input type="date" id="fDateTo" onchange="render()"></div>
+    <div class="fg date-filter" id="fgDateHint" style="display:none"><span style="font-size:11px;color:#e74c3c;margin-top:18px">日期范围仅对 每日明细/趋势分析 生效</span></div>
     <div class="fg"><label>数据源</label><span id="srcLabel" style="font-size:11px;padding:6px 0"><span class="status-dot s-on"></span>已连接 (40/172/1000)</span></div>
     <div class="finfo" id="dc">门店: 86 条</div>
   </div>
@@ -197,7 +198,12 @@ function getFilters(){
 
 // === Tab ===
 function go(t){curTab=t;document.querySelectorAll('.tab').forEach(function(el,i){el.classList.toggle('active',['city','store','daily','trend'][i]===t);});
-['city','store','daily','trend'].forEach(function(p){document.getElementById('p-'+p).classList.toggle('hidden',p!==t);});render();}
+['city','store','daily','trend'].forEach(function(p){document.getElementById('p-'+p).classList.toggle('hidden',p!==t);});
+var showDate=(t==='daily'||t==='trend');
+document.getElementById('fgDateFrom').style.display=showDate?'':'none';
+document.getElementById('fgDateTo').style.display=showDate?'':'none';
+document.getElementById('fgDateHint').style.display=showDate?'':'none';
+render();}
 
 // === SVG tools ===
 function svgEl(t,a,txt){var e=document.createElementNS('http://www.w3.org/2000/svg',t);if(a)Object.keys(a).forEach(function(k){e.setAttribute(k,a[k]);});if(txt!==undefined)e.textContent=txt;return e;}
