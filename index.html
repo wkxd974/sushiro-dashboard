@@ -428,7 +428,7 @@ function drawLineChart(container,data,keys,colors,labels,opts){
   for(var i=0;i<5;i++){var y=pad.t+ch*i/4;svg.appendChild(svgEl('line',{x1:pad.l,y1:y,x2:W-pad.r,y2:y,stroke:'#f0f0f0'}));
   var v=mx-(mx-mn)*i/4;svg.appendChild(svgEl('text',{x:pad.l-6,y:y+3,'text-anchor':'end','font-size':9,fill:'#999'},opts.yFmt?opts.yFmt(v):v.toFixed(1)));}
   var step=Math.max(1,Math.floor(data.length/10));
-  data.forEach(function(d,i){if(i%step===0||i===data.length-1){svg.appendChild(svgEl('text',{x:pad.l+i*xStep,y:H-pad.b+14,'text-anchor':'middle','font-size':9,fill:'#999',transform:'rotate(-20,'+( pad.l+i*xStep)+','+(H-pad.b+14)+')'},d._label||'')));}});
+  data.forEach(function(d,i){if(i%step===0||i===data.length-1){svg.appendChild(svgEl('text',{x:pad.l+i*xStep,y:H-pad.b+14,'text-anchor':'middle','font-size':9,fill:'#999',transform:'rotate(-20,'+( pad.l+i*xStep)+','+(H-pad.b+14)+')'},d._label||''));}});
   keys.forEach(function(k,ki){var pts=[];data.forEach(function(d,i){if(d[k]!=null&&!isNaN(d[k]))pts.push({x:pad.l+i*xStep,y:yS(+d[k]),v:+d[k],l:d._label||''});});
   if(pts.length<2)return;var pathD=pts.map(function(p,i){return(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
   svg.appendChild(svgEl('path',{d:pathD,fill:'none',stroke:colors[ki],'stroke-width':2}));
