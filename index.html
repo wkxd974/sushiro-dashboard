@@ -413,7 +413,7 @@ function fmtMoney(v){return v==null?'-':'¥'+Math.round(v).toLocaleString();}
 
 function drawBarH(container,items,valKey,labelKey,fmtFn,color){
   if(!items.length){container.innerHTML='<div style="color:#999;text-align:center;padding:30px">暂无数据</div>';return;}
-  var W=560,barH=26,gap=4,pad={l:90,r:55,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
+  var W=560,barH=30,gap=5,pad={l:95,r:65,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
   var mx=Math.max.apply(null,items.map(function(d){return d[valKey]||0;}))||1;var cw=W-pad.l-pad.r;
   items.forEach(function(d,i){var y=pad.t+i*(barH+gap);var w=((d[valKey]||0)/mx)*cw;
   var c;
@@ -425,12 +425,12 @@ function drawBarH(container,items,valKey,labelKey,fmtFn,color){
   } else {
     c=COLORS[i%COLORS.length];d._barOpacity=0.85;
   }
-  var lbl=d[labelKey]||'';if(lbl.length>7)lbl=lbl.substring(0,7)+'…';
-  svg.appendChild(svgEl('text',{x:pad.l-6,y:y+barH/2+4,'text-anchor':'end','font-size':11,fill:'#333'},lbl));
+  var lbl=d[labelKey]||'';if(lbl.length>8)lbl=lbl.substring(0,8)+'…';
+  svg.appendChild(svgEl('text',{x:pad.l-6,y:y+barH/2+5,'text-anchor':'end','font-size':13,fill:'#333','font-weight':500},lbl));
   var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:3,fill:c,opacity:d._barOpacity||.85,style:'cursor:pointer'});
   rect.addEventListener('mouseenter',function(e){showTip(e,d[labelKey]+': '+(fmtFn?fmtFn(d[valKey]):d[valKey]));});
   rect.addEventListener('mouseleave',hideTip);svg.appendChild(rect);
-  svg.appendChild(svgEl('text',{x:pad.l+w+4,y:y+barH/2+4,'font-size':10,fill:'#666'},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
+  svg.appendChild(svgEl('text',{x:pad.l+w+5,y:y+barH/2+5,'font-size':12,fill:'#555','font-weight':600},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
   container.innerHTML='';container.appendChild(svg);
 }
 
@@ -513,8 +513,8 @@ function initSushiroFilters(){
 
 // When month dropdown changes: auto-set date range to that month's available dates
 function onMonthChange(){
-  var isDailyTab=(curSTab==='s_daily'||curSTab==='s_trend');
-  if(isDailyTab) syncDateRangeToMonth();
+  var hasDateTab=(curSTab==='s_city'||curSTab==='s_store'||curSTab==='s_daily'||curSTab==='s_trend');
+  if(hasDateTab) syncDateRangeToMonth();
   sRender();
 }
 
@@ -567,10 +567,10 @@ function sTab(t){
   var tabs=['s_city','s_store','s_daily','s_trend','s_expand'];
   document.querySelectorAll('#sushiroTabs .tab').forEach(function(el,i){el.classList.toggle('active',tabs[i]===t);});
   tabs.forEach(function(p){document.getElementById('sp-'+p).classList.toggle('hidden',p!==t);});
-  var showDate=(t==='s_daily'||t==='s_trend');
+  var showDate=(t==='s_city'||t==='s_store'||t==='s_daily'||t==='s_trend');
   document.getElementById('sfgDateFrom').style.display=showDate?'':'none';
   document.getElementById('sfgDateTo').style.display=showDate?'':'none';
-  // When switching to daily/trend tab, sync date range to current month selection
+  // When switching tabs, sync date range to current month selection
   if(showDate) syncDateRangeToMonth();
   sRender();
 }
@@ -586,8 +586,40 @@ function sRender(){
 }
 
 function renderSCity(f){
-  var d=sushiroCityData.filter(function(r){return(f.month==='全部'||r.month===f.month)&&(f.city==='全部'||r.city===f.city)&&r.city!=='总计';});
-  document.getElementById('sDataCount').textContent='城市: '+d.length+' 条';
+  // Aggregate from daily data when date range is set
+  var dd=sushiroDailyData.filter(function(r){
+    var mc=f.city==='全部'||r.city===f.city;
+    var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
+    return mc&&md;
+  });
+  // Build city-level aggregates from daily data
+  var cg={};dd.forEach(function(r){
+    if(!r.city)return;
+    if(!cg[r.city])cg[r.city]={city:r.city,stores:{},dates:{},rev:0,tables:0,qh:0,bh:0,turnSum:0,turnN:0};
+    cg[r.city].stores[r.store_id||r.store_name]=1;
+    cg[r.city].dates[r.date]=1;
+    cg[r.city].rev+=(r.daily_sales_revenue||0);
+    cg[r.city].tables+=(r.daily_sales_tables||0);
+    cg[r.city].qh+=(r.queue_hours||0);
+    cg[r.city].bh+=(r.biz_hours||0);
+    cg[r.city].turnSum+=(r.daily_turnover_rate||0);
+    cg[r.city].turnN++;
+  });
+  var d=Object.values(cg).map(function(c){
+    var nStores=Object.keys(c.stores).length;
+    var nDays=Object.keys(c.dates).length;
+    return{
+      month:f.dateFrom&&f.dateTo?(f.dateFrom+'~'+f.dateTo):(f.month||''),
+      city:c.city,store_count:nStores,data_days:nDays,
+      daily_avg_sales_tables:nStores&&nDays?c.tables/nDays/nStores:0,
+      daily_avg_sales_revenue:nStores&&nDays?c.rev/nDays/nStores:0,
+      monthly_turnover_rate:c.turnN?c.turnSum/c.turnN:0,
+      queue_hour_pct:c.bh?c.qh/c.bh:0,
+      queue50_hour_pct:0,
+      total_sales_revenue:c.rev
+    };
+  });
+  document.getElementById('sDataCount').textContent='城市: '+d.length+' 条 ('+dd.length+' 条日数据)';
   var el=document.getElementById('sp-s_city');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var n=d.length;
@@ -597,16 +629,20 @@ function renderSCity(f){
   var avgQ50=d.reduce(function(s,r){return s+(r.queue50_hour_pct||0);},0)/n;
   var totalStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
 
+  // Count open stores: use avg_tables_per_store > 0 or data_days > 0 as proxy for open stores
+  var openStores=d.reduce(function(s,r){return s+((r.data_days>0||r.daily_avg_sales_tables>0)?(r.store_count||0):0);},0);
   el.innerHTML='<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">累计最低销售净额</div><div class="kv">¥'+(sumRev/10000).toFixed(0)+'万</div><div class="ks">'+n+' 个城市合计</div></div>'
     +'<div class="kpi"><div class="kl">平均翻台率</div><div class="kv">'+avgTurn.toFixed(1)+'</div></div>'
     +'<div class="kpi"><div class="kl">平均排队时段占比</div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">排50号以上占比</div><div class="kv">'+(avgQ50*100).toFixed(1)+'%</div></div>'
-    +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+totalStores+'</div></div>'
+    +'<div class="kpi"><div class="kl">总门店数<span style="font-size:10px;color:#999;display:block">含未开业门店</span></div><div class="kv">'+totalStores+'</div><div class="ks">开业门店: '+openStores+'</div></div>'
     +'</div>'
-    +'<div class="g2"><div class="card"><h3>城市日均单店最低销售桌数排行</h3><div id="sc1"></div></div>'
-    +'<div class="card"><h3>城市日均单店最低销售净额排行</h3><div id="sc2"></div></div></div>'
-    +'<div class="card"><h3>城市月滚动汇总明细</h3><div class="scroll-table"><table><thead><tr>'
+    +'<div class="g2"><div class="card"><h3>城市日均单店最低销售桌数排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选月份内每日销售桌数的<b>日均值</b>（总桌数÷数据天数÷门店数）</div><div id="sc1"></div></div>'
+    +'<div class="card"><h3>城市日均单店最低销售净额排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选月份内每日销售净额的<b>日均值</b>（总净额÷数据天数÷门店数）</div><div id="sc2"></div></div></div>'
+    +'<div class="card"><h3>城市月滚动汇总明细</h3>'
+    +'<div style="font-size:11px;color:#888;margin:4px 0 8px;padding:4px 8px;background:#f9f9f9;border-radius:4px;border:1px solid #eee">⚠️ 预估假设：单桌用餐时长 <b>57.5分钟</b>，桌均用餐人数 <b>2.5人</b></div>'
+    +'<div class="scroll-table"><table><thead><tr>'
     +'<th>月份</th><th>城市</th><th>门店数</th><th>日均单店销售桌数</th><th>日均单店销售净额</th><th>翻台率</th><th>排队时段占比</th><th>排50号以上</th>'
     +'</tr></thead><tbody id="sCityTbl"></tbody></table></div></div>';
 
@@ -625,14 +661,31 @@ function renderSCity(f){
 }
 
 function renderSStore(f){
-  var d=sushiroStoreData.filter(function(r){return(f.month==='全部'||r.month===f.month)&&(f.city==='全部'||r.city===f.city);});
-  document.getElementById('sDataCount').textContent='门店: '+d.length+' 条';
+  // Aggregate from daily data by store
+  var dd=sushiroDailyData.filter(function(r){
+    var mc=f.city==='全部'||r.city===f.city;
+    var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
+    return mc&&md;
+  });
+  var sg={};dd.forEach(function(r){
+    var key=r.store_id||r.store_name;if(!key)return;
+    if(!sg[key])sg[key]={store_name:r.store_name||r.store_id,store_id:r.store_id,city:r.city,rev:0,tables:0,qh:0,bh:0,turnSum:0,n:0,tbls:r.tables||0,up:r.unit_price||0};
+    sg[key].rev+=(r.daily_sales_revenue||0);sg[key].tables+=(r.daily_sales_tables||0);
+    sg[key].qh+=(r.queue_hours||0);sg[key].bh+=(r.biz_hours||0);
+    sg[key].turnSum+=(r.daily_turnover_rate||0);sg[key].n++;
+  });
+  var d=Object.values(sg).map(function(s){
+    return{month:f.dateFrom&&f.dateTo?(f.dateFrom+'~'+f.dateTo):(f.month||''),city:s.city,store_name:s.store_name,store_id:s.store_id,tables:s.tbls,unit_price:s.up,
+      daily_avg_sales_tables:s.n?s.tables/s.n:0,daily_avg_sales_revenue:s.n?s.rev/s.n:0,
+      queue_hour_pct:s.bh?s.qh/s.bh:0,monthly_turnover_rate:s.n?s.turnSum/s.n:0,data_days:s.n};
+  });
+  document.getElementById('sDataCount').textContent='门店: '+d.length+' 家 ('+dd.length+' 条日数据)';
   var el=document.getElementById('sp-s_store');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-  el.innerHTML='<div class="g2"><div class="card"><h3>门店日均最低销售桌数 TOP20</h3><div id="ss1"></div></div>'
-    +'<div class="card"><h3>门店日均最低销售净额 TOP20</h3><div id="ss2"></div></div></div>'
-    +'<div class="card"><h3>门店月滚动汇总</h3><div class="scroll-table"><table><thead><tr>'
-    +'<th>月份</th><th>城市</th><th>门店</th><th>桌数</th><th>客单价</th>'
+  el.innerHTML='<div class="g2"><div class="card"><h3>门店日均最低销售桌数 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="ss1"></div></div>'
+    +'<div class="card"><h3>门店日均最低销售净额 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="ss2"></div></div></div>'
+    +'<div class="card"><h3>门店汇总明细</h3><div class="scroll-table"><table><thead><tr>'
+    +'<th>日期范围</th><th>城市</th><th>门店</th><th>数据天数</th>'
     +'<th>日均销售桌数</th><th>日均销售净额</th><th>排队占比</th><th>翻台率</th>'
     +'</tr></thead><tbody id="sStoreTbl"></tbody></table></div></div>';
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,20);
@@ -640,9 +693,9 @@ function renderSStore(f){
   var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);}).slice(0,20);
   drawBarH(document.getElementById('ss2'),top2,'daily_avg_sales_revenue','store_name',fmtMoney,'#e74c3c');
   var tbody=document.getElementById('sStoreTbl');
-  d.slice(0,100).forEach(function(r){
+  d.sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);}).slice(0,200).forEach(function(r){
     tbody.innerHTML+='<tr><td>'+r.month+'</td><td>'+r.city+'</td><td style="font-weight:600">'+(r.store_name||r.store_id)+'</td>'
-    +'<td>'+fmtInt(r.tables)+'</td><td>'+fmtMoney(r.unit_price)+'</td>'
+    +'<td>'+r.data_days+'</td>'
     +'<td>'+fmtInt(r.daily_avg_sales_tables)+'</td><td>'+fmtMoney(r.daily_avg_sales_revenue)+'</td>'
     +'<td>'+fmtPct(r.queue_hour_pct)+'</td><td>'+fmtRate(r.monthly_turnover_rate)+'</td></tr>';
   });
@@ -689,7 +742,7 @@ function renderSTrend(f){
   var startD=f.dateFrom||allDates[0], endD=f.dateTo||allDates[allDates.length-1];
   var fullDates=[];
   (function(){var cur=new Date(startD+'T00:00:00');var end=new Date(endD+'T00:00:00');while(cur<=end){var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');fullDates.push(ds);cur.setDate(cur.getDate()+1);}})();
-  var trend=fullDates.map(function(ds){var o=g[ds];if(o)return{_label:ds.slice(5),avgRev:o.n?o.rev/o.n:0,avgTables:o.n?o.tables/o.n:0,queuePct:o.bh?o.qh/o.bh:0,totalRev:o.rev,_hasData:true};return{_label:ds.slice(5),avgRev:null,avgTables:null,queuePct:null,totalRev:null,_hasData:false};});
+  var trend=fullDates.map(function(ds){var o=g[ds];if(o)return{_label:ds.slice(5),avgRev:o.n?o.rev/o.n:0,avgTables:o.n?o.tables/o.n:0,queuePct:o.bh?(o.qh/o.bh)*100:0,totalRev:o.rev,_hasData:true};return{_label:ds.slice(5),avgRev:null,avgTables:null,queuePct:null,totalRev:null,_hasData:false};});
   var missingDates=fullDates.filter(function(ds){return !g[ds];});
   var dataTip=missingDates.length>0?'<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">⚠ 所选范围 '+fullDates.length+' 天中，'+allDates.length+' 天有数据，'+missingDates.length+' 天暂无数据（'+missingDates.map(function(d){return d.slice(5);}).join(', ')+'）</div>':'';
   el.innerHTML=dataTip+'<div class="g2">'
@@ -698,9 +751,9 @@ function renderSTrend(f){
     +'<div class="g2">'
     +'<div class="card"><h3>排队时段占比趋势</h3><div id="st3"></div></div>'
     +'<div class="card"><h3>每日总销售净额趋势</h3><div id="st4"></div></div></div>';
-  drawLineChart(document.getElementById('st1'),trend,['avgTables'],[COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';}});
+  drawLineChart(document.getElementById('st1'),trend,['avgTables'],[COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
   drawLineChart(document.getElementById('st2'),trend,['avgRev'],[COLORS[1]],['日均单店销售净额'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
-  drawLineChart(document.getElementById('st3'),trend,['queuePct'],[COLORS[2]],['排队时段占比'],{tipFmt:fmtPct});
+  drawLineChart(document.getElementById('st3'),trend,['queuePct'],[COLORS[2]],['排队时段占比'],{tipFmt:function(v){return v.toFixed(1)+'%';},yFmt:function(v){return v.toFixed(0)+'%';}});
   drawLineChart(document.getElementById('st4'),trend,['totalRev'],[COLORS[3]],['总销售净额'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
 }
 
