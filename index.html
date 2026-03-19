@@ -1,29 +1,45 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>寿司郎数据看板</title>
+<title>餐饮竞品数据看板</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
-.header{background:linear-gradient(135deg,#e74c3c 0%,#c0392b 50%,#e67e22 100%);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.header h1{font-size:20px;font-weight:700;letter-spacing:1px}
-.header .sub{font-size:11px;opacity:.8;margin-top:2px}
-.hbtns{display:flex;gap:6px;flex-wrap:wrap}
-.hbtns button{padding:6px 14px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.15);color:#fff;border-radius:6px;font-size:12px;cursor:pointer}
-.hbtns button:hover{background:rgba(255,255,255,.3)}
-.main{max-width:1320px;margin:0 auto;padding:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;display:flex}
+
+/* === Sidebar === */
+.sidebar{width:220px;min-height:100vh;background:linear-gradient(180deg,#1a1a2e 0%,#16213e 100%);color:#fff;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;overflow-y:auto}
+.sidebar .logo{padding:18px 16px 12px;font-size:17px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1);letter-spacing:1px}
+.sidebar .logo span{font-size:11px;opacity:.6;display:block;margin-top:3px;font-weight:400}
+.nav-section{padding:10px 0}
+.nav-header{padding:6px 16px;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.35);font-weight:600}
+.nav-item{padding:9px 16px 9px 20px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:8px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.active{background:rgba(231,76,60,.25);color:#e74c3c;font-weight:600;border-right:3px solid #e74c3c}
+.nav-item.active-blue{background:rgba(52,152,219,.2);color:#3498db;font-weight:600;border-right:3px solid #3498db}
+.nav-sub{padding-left:12px}
+.nav-divider{height:1px;background:rgba(255,255,255,.08);margin:8px 16px}
+
+/* === Main === */
+.main-wrap{margin-left:220px;flex:1;min-height:100vh}
+.topbar{background:#fff;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.06);position:sticky;top:0;z-index:50}
+.topbar h2{font-size:15px;font-weight:600;color:#333}
+.topbar .actions{display:flex;gap:8px;align-items:center}
+.topbar button{padding:5px 14px;border:1px solid #d9d9d9;background:#fff;border-radius:6px;font-size:12px;cursor:pointer;color:#555}
+.topbar button:hover{border-color:#e74c3c;color:#e74c3c}
+.content{padding:16px 24px;max-width:1360px;margin:0 auto}
 .tabs{display:flex;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px}
 .tab{flex:1;text-align:center;padding:11px 8px;cursor:pointer;font-size:13px;font-weight:500;color:#888;border-bottom:2.5px solid transparent;user-select:none}
 .tab:hover{color:#e74c3c;background:#fef5f5}
 .tab.active{color:#e74c3c;border-bottom-color:#e74c3c;background:#fef5f5}
+.tab.blue:hover{color:#3498db;background:#f0f7ff}
+.tab.blue.active{color:#3498db;border-bottom-color:#3498db;background:#f0f7ff}
 .filters{background:#fff;border-radius:8px;padding:12px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
 .fg{display:flex;flex-direction:column;gap:3px}
 .fg label{font-size:11px;color:#888;font-weight:500}
 .fg select,.fg input[type=date]{padding:6px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px;outline:none;min-width:120px}
 .fg select:focus,.fg input:focus{border-color:#e74c3c}
 .finfo{margin-left:auto;font-size:11px;color:#aaa}
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:12px}
 .kpi{background:#fff;border-radius:8px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid #e74c3c}
 .kpi:nth-child(2){border-left-color:#e67e22}
 .kpi:nth-child(3){border-left-color:#3498db}
@@ -41,189 +57,363 @@ th{background:#fafafa;padding:8px 10px;text-align:left;font-weight:600;color:#66
 td{padding:8px 10px;border-bottom:1px solid #f0f0f0;white-space:nowrap}
 tr:hover td{background:#fef5f5}
 .badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:500}
-.bg-g{background:#f6ffed;color:#52c41a}.bg-o{background:#fff7e6;color:#fa8c16}.bg-r{background:#fff2f0;color:#f5222d}
-.config-bar{background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.config-bar input{padding:5px 8px;border:1px solid #ddd;border-radius:4px;font-size:11px;font-family:monospace;flex:1;min-width:200px}
-.config-bar button{padding:5px 14px;background:#e74c3c;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px}
+.bg-g{background:#f6ffed;color:#52c41a}.bg-o{background:#fff7e6;color:#fa8c16}.bg-r{background:#fff2f0;color:#f5222d}.bg-b{background:#e6f7ff;color:#1890ff}
 .hidden{display:none!important}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
 .legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:#666}
 .legend span{display:flex;align-items:center;gap:3px}
-.tooltip{position:absolute;background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;pointer-events:none;z-index:10;white-space:nowrap;display:none}
-.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px}
-.s-on{background:#2ecc71}.s-off{background:#e74c3c}.s-demo{background:#f39c12}
+.tooltip{position:absolute;background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;pointer-events:none;z-index:999;white-space:nowrap;display:none}
 .scroll-table{overflow-x:auto;max-height:500px;overflow-y:auto}
-.scroll-table thead th{position:sticky;top:0;z-index:2}
-@media(max-width:768px){.g2{grid-template-columns:1fr}.kpi-row{grid-template-columns:1fr 1fr}}
+.scroll-table thead th{position:sticky;top:0;z-index:2;background:#fafafa}
+.loading{text-align:center;padding:60px;color:#999}
+.loading .spin{display:inline-block;width:24px;height:24px;border:3px solid #eee;border-top-color:#e74c3c;border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.matrix-cell{display:inline-block;width:18px;height:18px;border-radius:3px;margin:1px;font-size:8px;text-align:center;line-height:18px;color:#fff;cursor:pointer}
+.heatmap-row{display:flex;align-items:center;gap:2px;margin-bottom:2px}
+.heatmap-label{width:60px;font-size:10px;text-align:right;margin-right:4px;color:#666;flex-shrink:0}
+@media(max-width:900px){.sidebar{width:180px}.main-wrap{margin-left:180px}.g2{grid-template-columns:1fr}}
+@media(max-width:600px){.sidebar{display:none}.main-wrap{margin-left:0}}
 </style>
 </head>
 <body>
-<div class="header">
-  <div><h1>🍣 寿司郎经营数据看板</h1><div class="sub">排队·翻台率·销售·城市对比 <span id="refreshInfo">| 刷新于 18:11:24</span></div></div>
-  <div class="hbtns">
-    <button onclick="loadData()">刷新数据</button>
-    <button onclick="document.getElementById(&#39;configPanel&#39;).classList.toggle(&#39;hidden&#39;)">⚙️ 配置</button>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo">🍽️ 餐饮竞品看板<span>排队·拓展·经营对比</span></div>
+  
+  <div class="nav-section">
+    <div class="nav-header">寿司郎</div>
+    <div class="nav-item active" onclick="navTo('sushiro')">🍣 寿司郎看板</div>
+  </div>
+  
+  <div class="nav-divider"></div>
+  
+  <div class="nav-section">
+    <div class="nav-header">火锅友商</div>
+    <div class="nav-item" onclick="navTo('hp_summary')">📊 汇总看板</div>
+    <div class="nav-sub">
+      <div class="nav-item" onclick="navTo('hp_三出山')">🔥 三出山</div>
+      <div class="nav-item" onclick="navTo('hp_八合里')">🔥 八合里</div>
+      <div class="nav-item" onclick="navTo('hp_左庭右院')">🔥 左庭右院</div>
+      <div class="nav-item" onclick="navTo('hp_朱光玉')">🔥 朱光玉</div>
+      <div class="nav-item" onclick="navTo('hp_朱富贵')">🔥 朱富贵</div>
+      <div class="nav-item" onclick="navTo('hp_潮发')">🔥 潮发</div>
+      <div class="nav-item" onclick="navTo('hp_芈重山')">🔥 芈重山</div>
+    </div>
   </div>
 </div>
-<div class="main">
-  <!-- 配置 -->
-  <div class="config-bar hidden" id="configPanel">
-    <span>Supabase:</span>
-    <input id="cfgUrl" placeholder="Project URL">
-    <input id="cfgKey" placeholder="Anon Key">
-    <button onclick="saveConfig()">保存</button>
-    <button onclick="useDemoMode()" style="background:#f39c12">演示模式</button>
-    <span id="cfgStatus">已保存...</span>
-  </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab" onclick="go(&#39;city&#39;)">城市看板</div>
-    <div class="tab active" onclick="go(&#39;store&#39;)">门店看板</div>
-    <div class="tab" onclick="go(&#39;daily&#39;)">每日明细</div>
-    <div class="tab" onclick="go(&#39;trend&#39;)">趋势分析</div>
+<!-- Main -->
+<div class="main-wrap">
+  <div class="topbar">
+    <h2 id="pageTitle">🍣 寿司郎经营数据看板</h2>
+    <div class="actions">
+      <span id="srcLabel" style="font-size:11px;color:#aaa"></span>
+      <button onclick="loadAllData()">🔄 刷新</button>
+    </div>
   </div>
+  
+  <div class="content">
+    <!-- ====== SUSHIRO SECTION ====== -->
+    <div id="sec-sushiro">
+      <div class="tabs" id="sushiroTabs">
+        <div class="tab active" onclick="sTab('s_city')">城市看板</div>
+        <div class="tab" onclick="sTab('s_store')">门店看板</div>
+        <div class="tab" onclick="sTab('s_daily')">每日明细</div>
+        <div class="tab" onclick="sTab('s_trend')">趋势分析</div>
+        <div class="tab" onclick="sTab('s_expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="sushiroFilters">
+        <div class="fg"><label>月份</label><select id="sfMonth" onchange="sRender()"></select></div>
+        <div class="fg"><label>城市</label><select id="sfCity" onchange="sRender()"></select></div>
+        <div class="fg" id="sfgDateFrom" style="display:none"><label>开始日期</label><input type="date" id="sfDateFrom" onchange="sRender()"></div>
+        <div class="fg" id="sfgDateTo" style="display:none"><label>结束日期</label><input type="date" id="sfDateTo" onchange="sRender()"></div>
+        <div class="finfo" id="sDataCount"></div>
+      </div>
+      <div id="sp-s_city"></div>
+      <div id="sp-s_store" class="hidden"></div>
+      <div id="sp-s_daily" class="hidden"></div>
+      <div id="sp-s_trend" class="hidden"></div>
+      <div id="sp-s_expand" class="hidden"></div>
+    </div>
 
-  <!-- Filters -->
-  <div class="filters">
-    <div class="fg"><label>月份</label><select id="fMonth" onchange="render()"><option>全部</option><option>2026-02</option><option>2026-03</option></select></div>
-    <div class="fg"><label>城市</label><select id="fCity" onchange="render()"><option>全部</option><option>上海</option><option>东莞</option><option>佛山</option><option>北京</option><option>厦门</option><option>天津</option><option>宁波</option><option>广州</option><option>总计</option><option>惠州</option><option>成都</option><option>无锡</option><option>杭州</option><option>武汉</option><option>江门</option><option>济南</option><option>深圳</option><option>珠海</option><option>苏州</option><option>重庆</option><option>金华</option></select></div>
-    <div class="fg date-filter" id="fgDateFrom" style="display:none"><label>开始日期</label><input type="date" id="fDateFrom" onchange="render()"></div>
-    <div class="fg date-filter" id="fgDateTo" style="display:none"><label>结束日期</label><input type="date" id="fDateTo" onchange="render()"></div>
-    <div class="fg date-filter" id="fgDateHint" style="display:none"><span style="font-size:11px;color:#e74c3c;margin-top:18px">日期范围仅对 每日明细/趋势分析 生效</span></div>
-    <div class="fg"><label>数据源</label><span id="srcLabel" style="font-size:11px;padding:6px 0"><span class="status-dot s-on"></span>已连接 (40/172/1000)</span></div>
-    <div class="finfo" id="dc">门店: 86 条</div>
-  </div>
+    <!-- ====== HOTPOT SUMMARY SECTION ====== -->
+    <div id="sec-hp_summary" class="hidden">
+      <div class="tabs" id="hpSumTabs">
+        <div class="tab blue active" onclick="hpSumTab('hps_queue')">排队对比</div>
+        <div class="tab blue" onclick="hpSumTab('hps_rate')">排队门店率</div>
+        <div class="tab blue" onclick="hpSumTab('hps_expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="hpSumFilters">
+        <div class="fg"><label>日期</label><select id="hpsfDate" onchange="hpSumRender()"></select></div>
+        <div class="finfo" id="hpSumCount"></div>
+      </div>
+      <div id="sp-hps_queue"></div>
+      <div id="sp-hps_rate" class="hidden"></div>
+      <div id="sp-hps_expand" class="hidden"></div>
+    </div>
 
-  <div id="p-city" class="hidden"><div class="kpi-row"><div class="kpi"><div class="kl">累计最低销售净额</div><div class="kv">¥14116万</div><div class="ks">20 个城市合计</div></div><div class="kpi"><div class="kl">平均翻台率</div><div class="kv">7.3</div><div class="ks">城市均值</div></div><div class="kpi"><div class="kl">平均排队时段占比</div><div class="kv">64.2%</div></div><div class="kpi"><div class="kl">排50号以上占比</div><div class="kv">41.1%</div></div><div class="kpi"><div class="kl">总门店数</div><div class="kv">94</div></div><div class="kpi"><div class="kl">城市日均单店销售桌数</div><div class="kv">371</div></div></div><div class="g2"><div class="card"><h3>城市日均单店最低销售桌数排行</h3><div id="c1"><svg width="100%" height="505" viewBox="0 0 560 505" preserveAspectRatio="xMidYMid meet" style="display: block;"><text x="74" y="23" text-anchor="end" font-size="11" fill="#333">宁波</text><rect x="80" y="5" width="430" height="28" rx="3" fill="#e74c3c" style="cursor:pointer"></rect><text x="514" y="23" font-size="10" fill="#666">654</text><text x="74" y="56" text-anchor="end" font-size="11" fill="#333">厦门</text><rect x="80" y="38" width="408.2799712410702" height="28" rx="3" fill="#e67e22" style="cursor:pointer"></rect><text x="492.2799712410702" y="56" font-size="10" fill="#666">621</text><text x="74" y="89" text-anchor="end" font-size="11" fill="#333">济南</text><rect x="80" y="71" width="366.4054397209772" height="28" rx="3" fill="#3498db" style="cursor:pointer"></rect><text x="450.4054397209772" y="89" font-size="10" fill="#666">557</text><text x="74" y="122" text-anchor="end" font-size="11" fill="#333">江门</text><rect x="80" y="104" width="358.09104954796464" height="28" rx="3" fill="#2ecc71" style="cursor:pointer"></rect><text x="442.09104954796464" y="122" font-size="10" fill="#666">544</text><text x="74" y="155" text-anchor="end" font-size="11" fill="#333">上海</text><rect x="80" y="137" width="325.43865016597573" height="28" rx="3" fill="#9b59b6" style="cursor:pointer"></rect><text x="409.43865016597573" y="155" font-size="10" fill="#666">495</text><text x="74" y="188" text-anchor="end" font-size="11" fill="#333">无锡</text><rect x="80" y="170" width="297.7722537516636" height="28" rx="3" fill="#1abc9c" style="cursor:pointer"></rect><text x="381.7722537516636" y="188" font-size="10" fill="#666">453</text><text x="74" y="221" text-anchor="end" font-size="11" fill="#333">杭州</text><rect x="80" y="203" width="274.72350124673017" height="28" rx="3" fill="#f39c12" style="cursor:pointer"></rect><text x="358.72350124673017" y="221" font-size="10" fill="#666">418</text><text x="74" y="254" text-anchor="end" font-size="11" fill="#333">北京</text><rect x="80" y="236" width="255.87141087026353" height="28" rx="3" fill="#34495e" style="cursor:pointer"></rect><text x="339.8714108702635" y="254" font-size="10" fill="#666">389</text><text x="74" y="287" text-anchor="end" font-size="11" fill="#333">武汉</text><rect x="80" y="269" width="251.05643175108227" height="28" rx="3" fill="#e84393" style="cursor:pointer"></rect><text x="335.0564317510823" y="287" font-size="10" fill="#666">382</text><text x="74" y="320" text-anchor="end" font-size="11" fill="#333">珠海</text><rect x="80" y="302" width="232.55954475226017" height="28" rx="3" fill="#00cec9" style="cursor:pointer"></rect><text x="316.5595447522602" y="320" font-size="10" fill="#666">354</text><text x="74" y="353" text-anchor="end" font-size="11" fill="#333">广州</text><rect x="80" y="335" width="218.9499931162136" height="28" rx="3" fill="#6c5ce7" style="cursor:pointer"></rect><text x="302.9499931162136" y="353" font-size="10" fill="#666">333</text><text x="74" y="386" text-anchor="end" font-size="11" fill="#333">佛山</text><rect x="80" y="368" width="214.19421455997306" height="28" rx="3" fill="#fdcb6e" style="cursor:pointer"></rect><text x="298.19421455997303" y="386" font-size="10" fill="#666">326</text><text x="74" y="419" text-anchor="end" font-size="11" fill="#333">苏州</text><rect x="80" y="401" width="205.86666870630708" height="28" rx="3" fill="#e74c3c" style="cursor:pointer"></rect><text x="289.8666687063071" y="419" font-size="10" fill="#666">313</text><text x="74" y="452" text-anchor="end" font-size="11" fill="#333">成都</text><rect x="80" y="434" width="190.2969206528889" height="28" rx="3" fill="#e67e22" style="cursor:pointer"></rect><text x="274.2969206528889" y="452" font-size="10" fill="#666">289</text><text x="74" y="485" text-anchor="end" font-size="11" fill="#333">惠州</text><rect x="80" y="467" width="188.75770601642927" height="28" rx="3" fill="#3498db" style="cursor:pointer"></rect><text x="272.75770601642927" y="485" font-size="10" fill="#666">287</text></svg></div></div><div class="card"><h3>城市日均单店最低销售净额排行</h3><div id="c2"><svg width="100%" height="505" viewBox="0 0 560 505" preserveAspectRatio="xMidYMid meet" style="display: block;"><text x="74" y="23" text-anchor="end" font-size="11" fill="#333">宁波</text><rect x="80" y="5" width="430" height="28" rx="3" fill="#e74c3c" style="cursor:pointer"></rect><text x="514" y="23" font-size="10" fill="#666">¥197,346</text><text x="74" y="56" text-anchor="end" font-size="11" fill="#333">济南</text><rect x="80" y="38" width="415.07208002353633" height="28" rx="3" fill="#e67e22" style="cursor:pointer"></rect><text x="499.07208002353633" y="56" font-size="10" fill="#666">¥190,495</text><text x="74" y="89" text-anchor="end" font-size="11" fill="#333">厦门</text><rect x="80" y="71" width="414.65728000282144" height="28" rx="3" fill="#3498db" style="cursor:pointer"></rect><text x="498.65728000282144" y="89" font-size="10" fill="#666">¥190,304</text><text x="74" y="122" text-anchor="end" font-size="11" fill="#333">上海</text><rect x="80" y="104" width="401.56102121989437" height="28" rx="3" fill="#2ecc71" style="cursor:pointer"></rect><text x="485.56102121989437" y="122" font-size="10" fill="#666">¥184,294</text><text x="74" y="155" text-anchor="end" font-size="11" fill="#333">无锡</text><rect x="80" y="137" width="286.1383233929211" height="28" rx="3" fill="#9b59b6" style="cursor:pointer"></rect><text x="370.1383233929211" y="155" font-size="10" fill="#666">¥131,321</text><text x="74" y="188" text-anchor="end" font-size="11" fill="#333">杭州</text><rect x="80" y="170" width="281.55881088812873" height="28" rx="3" fill="#1abc9c" style="cursor:pointer"></rect><text x="365.55881088812873" y="188" font-size="10" fill="#666">¥129,220</text><text x="74" y="221" text-anchor="end" font-size="11" fill="#333">北京</text><rect x="80" y="203" width="272.08249229753596" height="28" rx="3" fill="#f39c12" style="cursor:pointer"></rect><text x="356.08249229753596" y="221" font-size="10" fill="#666">¥124,871</text><text x="74" y="254" text-anchor="end" font-size="11" fill="#333">江门</text><rect x="80" y="236" width="254.58038052366317" height="28" rx="3" fill="#34495e" style="cursor:pointer"></rect><text x="338.58038052366317" y="254" font-size="10" fill="#666">¥116,838</text><text x="74" y="287" text-anchor="end" font-size="11" fill="#333">珠海</text><rect x="80" y="269" width="198.04226831319664" height="28" rx="3" fill="#e84393" style="cursor:pointer"></rect><text x="282.04226831319664" y="287" font-size="10" fill="#666">¥90,890</text><text x="74" y="320" text-anchor="end" font-size="11" fill="#333">苏州</text><rect x="80" y="302" width="197.98391697341228" height="28" rx="3" fill="#00cec9" style="cursor:pointer"></rect><text x="281.9839169734123" y="320" font-size="10" fill="#666">¥90,864</text><text x="74" y="353" text-anchor="end" font-size="11" fill="#333">武汉</text><rect x="80" y="335" width="193.7531397909681" height="28" rx="3" fill="#6c5ce7" style="cursor:pointer"></rect><text x="277.75313979096813" y="353" font-size="10" fill="#666">¥88,922</text><text x="74" y="386" text-anchor="end" font-size="11" fill="#333">广州</text><rect x="80" y="368" width="156.5412832916654" height="28" rx="3" fill="#fdcb6e" style="cursor:pointer"></rect><text x="240.5412832916654" y="386" font-size="10" fill="#666">¥71,844</text><text x="74" y="419" text-anchor="end" font-size="11" fill="#333">成都</text><rect x="80" y="401" width="155.79415517745133" height="28" rx="3" fill="#e74c3c" style="cursor:pointer"></rect><text x="239.79415517745133" y="419" font-size="10" fill="#666">¥71,501</text><text x="74" y="452" text-anchor="end" font-size="11" fill="#333">佛山</text><rect x="80" y="434" width="145.919901367112" height="28" rx="3" fill="#e67e22" style="cursor:pointer"></rect><text x="229.919901367112" y="452" font-size="10" fill="#666">¥66,969</text><text x="74" y="485" text-anchor="end" font-size="11" fill="#333">天津</text><rect x="80" y="467" width="144.1482910669457" height="28" rx="3" fill="#3498db" style="cursor:pointer"></rect><text x="228.1482910669457" y="485" font-size="10" fill="#666">¥66,156</text></svg></div></div></div><div class="card"><h3>城市月滚动汇总明细</h3><div class="scroll-table"><table><thead><tr><th>月份</th><th>城市</th><th>门店数</th><th>单店平均桌数</th><th>数据天数</th><th>日均单店销售桌数</th><th>日均单店销售净额</th><th>累计最低翻台率</th><th>排队时段占比</th><th>排50号以上占比</th><th>备注</th></tr></thead><tbody id="cityTbl"><tr><td>2026-03</td><td style="font-weight:600">宁波</td><td>2</td><td>71</td><td>17</td><td>654</td><td>¥197,346</td><td><span class="badge bg-o">9.2</span></td><td>80.7%</td><td>53.5%</td><td style="white-space:normal;max-width:200px">2026年4月预计新开1家店</td></tr><tr><td>2026-03</td><td style="font-weight:600">厦门</td><td>1</td><td>64</td><td>17</td><td>621</td><td>¥190,304</td><td><span class="badge bg-o">9.7</span></td><td>85.0%</td><td>72.0%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">济南</td><td>1</td><td>50</td><td>17</td><td>557</td><td>¥190,495</td><td><span class="badge bg-g">11.1</span></td><td>97.6%</td><td>82.5%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">江门</td><td>1</td><td>49</td><td>17</td><td>544</td><td>¥116,838</td><td><span class="badge bg-g">11.1</span></td><td>97.3%</td><td>91.9%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">上海</td><td>8</td><td>53</td><td>17</td><td>495</td><td>¥184,294</td><td><span class="badge bg-o">9.3</span></td><td>82.1%</td><td>48.8%</td><td style="white-space:normal;max-width:200px">2026年3月预计新开1家店</td></tr><tr><td>2026-03</td><td style="font-weight:600">无锡</td><td>1</td><td>59</td><td>17</td><td>453</td><td>¥131,321</td><td><span class="badge bg-r">7.7</span></td><td>67.2%</td><td>37.1%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">杭州</td><td>5</td><td>44</td><td>17</td><td>418</td><td>¥129,220</td><td><span class="badge bg-o">9.4</span></td><td>84.3%</td><td>58.3%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">北京</td><td>17</td><td>47</td><td>17</td><td>389</td><td>¥124,871</td><td><span class="badge bg-o">8.2</span></td><td>72.9%</td><td>39.0%</td><td style="white-space:normal;max-width:200px">2026年3月预计新开1家店</td></tr><tr><td>2026-03</td><td style="font-weight:600">武汉</td><td>3</td><td>55</td><td>17</td><td>382</td><td>¥88,922</td><td><span class="badge bg-r">6.9</span></td><td>60.9%</td><td>34.3%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">珠海</td><td>2</td><td>32</td><td>17</td><td>354</td><td>¥90,890</td><td><span class="badge bg-g">11.1</span></td><td>96.8%</td><td>86.6%</td><td style="white-space:normal;max-width:200px">2026年3月预计新开1家店</td></tr><tr><td>2026-03</td><td style="font-weight:600">广州</td><td>19</td><td>46</td><td>17</td><td>333</td><td>¥71,844</td><td><span class="badge bg-r">7.3</span></td><td>65.7%</td><td>35.9%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">佛山</td><td>2</td><td>55</td><td>17</td><td>326</td><td>¥66,969</td><td><span class="badge bg-r">5.9</span></td><td>53.0%</td><td>32.9%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">苏州</td><td>5</td><td>47</td><td>17</td><td>313</td><td>¥90,864</td><td><span class="badge bg-r">6.7</span></td><td>59.4%</td><td>27.9%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">成都</td><td>3</td><td>52</td><td>17</td><td>289</td><td>¥71,501</td><td><span class="badge bg-r">5.6</span></td><td>49.7%</td><td>17.2%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">惠州</td><td>1</td><td>50</td><td>17</td><td>287</td><td>¥59,557</td><td><span class="badge bg-r">5.7</span></td><td>50.3%</td><td>30.1%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">东莞</td><td>3</td><td>49</td><td>17</td><td>267</td><td>¥55,278</td><td><span class="badge bg-r">5.4</span></td><td>47.7%</td><td>28.5%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">天津</td><td>4</td><td>44</td><td>17</td><td>254</td><td>¥66,156</td><td><span class="badge bg-r">5.8</span></td><td>50.0%</td><td>16.1%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">深圳</td><td>13</td><td>52</td><td>17</td><td>250</td><td>¥61,813</td><td><span class="badge bg-r">4.8</span></td><td>42.6%</td><td>17.7%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">重庆</td><td>2</td><td>52</td><td>17</td><td>240</td><td>¥49,638</td><td><span class="badge bg-r">4.7</span></td><td>41.0%</td><td>12.4%</td><td style="white-space:normal;max-width:200px">nan</td></tr><tr><td>2026-03</td><td style="font-weight:600">金华</td><td>1</td><td>-</td><td>-</td><td>-</td><td>-</td><td><span class="badge bg-r">-</span></td><td>-</td><td>-</td><td style="white-space:normal;max-width:200px">2026年4月预计新开1家店</td></tr></tbody></table></div></div></div>
-  <div id="p-store" class=""><div class="g2"><div class="card"><h3>门店日均最低销售桌数 TOP 20</h3><div id="s1"><svg width="100%" height="670" viewBox="0 0 560 670" preserveAspectRatio="xMidYMid meet" style="display: block;"><text x="74" y="23" text-anchor="end" font-size="11" fill="#333">宁波万象城店</text><rect x="80" y="5" width="430" height="28" rx="3" fill="#e74c3c" style="cursor:pointer"></rect><text x="514" y="23" font-size="10" fill="#666">654</text><text x="74" y="56" text-anchor="end" font-size="11" fill="#333">朝阳合生汇店</text><rect x="80" y="38" width="422.4289057839103" height="28" rx="3" fill="#e67e22" style="cursor:pointer"></rect><text x="506.4289057839103" y="56" font-size="10" fill="#666">642</text><text x="74" y="89" text-anchor="end" font-size="11" fill="#333">SM厦门店</text><rect x="80" y="71" width="408.2799712410702" height="28" rx="3" fill="#3498db" style="cursor:pointer"></rect><text x="492.2799712410702" y="89" font-size="10" fill="#666">621</text><text x="74" y="122" text-anchor="end" font-size="11" fill="#333">杭州奥体印象…</text><rect x="80" y="104" width="380.07419191996445" height="28" rx="3" fill="#2ecc71" style="cursor:pointer"></rect><text x="464.07419191996445" y="122" font-size="10" fill="#666">578</text><text x="74" y="155" text-anchor="end" font-size="11" fill="#333">中山公园龙之…</text><rect x="80" y="137" width="369.74040476663964" height="28" rx="3" fill="#9b59b6" style="cursor:pointer"></rect><text x="453.74040476663964" y="155" font-size="10" fill="#666">562</text><text x="74" y="188" text-anchor="end" font-size="11" fill="#333">济南万象城店</text><rect x="80" y="170" width="366.4054397209772" height="28" rx="3" fill="#1abc9c" style="cursor:pointer"></rect><text x="450.4054397209772" y="188" font-size="10" fill="#666">557</text><text x="74" y="221" text-anchor="end" font-size="11" fill="#333">陆家嘴中心店</text><rect x="80" y="203" width="359.74866531030574" height="28" rx="3" fill="#f39c12" style="cursor:pointer"></rect><text x="443.74866531030574" y="221" font-size="10" fill="#666">547</text><text x="74" y="254" text-anchor="end" font-size="11" fill="#333">江门利和广场…</text><rect x="80" y="236" width="358.09104954796464" height="28" rx="3" fill="#34495e" style="cursor:pointer"></rect><text x="442.09104954796464" y="254" font-size="10" fill="#666">544</text><text x="74" y="287" text-anchor="end" font-size="11" fill="#333">上海环球港店</text><rect x="80" y="269" width="355.8874730385033" height="28" rx="3" fill="#e84393" style="cursor:pointer"></rect><text x="439.8874730385033" y="287" font-size="10" fill="#666">541</text><text x="74" y="320" text-anchor="end" font-size="11" fill="#333">银泰创意城店</text><rect x="80" y="302" width="343.19224120787504" height="28" rx="3" fill="#00cec9" style="cursor:pointer"></rect><text x="427.19224120787504" y="320" font-size="10" fill="#666">522</text><text x="74" y="353" text-anchor="end" font-size="11" fill="#333">虹桥新天地店</text><rect x="80" y="335" width="329.464288445947" height="28" rx="3" fill="#6c5ce7" style="cursor:pointer"></rect><text x="413.464288445947" y="353" font-size="10" fill="#666">501</text><text x="74" y="386" text-anchor="end" font-size="11" fill="#333">西单大悦城店</text><rect x="80" y="368" width="328.05005277569563" height="28" rx="3" fill="#fdcb6e" style="cursor:pointer"></rect><text x="412.05005277569563" y="386" font-size="10" fill="#666">499</text><text x="74" y="419" text-anchor="end" font-size="11" fill="#333">美林天地店</text><rect x="80" y="401" width="318.9660552844533" height="28" rx="3" fill="#e74c3c" style="cursor:pointer"></rect><text x="402.9660552844533" y="419" font-size="10" fill="#666">485</text><text x="74" y="452" text-anchor="end" font-size="11" fill="#333">万菱汇店</text><rect x="80" y="434" width="304.93552186749474" height="28" rx="3" fill="#e67e22" style="cursor:pointer"></rect><text x="388.93552186749474" y="452" font-size="10" fill="#666">464</text><text x="74" y="485" text-anchor="end" font-size="11" fill="#333">丽泽天街店</text><rect x="80" y="467" width="303.7251992473727" height="28" rx="3" fill="#3498db" style="cursor:pointer"></rect><text x="387.7251992473727" y="485" font-size="10" fill="#666">462</text><text x="74" y="518" text-anchor="end" font-size="11" fill="#333">无锡万象城店</text><rect x="80" y="500" width="297.7722537516636" height="28" rx="3" fill="#2ecc71" style="cursor:pointer"></rect><text x="381.7722537516636" y="518" font-size="10" fill="#666">453</text><text x="74" y="551" text-anchor="end" font-size="11" fill="#333">番禺天河城店</text><rect x="80" y="533" width="293.1282984809778" height="28" rx="3" fill="#9b59b6" style="cursor:pointer"></rect><text x="377.1282984809778" y="551" font-size="10" fill="#666">446</text><text x="74" y="584" text-anchor="end" font-size="11" fill="#333">凯德云尚店</text><rect x="80" y="566" width="288.8855914702238" height="28" rx="3" fill="#1abc9c" style="cursor:pointer"></rect><text x="372.8855914702238" y="584" font-size="10" fill="#666">439</text><text x="74" y="617" text-anchor="end" font-size="11" fill="#333">长楹天街店</text><rect x="80" y="599" width="287.87918190023095" height="28" rx="3" fill="#f39c12" style="cursor:pointer"></rect><text x="371.87918190023095" y="617" font-size="10" fill="#666">438</text><text x="74" y="650" text-anchor="end" font-size="11" fill="#333">银泰in77…</text><rect x="80" y="632" width="287.3726881950712" height="28" rx="3" fill="#34495e" style="cursor:pointer"></rect><text x="371.3726881950712" y="650" font-size="10" fill="#666">437</text></svg></div></div><div class="card"><h3>门店日均最低销售净额 TOP 20</h3><div id="s2"><svg width="100%" height="670" viewBox="0 0 560 670" preserveAspectRatio="xMidYMid meet" style="display: block;"><text x="74" y="23" text-anchor="end" font-size="11" fill="#333">朝阳合生汇店</text><rect x="80" y="5" width="430" height="28" rx="3" fill="#e74c3c" style="cursor:pointer"></rect><text x="514" y="23" font-size="10" fill="#666">¥229,586</text><text x="74" y="56" text-anchor="end" font-size="11" fill="#333">中山公园龙之…</text><rect x="80" y="38" width="400.05292954737024" height="28" rx="3" fill="#e67e22" style="cursor:pointer"></rect><text x="484.05292954737024" y="56" font-size="10" fill="#666">¥213,597</text><text x="74" y="89" text-anchor="end" font-size="11" fill="#333">陆家嘴中心店</text><rect x="80" y="71" width="399.4838573134497" height="28" rx="3" fill="#3498db" style="cursor:pointer"></rect><text x="483.4838573134497" y="89" font-size="10" fill="#666">¥213,293</text><text x="74" y="122" text-anchor="end" font-size="11" fill="#333">宁波万象城店</text><rect x="80" y="104" width="369.61589958844235" height="28" rx="3" fill="#2ecc71" style="cursor:pointer"></rect><text x="453.61589958844235" y="122" font-size="10" fill="#666">¥197,346</text><text x="74" y="155" text-anchor="end" font-size="11" fill="#333">上海环球港店</text><rect x="80" y="137" width="360.8824088473564" height="28" rx="3" fill="#9b59b6" style="cursor:pointer"></rect><text x="444.8824088473564" y="155" font-size="10" fill="#666">¥192,683</text><text x="74" y="188" text-anchor="end" font-size="11" fill="#333">济南万象城店</text><rect x="80" y="170" width="356.78427965568676" height="28" rx="3" fill="#1abc9c" style="cursor:pointer"></rect><text x="440.78427965568676" y="188" font-size="10" fill="#666">¥190,495</text><text x="74" y="221" text-anchor="end" font-size="11" fill="#333">SM厦门店</text><rect x="80" y="203" width="356.4277292305569" height="28" rx="3" fill="#f39c12" style="cursor:pointer"></rect><text x="440.4277292305569" y="221" font-size="10" fill="#666">¥190,304</text><text x="74" y="254" text-anchor="end" font-size="11" fill="#333">虹桥新天地店</text><rect x="80" y="236" width="342.40488588344465" height="28" rx="3" fill="#34495e" style="cursor:pointer"></rect><text x="426.40488588344465" y="254" font-size="10" fill="#666">¥182,817</text><text x="74" y="287" text-anchor="end" font-size="11" fill="#333">杭州奥体印象…</text><rect x="80" y="269" width="329.25464243688384" height="28" rx="3" fill="#e84393" style="cursor:pointer"></rect><text x="413.25464243688384" y="287" font-size="10" fill="#666">¥175,796</text><text x="74" y="320" text-anchor="end" font-size="11" fill="#333">西单大悦城店</text><rect x="80" y="302" width="301.81097288375025" height="28" rx="3" fill="#00cec9" style="cursor:pointer"></rect><text x="385.81097288375025" y="320" font-size="10" fill="#666">¥161,143</text><text x="74" y="353" text-anchor="end" font-size="11" fill="#333">南翔印象城M…</text><rect x="80" y="335" width="294.8754237621823" height="28" rx="3" fill="#6c5ce7" style="cursor:pointer"></rect><text x="378.8754237621823" y="353" font-size="10" fill="#666">¥157,440</text><text x="74" y="386" text-anchor="end" font-size="11" fill="#333">丽泽天街店</text><rect x="80" y="368" width="287.5482816223545" height="28" rx="3" fill="#fdcb6e" style="cursor:pointer"></rect><text x="371.5482816223545" y="386" font-size="10" fill="#666">¥153,528</text><text x="74" y="419" text-anchor="end" font-size="11" fill="#333">瑞虹新天地月…</text><rect x="80" y="401" width="273.32379821236736" height="28" rx="3" fill="#e74c3c" style="cursor:pointer"></rect><text x="357.32379821236736" y="419" font-size="10" fill="#666">¥145,934</text><text x="74" y="452" text-anchor="end" font-size="11" fill="#333">银泰in77…</text><rect x="80" y="434" width="252.8074368716742" height="28" rx="3" fill="#e67e22" style="cursor:pointer"></rect><text x="336.8074368716742" y="452" font-size="10" fill="#666">¥134,979</text><text x="74" y="485" text-anchor="end" font-size="11" fill="#333">长楹天街店</text><rect x="80" y="467" width="249.38498731109067" height="28" rx="3" fill="#3498db" style="cursor:pointer"></rect><text x="333.38498731109064" y="485" font-size="10" fill="#666">¥133,152</text><text x="74" y="518" text-anchor="end" font-size="11" fill="#333">无锡万象城店</text><rect x="80" y="500" width="245.95645071535623" height="28" rx="3" fill="#2ecc71" style="cursor:pointer"></rect><text x="329.95645071535625" y="518" font-size="10" fill="#666">¥131,321</text><text x="74" y="551" text-anchor="end" font-size="11" fill="#333">太阳宫凯德店</text><rect x="80" y="533" width="244.42045763005393" height="28" rx="3" fill="#9b59b6" style="cursor:pointer"></rect><text x="328.42045763005393" y="551" font-size="10" fill="#666">¥130,501</text><text x="74" y="584" text-anchor="end" font-size="11" fill="#333">北京世纪金源…</text><rect x="80" y="566" width="242.9569845450722" height="28" rx="3" fill="#1abc9c" style="cursor:pointer"></rect><text x="326.9569845450722" y="584" font-size="10" fill="#666">¥129,720</text><text x="74" y="617" text-anchor="end" font-size="11" fill="#333">熙悦天街店</text><rect x="80" y="599" width="237.31145610069447" height="28" rx="3" fill="#f39c12" style="cursor:pointer"></rect><text x="321.3114561006945" y="617" font-size="10" fill="#666">¥126,706</text><text x="74" y="650" text-anchor="end" font-size="11" fill="#333">西直门凯德店</text><rect x="80" y="632" width="234.86797035642195" height="28" rx="3" fill="#34495e" style="cursor:pointer"></rect><text x="318.86797035642195" y="650" font-size="10" fill="#666">¥125,401</text></svg></div></div></div><div class="card"><h3>门店月滚动汇总</h3><div class="scroll-table"><table><thead><tr><th>月份</th><th>城市</th><th>门店名称</th><th>桌子数</th><th>客单价</th><th>数据天数</th><th>日均销售桌数</th><th>日均销售净额</th><th>排队占比</th><th>排50号占比</th><th>累计翻台率</th></tr></thead><tbody id="storeTbl"><tr><td>2026-03</td><td>宁波</td><td style="font-weight:600">宁波万象城店</td><td>71</td><td>¥121</td><td>17</td><td>654</td><td>¥197,346</td><td>80.7%</td><td>53.5%</td><td>9.2</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">朝阳合生汇店</td><td>75</td><td>¥143</td><td>17</td><td>642</td><td>¥229,586</td><td>75.0%</td><td>46.5%</td><td>8.6</td></tr><tr><td>2026-03</td><td>厦门</td><td style="font-weight:600">SM厦门店</td><td>64</td><td>¥123</td><td>17</td><td>621</td><td>¥190,304</td><td>85.0%</td><td>72.0%</td><td>9.7</td></tr><tr><td>2026-03</td><td>杭州</td><td style="font-weight:600">杭州奥体印象城店</td><td>67</td><td>¥122</td><td>17</td><td>578</td><td>¥175,796</td><td>75.5%</td><td>48.7%</td><td>8.6</td></tr><tr><td>2026-03</td><td>上海</td><td style="font-weight:600">中山公园龙之梦店</td><td>55</td><td>¥152</td><td>17</td><td>562</td><td>¥213,597</td><td>89.5%</td><td>55.1%</td><td>10.2</td></tr><tr><td>2026-03</td><td>济南</td><td style="font-weight:600">济南万象城店</td><td>50</td><td>¥137</td><td>17</td><td>557</td><td>¥190,495</td><td>97.6%</td><td>82.5%</td><td>11.1</td></tr><tr><td>2026-03</td><td>上海</td><td style="font-weight:600">陆家嘴中心店</td><td>55</td><td>¥156</td><td>17</td><td>547</td><td>¥213,293</td><td>87.1%</td><td>61.8%</td><td>9.9</td></tr><tr><td>2026-03</td><td>江门</td><td style="font-weight:600">江门利和广场店</td><td>49</td><td>¥86</td><td>17</td><td>544</td><td>¥116,838</td><td>97.3%</td><td>91.9%</td><td>11.1</td></tr><tr><td>2026-03</td><td>上海</td><td style="font-weight:600">上海环球港店</td><td>61</td><td>¥142</td><td>17</td><td>541</td><td>¥192,683</td><td>77.7%</td><td>48.4%</td><td>8.9</td></tr><tr><td>2026-03</td><td>武汉</td><td style="font-weight:600">银泰创意城店</td><td>50</td><td>¥89</td><td>17</td><td>522</td><td>¥115,669</td><td>91.4%</td><td>57.0%</td><td>10.4</td></tr><tr><td>2026-03</td><td>上海</td><td style="font-weight:600">虹桥新天地店</td><td>60</td><td>¥146</td><td>17</td><td>501</td><td>¥182,817</td><td>73.1%</td><td>29.6%</td><td>8.3</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">西单大悦城店</td><td>50</td><td>¥129</td><td>17</td><td>499</td><td>¥161,143</td><td>87.4%</td><td>57.0%</td><td>10.0</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">美林天地店</td><td>50</td><td>¥91</td><td>17</td><td>485</td><td>¥110,317</td><td>85.0%</td><td>50.5%</td><td>9.7</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">万菱汇店</td><td>53</td><td>¥84</td><td>17</td><td>464</td><td>¥97,308</td><td>76.6%</td><td>47.9%</td><td>8.8</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">丽泽天街店</td><td>59</td><td>¥133</td><td>17</td><td>462</td><td>¥153,528</td><td>68.5%</td><td>42.5%</td><td>7.8</td></tr><tr><td>2026-03</td><td>无锡</td><td style="font-weight:600">无锡万象城店</td><td>59</td><td>¥116</td><td>17</td><td>453</td><td>¥131,321</td><td>67.2%</td><td>37.1%</td><td>7.7</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">番禺天河城店</td><td>44</td><td>¥88</td><td>17</td><td>446</td><td>¥97,744</td><td>88.7%</td><td>49.5%</td><td>10.1</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">凯德云尚店</td><td>54</td><td>¥87</td><td>17</td><td>439</td><td>¥95,294</td><td>71.2%</td><td>43.0%</td><td>8.1</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">长楹天街店</td><td>62</td><td>¥122</td><td>17</td><td>438</td><td>¥133,152</td><td>61.8%</td><td>24.5%</td><td>7.1</td></tr><tr><td>2026-03</td><td>杭州</td><td style="font-weight:600">银泰in77・D馆店</td><td>39</td><td>¥124</td><td>17</td><td>437</td><td>¥134,979</td><td>98.1%</td><td>76.6%</td><td>11.2</td></tr><tr><td>2026-03</td><td>武汉</td><td style="font-weight:600">武汉江宸天街店</td><td>64</td><td>¥99</td><td>17</td><td>430</td><td>¥106,464</td><td>58.9%</td><td>33.1%</td><td>6.7</td></tr><tr><td>2026-03</td><td>上海</td><td style="font-weight:600">南翔印象城MEGA店</td><td>47</td><td>¥147</td><td>17</td><td>428</td><td>¥157,440</td><td>79.8%</td><td>41.9%</td><td>9.1</td></tr><tr><td>2026-03</td><td>天津</td><td style="font-weight:600">天津天河城店</td><td>50</td><td>¥108</td><td>17</td><td>416</td><td>¥112,281</td><td>72.9%</td><td>23.7%</td><td>8.3</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">熙悦天街店</td><td>49</td><td>¥123</td><td>17</td><td>412</td><td>¥126,706</td><td>73.7%</td><td>29.0%</td><td>8.4</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">花城汇南区店</td><td>60</td><td>¥86</td><td>17</td><td>411</td><td>¥88,133</td><td>60.0%</td><td>26.9%</td><td>6.8</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">北京世纪金源店</td><td>45</td><td>¥127</td><td>17</td><td>407</td><td>¥129,720</td><td>79.3%</td><td>51.9%</td><td>9.1</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">太阳宫凯德店</td><td>40</td><td>¥129</td><td>17</td><td>404</td><td>¥130,501</td><td>88.4%</td><td>54.6%</td><td>10.1</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">西直门凯德店</td><td>39</td><td>¥125</td><td>17</td><td>400</td><td>¥125,401</td><td>89.8%</td><td>63.2%</td><td>10.3</td></tr><tr><td>2026-03</td><td>佛山</td><td style="font-weight:600">王府井紫薇港店</td><td>70</td><td>¥83</td><td>17</td><td>391</td><td>¥81,150</td><td>48.9%</td><td>30.4%</td><td>5.6</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">北京荟聚店</td><td>42</td><td>¥125</td><td>17</td><td>391</td><td>¥121,592</td><td>81.5%</td><td>52.1%</td><td>9.3</td></tr><tr><td>2026-03</td><td>东莞</td><td style="font-weight:600">民盈国贸城店</td><td>68</td><td>¥82</td><td>17</td><td>390</td><td>¥80,077</td><td>50.3%</td><td>32.0%</td><td>5.7</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">正佳广场店</td><td>42</td><td>¥86</td><td>17</td><td>389</td><td>¥83,548</td><td>81.2%</td><td>47.0%</td><td>9.3</td></tr><tr><td>2026-03</td><td>上海</td><td style="font-weight:600">瑞虹新天地月亮湾店</td><td>40</td><td>¥150</td><td>17</td><td>389</td><td>¥145,934</td><td>85.2%</td><td>55.6%</td><td>9.7</td></tr><tr><td>2026-03</td><td>苏州</td><td style="font-weight:600">苏州万象天地店</td><td>60</td><td>¥113</td><td>17</td><td>389</td><td>¥109,763</td><td>56.7%</td><td>23.1%</td><td>6.5</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">海雅缤纷城店</td><td>68</td><td>¥98</td><td>17</td><td>384</td><td>¥94,189</td><td>49.5%</td><td>32.3%</td><td>5.7</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">朝阳大悦城店</td><td>40</td><td>¥126</td><td>17</td><td>378</td><td>¥119,496</td><td>82.8%</td><td>47.0%</td><td>9.4</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">中关村大融城店</td><td>34</td><td>¥125</td><td>17</td><td>374</td><td>¥117,180</td><td>96.2%</td><td>66.4%</td><td>11.0</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">东方宝泰店</td><td>42</td><td>¥85</td><td>17</td><td>357</td><td>¥75,790</td><td>74.5%</td><td>44.4%</td><td>8.5</td></tr><tr><td>2026-03</td><td>珠海</td><td style="font-weight:600">南湾华发商都店</td><td>32</td><td>¥103</td><td>17</td><td>354</td><td>¥90,890</td><td>96.8%</td><td>86.6%</td><td>11.1</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">江燕路万科里店</td><td>78</td><td>¥86</td><td>17</td><td>352</td><td>¥75,525</td><td>39.5%</td><td>19.9%</td><td>4.5</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">乐峰广场店</td><td>61</td><td>¥82</td><td>17</td><td>348</td><td>¥71,450</td><td>50.0%</td><td>29.6%</td><td>5.7</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">番禺永旺店</td><td>60</td><td>¥89</td><td>17</td><td>343</td><td>¥75,933</td><td>50.0%</td><td>28.0%</td><td>5.7</td></tr><tr><td>2026-03</td><td>杭州</td><td style="font-weight:600">萧山万象汇店</td><td>40</td><td>¥121</td><td>17</td><td>340</td><td>¥102,657</td><td>74.5%</td><td>49.7%</td><td>8.5</td></tr><tr><td>2026-03</td><td>天津</td><td style="font-weight:600">和平大悦城店</td><td>61</td><td>¥106</td><td>17</td><td>339</td><td>¥89,796</td><td>48.7%</td><td>15.0%</td><td>5.5</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">丽影广场店</td><td>41</td><td>¥88</td><td>17</td><td>333</td><td>¥73,139</td><td>71.2%</td><td>40.1%</td><td>8.1</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">石景山喜隆多店</td><td>47</td><td>¥125</td><td>17</td><td>323</td><td>¥100,591</td><td>60.2%</td><td>19.4%</td><td>6.9</td></tr><tr><td>2026-03</td><td>成都</td><td style="font-weight:600">IFS店</td><td>45</td><td>¥96</td><td>17</td><td>322</td><td>¥77,412</td><td>62.6%</td><td>23.1%</td><td>7.2</td></tr><tr><td>2026-03</td><td>苏州</td><td style="font-weight:600">苏州中心店</td><td>40</td><td>¥121</td><td>17</td><td>318</td><td>¥96,181</td><td>69.6%</td><td>41.1%</td><td>8.0</td></tr><tr><td>2026-03</td><td>杭州</td><td style="font-weight:600">城西银泰城店</td><td>31</td><td>¥131</td><td>17</td><td>316</td><td>¥103,446</td><td>89.3%</td><td>58.3%</td><td>10.2</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">亦庄天街店</td><td>45</td><td>¥125</td><td>17</td><td>315</td><td>¥98,030</td><td>61.3%</td><td>23.7%</td><td>7.0</td></tr><tr><td>2026-03</td><td>苏州</td><td style="font-weight:600">昆山万象汇店</td><td>52</td><td>¥121</td><td>17</td><td>313</td><td>¥94,621</td><td>52.7%</td><td>22.6%</td><td>6.0</td></tr><tr><td>2026-03</td><td>东莞</td><td style="font-weight:600">松山湖万象汇店</td><td>60</td><td>¥83</td><td>17</td><td>298</td><td>¥61,914</td><td>43.5%</td><td>22.0%</td><td>5.0</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">通州万象汇店</td><td>51</td><td>¥131</td><td>17</td><td>294</td><td>¥96,370</td><td>50.5%</td><td>14.5%</td><td>5.8</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">壹方天地店</td><td>56</td><td>¥93</td><td>17</td><td>289</td><td>¥67,417</td><td>45.2%</td><td>25.8%</td><td>5.2</td></tr><tr><td>2026-03</td><td>成都</td><td style="font-weight:600">成都万象城店</td><td>61</td><td>¥105</td><td>17</td><td>288</td><td>¥75,681</td><td>41.4%</td><td>18.3%</td><td>4.7</td></tr><tr><td>2026-03</td><td>惠州</td><td style="font-weight:600">华贸天地店</td><td>50</td><td>¥83</td><td>17</td><td>287</td><td>¥59,557</td><td>50.3%</td><td>30.1%</td><td>5.7</td></tr><tr><td>2026-03</td><td>重庆</td><td style="font-weight:600">观音桥大融城店</td><td>50</td><td>¥82</td><td>17</td><td>281</td><td>¥57,621</td><td>49.2%</td><td>16.7%</td><td>5.6</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">通州万达店</td><td>35</td><td>¥134</td><td>17</td><td>276</td><td>¥92,481</td><td>69.1%</td><td>25.8%</td><td>7.9</td></tr><tr><td>2026-03</td><td>苏州</td><td style="font-weight:600">獅山天街店</td><td>40</td><td>¥111</td><td>17</td><td>274</td><td>¥76,188</td><td>60.0%</td><td>26.3%</td><td>6.8</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">萝岗万达店</td><td>30</td><td>¥88</td><td>17</td><td>273</td><td>¥59,979</td><td>79.8%</td><td>45.4%</td><td>9.1</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">卓悦汇店</td><td>61</td><td>¥94</td><td>17</td><td>273</td><td>¥64,465</td><td>39.3%</td><td>15.6%</td><td>4.5</td></tr><tr><td>2026-03</td><td>苏州</td><td style="font-weight:600">苏州吴江万象汇店</td><td>41</td><td>¥114</td><td>17</td><td>272</td><td>¥77,564</td><td>58.1%</td><td>26.3%</td><td>6.6</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">富力海珠城店</td><td>44</td><td>¥85</td><td>17</td><td>271</td><td>¥57,614</td><td>54.0%</td><td>24.2%</td><td>6.2</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">iN城市广场店</td><td>37</td><td>¥102</td><td>17</td><td>265</td><td>¥67,394</td><td>62.6%</td><td>21.0%</td><td>7.2</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">卓悦中心店</td><td>44</td><td>¥100</td><td>17</td><td>262</td><td>¥65,494</td><td>52.1%</td><td>23.4%</td><td>6.0</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">KK ONE店</td><td>60</td><td>¥96</td><td>17</td><td>261</td><td>¥62,904</td><td>38.2%</td><td>11.3%</td><td>4.4</td></tr><tr><td>2026-03</td><td>佛山</td><td style="font-weight:600">南海万科广场店</td><td>40</td><td>¥81</td><td>17</td><td>260</td><td>¥52,788</td><td>57.0%</td><td>35.5%</td><td>6.5</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">海岸城店</td><td>58</td><td>¥102</td><td>17</td><td>260</td><td>¥66,198</td><td>39.3%</td><td>13.7%</td><td>4.5</td></tr><tr><td>2026-03</td><td>成都</td><td style="font-weight:600">来福士广场店</td><td>50</td><td>¥95</td><td>17</td><td>258</td><td>¥61,410</td><td>45.2%</td><td>10.2%</td><td>5.2</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">北京路粤潮楼店</td><td>40</td><td>¥84</td><td>17</td><td>253</td><td>¥53,083</td><td>55.4%</td><td>24.2%</td><td>6.3</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">南山天利名城店</td><td>72</td><td>¥116</td><td>17</td><td>250</td><td>¥72,436</td><td>30.4%</td><td>10.8%</td><td>3.5</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">荔湾领展店</td><td>32</td><td>¥83</td><td>17</td><td>243</td><td>¥50,346</td><td>66.4%</td><td>34.4%</td><td>7.6</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">番禺万达广场店</td><td>34</td><td>¥84</td><td>17</td><td>241</td><td>¥50,596</td><td>62.1%</td><td>40.9%</td><td>7.1</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">皇庭广场店</td><td>51</td><td>¥96</td><td>17</td><td>238</td><td>¥57,234</td><td>40.9%</td><td>11.6%</td><td>4.7</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">CCP雅宝店</td><td>50</td><td>¥97</td><td>17</td><td>235</td><td>¥56,935</td><td>41.1%</td><td>20.2%</td><td>4.7</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">中华广场店</td><td>30</td><td>¥89</td><td>17</td><td>231</td><td>¥51,234</td><td>67.5%</td><td>29.6%</td><td>7.7</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">悦汇城店</td><td>42</td><td>¥90</td><td>17</td><td>228</td><td>¥51,335</td><td>47.6%</td><td>21.8%</td><td>5.4</td></tr><tr><td>2026-03</td><td>广州</td><td style="font-weight:600">陈家祠扬韬店</td><td>28</td><td>¥86</td><td>17</td><td>217</td><td>¥46,661</td><td>68.0%</td><td>35.2%</td><td>7.8</td></tr><tr><td>2026-03</td><td>北京</td><td style="font-weight:600">门头沟长安天街店</td><td>45</td><td>¥119</td><td>17</td><td>210</td><td>¥62,452</td><td>40.9%</td><td>6.5%</td><td>4.7</td></tr><tr><td>2026-03</td><td>重庆</td><td style="font-weight:600">重庆时代天街店</td><td>53</td><td>¥84</td><td>17</td><td>198</td><td>¥41,655</td><td>32.8%</td><td>8.1%</td><td>3.7</td></tr><tr><td>2026-03</td><td>武汉</td><td style="font-weight:600">武汉摩尔城店</td><td>52</td><td>¥92</td><td>17</td><td>193</td><td>¥44,633</td><td>32.5%</td><td>12.9%</td><td>3.7</td></tr><tr><td>2026-03</td><td>天津</td><td style="font-weight:600">天津南开大悦城</td><td>27</td><td>¥94</td><td>17</td><td>189</td><td>¥44,559</td><td>61.3%</td><td>25.8%</td><td>7.0</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">天虹龙华店</td><td>30</td><td>¥92</td><td>17</td><td>139</td><td>¥32,134</td><td>40.6%</td><td>16.7%</td><td>4.6</td></tr><tr><td>2026-03</td><td>深圳</td><td style="font-weight:600">福田卓悦Intown店</td><td>37</td><td>¥101</td><td>17</td><td>139</td><td>¥34,961</td><td>32.8%</td><td>10.5%</td><td>3.7</td></tr><tr><td>2026-03</td><td>东莞</td><td style="font-weight:600">海德・汇一城店</td><td>20</td><td>¥85</td><td>17</td><td>112</td><td>¥23,843</td><td>49.2%</td><td>31.4%</td><td>5.6</td></tr><tr><td>2026-03</td><td>天津</td><td style="font-weight:600">西青大悦汇店</td><td>37</td><td>¥99</td><td>17</td><td>73</td><td>¥17,987</td><td>17.2%</td><td>0.0%</td><td>2.0</td></tr></tbody></table></div></div></div>
-  <div id="p-daily" class="hidden"><div class="card"><h3>门店每日明细 (1000 条，最多显示200条)</h3><div class="scroll-table"><table><thead><tr><th>日期</th><th>城市</th><th>门店名称</th><th>桌子数</th><th>排队小时数</th><th>排50号小时数</th><th>营业小时数</th><th>最低销售桌数</th><th>最低翻台率</th><th>最低销售额</th></tr></thead><tbody id="dailyTbl"><tr><td>2026-03-17</td><td>佛山</td><td style="font-weight:600">南海万科广场店</td><td>40</td><td>3.0</td><td>2.0</td><td>10.5</td><td>125</td><td>3.1</td><td>¥25,398</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">番禺永旺店</td><td>60</td><td>4.0</td><td>2.0</td><td>10.5</td><td>250</td><td>4.2</td><td>¥55,521</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">凯德云尚店</td><td>54</td><td>6.0</td><td>2.0</td><td>10.5</td><td>338</td><td>6.3</td><td>¥73,358</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">丽影广场店</td><td>41</td><td>6.5</td><td>3.0</td><td>10.5</td><td>278</td><td>6.8</td><td>¥60,995</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">富力海珠城店</td><td>44</td><td>4.0</td><td>0.0</td><td>10.5</td><td>184</td><td>4.2</td><td>¥38,983</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">悦汇城店</td><td>42</td><td>3.0</td><td>0.0</td><td>10.5</td><td>131</td><td>3.1</td><td>¥29,583</td></tr><tr><td>2026-03-17</td><td>江门</td><td style="font-weight:600">江门利和广场店</td><td>49</td><td>10.5</td><td>10.5</td><td>10.5</td><td>537</td><td>11.0</td><td>¥115,224</td></tr><tr><td>2026-03-17</td><td>厦门</td><td style="font-weight:600">SM厦门店</td><td>64</td><td>8.5</td><td>6.0</td><td>10.5</td><td>568</td><td>8.9</td><td>¥174,044</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">萝岗万达店</td><td>30</td><td>7.0</td><td>3.0</td><td>10.5</td><td>219</td><td>7.3</td><td>¥48,064</td></tr><tr><td>2026-03-17</td><td>珠海</td><td style="font-weight:600">南湾华发商都店</td><td>32</td><td>10.5</td><td>7.0</td><td>10.5</td><td>351</td><td>11.0</td><td>¥90,133</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">通州万象汇店</td><td>51</td><td>2.0</td><td>0.0</td><td>10.5</td><td>106</td><td>2.1</td><td>¥34,857</td></tr><tr><td>2026-03-17</td><td>济南</td><td style="font-weight:600">济南万象城店</td><td>50</td><td>10.5</td><td>8.0</td><td>10.5</td><td>548</td><td>11.0</td><td>¥187,346</td></tr><tr><td>2026-03-17</td><td>上海</td><td style="font-weight:600">虹桥新天地店</td><td>60</td><td>5.0</td><td>0.0</td><td>10.5</td><td>313</td><td>5.2</td><td>¥114,261</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">门头沟长安天街店</td><td>45</td><td>1.0</td><td>0.0</td><td>10.5</td><td>47</td><td>1.0</td><td>¥13,970</td></tr><tr><td>2026-03-17</td><td>上海</td><td style="font-weight:600">瑞虹新天地月亮湾店</td><td>40</td><td>7.0</td><td>3.0</td><td>10.5</td><td>292</td><td>7.3</td><td>¥109,565</td></tr><tr><td>2026-03-17</td><td>上海</td><td style="font-weight:600">南翔印象城MEGA店</td><td>47</td><td>7.0</td><td>2.0</td><td>10.5</td><td>343</td><td>7.3</td><td>¥126,164</td></tr><tr><td>2026-03-17</td><td>上海</td><td style="font-weight:600">陆家嘴中心店</td><td>55</td><td>8.0</td><td>3.0</td><td>10.5</td><td>459</td><td>8.3</td><td>¥179,061</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">通州万达店</td><td>35</td><td>6.0</td><td>0.0</td><td>10.5</td><td>219</td><td>6.3</td><td>¥73,409</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">熙悦天街店</td><td>49</td><td>6.0</td><td>0.0</td><td>10.5</td><td>307</td><td>6.3</td><td>¥94,336</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">朝阳合生汇店</td><td>75</td><td>7.0</td><td>3.0</td><td>10.5</td><td>548</td><td>7.3</td><td>¥195,848</td></tr><tr><td>2026-03-17</td><td>苏州</td><td style="font-weight:600">苏州吴江万象汇店</td><td>41</td><td>2.0</td><td>0.0</td><td>10.5</td><td>86</td><td>2.1</td><td>¥24,418</td></tr><tr><td>2026-03-17</td><td>苏州</td><td style="font-weight:600">苏州万象天地店</td><td>60</td><td>0.0</td><td>0.0</td><td>10.5</td><td>0</td><td>0.0</td><td>¥0</td></tr><tr><td>2026-03-17</td><td>上海</td><td style="font-weight:600">中山公园龙之梦店</td><td>55</td><td>9.0</td><td>3.0</td><td>10.5</td><td>517</td><td>9.4</td><td>¥196,278</td></tr><tr><td>2026-03-17</td><td>上海</td><td style="font-weight:600">上海环球港店</td><td>61</td><td>6.5</td><td>3.0</td><td>10.5</td><td>414</td><td>6.8</td><td>¥147,346</td></tr><tr><td>2026-03-17</td><td>无锡</td><td style="font-weight:600">无锡万象城店</td><td>59</td><td>4.0</td><td>0.0</td><td>10.5</td><td>246</td><td>4.2</td><td>¥71,439</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">丽泽天街店</td><td>59</td><td>5.0</td><td>2.0</td><td>10.5</td><td>308</td><td>5.2</td><td>¥102,352</td></tr><tr><td>2026-03-17</td><td>宁波</td><td style="font-weight:600">宁波万象城店</td><td>71</td><td>8.0</td><td>2.0</td><td>10.5</td><td>593</td><td>8.3</td><td>¥178,927</td></tr><tr><td>2026-03-17</td><td>杭州</td><td style="font-weight:600">杭州奥体印象城店</td><td>67</td><td>5.5</td><td>2.0</td><td>10.5</td><td>385</td><td>5.7</td><td>¥116,989</td></tr><tr><td>2026-03-17</td><td>杭州</td><td style="font-weight:600">城西银泰城店</td><td>31</td><td>9.5</td><td>3.0</td><td>10.5</td><td>307</td><td>9.9</td><td>¥100,642</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">石景山喜隆多店</td><td>47</td><td>3.0</td><td>0.0</td><td>10.5</td><td>147</td><td>3.1</td><td>¥45,805</td></tr><tr><td>2026-03-17</td><td>杭州</td><td style="font-weight:600">萧山万象汇店</td><td>40</td><td>7.0</td><td>3.0</td><td>10.5</td><td>292</td><td>7.3</td><td>¥88,203</td></tr><tr><td>2026-03-17</td><td>苏州</td><td style="font-weight:600">昆山万象汇店</td><td>52</td><td>3.0</td><td>0.0</td><td>10.5</td><td>163</td><td>3.1</td><td>¥49,242</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">亦庄天街店</td><td>45</td><td>4.0</td><td>0.0</td><td>10.5</td><td>188</td><td>4.2</td><td>¥58,474</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">西直门凯德店</td><td>39</td><td>9.0</td><td>5.0</td><td>10.5</td><td>366</td><td>9.4</td><td>¥114,888</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">中关村大融城店</td><td>34</td><td>9.5</td><td>4.0</td><td>10.5</td><td>337</td><td>9.9</td><td>¥105,724</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">北京荟聚店</td><td>42</td><td>6.5</td><td>3.0</td><td>10.5</td><td>285</td><td>6.8</td><td>¥88,686</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">北京世纪金源店</td><td>45</td><td>7.5</td><td>3.0</td><td>10.5</td><td>352</td><td>7.8</td><td>¥112,131</td></tr><tr><td>2026-03-17</td><td>杭州</td><td style="font-weight:600">银泰in77・D馆店</td><td>39</td><td>10.5</td><td>5.5</td><td>10.5</td><td>427</td><td>11.0</td><td>¥132,021</td></tr><tr><td>2026-03-17</td><td>苏州</td><td style="font-weight:600">獅山天街店</td><td>40</td><td>4.0</td><td>0.0</td><td>10.5</td><td>167</td><td>4.2</td><td>¥46,464</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">朝阳大悦城店</td><td>40</td><td>6.5</td><td>3.0</td><td>10.5</td><td>271</td><td>6.8</td><td>¥85,742</td></tr><tr><td>2026-03-17</td><td>苏州</td><td style="font-weight:600">苏州中心店</td><td>40</td><td>3.0</td><td>0.0</td><td>10.5</td><td>125</td><td>3.1</td><td>¥37,878</td></tr><tr><td>2026-03-17</td><td>天津</td><td style="font-weight:600">和平大悦城店</td><td>61</td><td>2.0</td><td>0.0</td><td>10.5</td><td>127</td><td>2.1</td><td>¥33,736</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">太阳宫凯德店</td><td>40</td><td>7.5</td><td>3.0</td><td>10.5</td><td>313</td><td>7.8</td><td>¥101,148</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">长楹天街店</td><td>62</td><td>5.0</td><td>0.0</td><td>10.5</td><td>323</td><td>5.2</td><td>¥98,417</td></tr><tr><td>2026-03-17</td><td>北京</td><td style="font-weight:600">西单大悦城店</td><td>50</td><td>8.0</td><td>3.0</td><td>10.5</td><td>417</td><td>8.3</td><td>¥134,865</td></tr><tr><td>2026-03-17</td><td>天津</td><td style="font-weight:600">天津天河城店</td><td>50</td><td>6.5</td><td>0.0</td><td>10.5</td><td>339</td><td>6.8</td><td>¥91,565</td></tr><tr><td>2026-03-17</td><td>天津</td><td style="font-weight:600">西青大悦汇店</td><td>37</td><td>0.0</td><td>0.0</td><td>10.5</td><td>0</td><td>0.0</td><td>¥0</td></tr><tr><td>2026-03-17</td><td>天津</td><td style="font-weight:600">天津南开大悦城</td><td>27</td><td>3.0</td><td>0.0</td><td>10.5</td><td>85</td><td>3.1</td><td>¥19,934</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">番禺万达广场店</td><td>34</td><td>3.5</td><td>2.0</td><td>10.5</td><td>124</td><td>3.6</td><td>¥26,065</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">万菱汇店</td><td>53</td><td>6.0</td><td>3.0</td><td>10.5</td><td>332</td><td>6.3</td><td>¥69,652</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">荔湾领展店</td><td>32</td><td>5.5</td><td>2.0</td><td>10.5</td><td>184</td><td>5.7</td><td>¥38,116</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">番禺天河城店</td><td>44</td><td>8.5</td><td>3.0</td><td>10.5</td><td>390</td><td>8.9</td><td>¥85,600</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">中华广场店</td><td>30</td><td>5.0</td><td>0.0</td><td>10.5</td><td>157</td><td>5.2</td><td>¥34,701</td></tr><tr><td>2026-03-17</td><td>惠州</td><td style="font-weight:600">华贸天地店</td><td>50</td><td>3.0</td><td>1.0</td><td>10.5</td><td>157</td><td>3.1</td><td>¥32,486</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">陈家祠扬韬店</td><td>28</td><td>5.0</td><td>2.0</td><td>10.5</td><td>146</td><td>5.2</td><td>¥31,354</td></tr><tr><td>2026-03-17</td><td>武汉</td><td style="font-weight:600">银泰创意城店</td><td>50</td><td>8.0</td><td>3.0</td><td>10.5</td><td>417</td><td>8.3</td><td>¥92,535</td></tr><tr><td>2026-03-17</td><td>东莞</td><td style="font-weight:600">民盈国贸城店</td><td>68</td><td>3.0</td><td>0.0</td><td>10.5</td><td>213</td><td>3.1</td><td>¥43,678</td></tr><tr><td>2026-03-17</td><td>武汉</td><td style="font-weight:600">武汉江宸天街店</td><td>64</td><td>4.0</td><td>0.0</td><td>10.5</td><td>267</td><td>4.2</td><td>¥66,115</td></tr><tr><td>2026-03-17</td><td>重庆</td><td style="font-weight:600">重庆时代天街店</td><td>53</td><td>0.0</td><td>0.0</td><td>10.5</td><td>0</td><td>0.0</td><td>¥0</td></tr><tr><td>2026-03-17</td><td>重庆</td><td style="font-weight:600">观音桥大融城店</td><td>50</td><td>2.0</td><td>0.0</td><td>10.5</td><td>104</td><td>2.1</td><td>¥21,411</td></tr><tr><td>2026-03-17</td><td>成都</td><td style="font-weight:600">成都万象城店</td><td>61</td><td>2.0</td><td>0.0</td><td>10.5</td><td>127</td><td>2.1</td><td>¥33,417</td></tr><tr><td>2026-03-17</td><td>成都</td><td style="font-weight:600">来福士广场店</td><td>50</td><td>2.0</td><td>0.0</td><td>10.5</td><td>104</td><td>2.1</td><td>¥24,856</td></tr><tr><td>2026-03-17</td><td>成都</td><td style="font-weight:600">IFS店</td><td>45</td><td>5.5</td><td>0.0</td><td>10.5</td><td>258</td><td>5.7</td><td>¥62,129</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">正佳广场店</td><td>42</td><td>6.5</td><td>2.0</td><td>10.5</td><td>285</td><td>6.8</td><td>¥61,139</td></tr><tr><td>2026-03-17</td><td>东莞</td><td style="font-weight:600">海德・汇一城店</td><td>20</td><td>3.0</td><td>1.0</td><td>10.5</td><td>63</td><td>3.1</td><td>¥13,290</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">江燕路万科里店</td><td>78</td><td>2.0</td><td>1.0</td><td>10.5</td><td>163</td><td>2.1</td><td>¥34,937</td></tr><tr><td>2026-03-17</td><td>东莞</td><td style="font-weight:600">松山湖万象汇店</td><td>60</td><td>3.0</td><td>0.0</td><td>10.5</td><td>188</td><td>3.1</td><td>¥38,983</td></tr><tr><td>2026-03-17</td><td>武汉</td><td style="font-weight:600">武汉摩尔城店</td><td>52</td><td>0.0</td><td>0.0</td><td>10.5</td><td>0</td><td>0.0</td><td>¥0</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">花城汇南区店</td><td>60</td><td>5.0</td><td>1.0</td><td>10.5</td><td>313</td><td>5.2</td><td>¥67,186</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">乐峰广场店</td><td>61</td><td>4.0</td><td>1.0</td><td>10.5</td><td>255</td><td>4.2</td><td>¥52,243</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">美林天地店</td><td>50</td><td>8.5</td><td>3.0</td><td>10.5</td><td>443</td><td>8.9</td><td>¥100,891</td></tr><tr><td>2026-03-17</td><td>佛山</td><td style="font-weight:600">王府井紫薇港店</td><td>70</td><td>3.0</td><td>1.0</td><td>10.5</td><td>219</td><td>3.1</td><td>¥45,480</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">南山天利名城店</td><td>72</td><td>1.0</td><td>0.0</td><td>10.5</td><td>75</td><td>1.0</td><td>¥21,795</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">福田卓悦Intown店</td><td>37</td><td>1.0</td><td>0.0</td><td>10.5</td><td>39</td><td>1.0</td><td>¥9,743</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">iN城市广场店</td><td>37</td><td>5.0</td><td>0.0</td><td>10.5</td><td>193</td><td>5.2</td><td>¥49,171</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">CCP雅宝店</td><td>50</td><td>2.0</td><td>0.0</td><td>10.5</td><td>104</td><td>2.1</td><td>¥25,304</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">天虹龙华店</td><td>30</td><td>2.0</td><td>0.0</td><td>10.5</td><td>63</td><td>2.1</td><td>¥14,471</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">海岸城店</td><td>58</td><td>2.0</td><td>0.0</td><td>10.5</td><td>121</td><td>2.1</td><td>¥30,832</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">卓悦汇店</td><td>61</td><td>1.0</td><td>0.0</td><td>10.5</td><td>64</td><td>1.0</td><td>¥15,012</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">KK ONE店</td><td>60</td><td>2.0</td><td>0.0</td><td>10.5</td><td>125</td><td>2.1</td><td>¥30,123</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">皇庭广场店</td><td>51</td><td>1.0</td><td>0.0</td><td>10.5</td><td>53</td><td>1.0</td><td>¥12,802</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">海雅缤纷城店</td><td>68</td><td>4.0</td><td>1.0</td><td>10.5</td><td>284</td><td>4.2</td><td>¥69,618</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">壹方天地店</td><td>56</td><td>3.0</td><td>0.0</td><td>10.5</td><td>175</td><td>3.1</td><td>¥40,932</td></tr><tr><td>2026-03-17</td><td>深圳</td><td style="font-weight:600">卓悦中心店</td><td>44</td><td>4.0</td><td>0.0</td><td>10.5</td><td>184</td><td>4.2</td><td>¥45,913</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">北京路粤潮楼店</td><td>40</td><td>3.0</td><td>1.0</td><td>10.5</td><td>125</td><td>3.1</td><td>¥26,284</td></tr><tr><td>2026-03-17</td><td>广州</td><td style="font-weight:600">东方宝泰店</td><td>42</td><td>6.5</td><td>2.0</td><td>10.5</td><td>285</td><td>6.8</td><td>¥60,468</td></tr><tr><td>2026-03-16</td><td>佛山</td><td style="font-weight:600">南海万科广场店</td><td>40</td><td>3.0</td><td>1.0</td><td>10.5</td><td>125</td><td>3.1</td><td>¥25,398</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">番禺永旺店</td><td>60</td><td>4.0</td><td>0.0</td><td>10.5</td><td>250</td><td>4.2</td><td>¥55,521</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">凯德云尚店</td><td>54</td><td>5.0</td><td>3.0</td><td>10.5</td><td>282</td><td>5.2</td><td>¥61,132</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">丽影广场店</td><td>41</td><td>8.5</td><td>3.0</td><td>10.5</td><td>364</td><td>8.9</td><td>¥79,763</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">富力海珠城店</td><td>44</td><td>5.0</td><td>1.0</td><td>10.5</td><td>230</td><td>5.2</td><td>¥48,728</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">悦汇城店</td><td>42</td><td>4.0</td><td>0.0</td><td>10.5</td><td>175</td><td>4.2</td><td>¥39,443</td></tr><tr><td>2026-03-16</td><td>江门</td><td style="font-weight:600">江门利和广场店</td><td>49</td><td>10.5</td><td>9.0</td><td>10.5</td><td>537</td><td>11.0</td><td>¥115,224</td></tr><tr><td>2026-03-16</td><td>厦门</td><td style="font-weight:600">SM厦门店</td><td>64</td><td>9.5</td><td>9.5</td><td>10.5</td><td>634</td><td>9.9</td><td>¥194,520</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">萝岗万达店</td><td>30</td><td>7.5</td><td>2.0</td><td>10.5</td><td>235</td><td>7.8</td><td>¥51,497</td></tr><tr><td>2026-03-16</td><td>珠海</td><td style="font-weight:600">南湾华发商都店</td><td>32</td><td>10.5</td><td>8.5</td><td>10.5</td><td>351</td><td>11.0</td><td>¥90,133</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">通州万象汇店</td><td>51</td><td>3.0</td><td>0.0</td><td>10.5</td><td>160</td><td>3.1</td><td>¥52,286</td></tr><tr><td>2026-03-16</td><td>济南</td><td style="font-weight:600">济南万象城店</td><td>50</td><td>10.5</td><td>9.0</td><td>10.5</td><td>548</td><td>11.0</td><td>¥187,346</td></tr><tr><td>2026-03-16</td><td>上海</td><td style="font-weight:600">虹桥新天地店</td><td>60</td><td>8.0</td><td>0.0</td><td>10.5</td><td>501</td><td>8.3</td><td>¥182,817</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">门头沟长安天街店</td><td>45</td><td>1.0</td><td>0.0</td><td>10.5</td><td>47</td><td>1.0</td><td>¥13,970</td></tr><tr><td>2026-03-16</td><td>上海</td><td style="font-weight:600">瑞虹新天地月亮湾店</td><td>40</td><td>9.0</td><td>4.0</td><td>10.5</td><td>376</td><td>9.4</td><td>¥140,870</td></tr><tr><td>2026-03-16</td><td>上海</td><td style="font-weight:600">南翔印象城MEGA店</td><td>47</td><td>7.0</td><td>0.0</td><td>10.5</td><td>343</td><td>7.3</td><td>¥126,164</td></tr><tr><td>2026-03-16</td><td>上海</td><td style="font-weight:600">陆家嘴中心店</td><td>55</td><td>7.5</td><td>3.0</td><td>10.5</td><td>430</td><td>7.8</td><td>¥167,870</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">通州万达店</td><td>35</td><td>6.0</td><td>0.0</td><td>10.5</td><td>219</td><td>6.3</td><td>¥73,409</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">熙悦天街店</td><td>49</td><td>5.0</td><td>0.0</td><td>10.5</td><td>256</td><td>5.2</td><td>¥78,613</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">朝阳合生汇店</td><td>75</td><td>4.0</td><td>1.0</td><td>10.5</td><td>313</td><td>4.2</td><td>¥111,913</td></tr><tr><td>2026-03-16</td><td>苏州</td><td style="font-weight:600">苏州吴江万象汇店</td><td>41</td><td>1.0</td><td>0.0</td><td>10.5</td><td>43</td><td>1.0</td><td>¥12,209</td></tr><tr><td>2026-03-16</td><td>苏州</td><td style="font-weight:600">苏州万象天地店</td><td>60</td><td>3.0</td><td>0.0</td><td>10.5</td><td>188</td><td>3.1</td><td>¥53,061</td></tr><tr><td>2026-03-16</td><td>上海</td><td style="font-weight:600">中山公园龙之梦店</td><td>55</td><td>8.5</td><td>3.0</td><td>10.5</td><td>488</td><td>8.9</td><td>¥185,374</td></tr><tr><td>2026-03-16</td><td>上海</td><td style="font-weight:600">上海环球港店</td><td>61</td><td>8.0</td><td>2.0</td><td>10.5</td><td>509</td><td>8.3</td><td>¥181,349</td></tr><tr><td>2026-03-16</td><td>无锡</td><td style="font-weight:600">无锡万象城店</td><td>59</td><td>4.0</td><td>0.0</td><td>10.5</td><td>246</td><td>4.2</td><td>¥71,439</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">丽泽天街店</td><td>59</td><td>5.0</td><td>0.0</td><td>10.5</td><td>308</td><td>5.2</td><td>¥102,352</td></tr><tr><td>2026-03-16</td><td>宁波</td><td style="font-weight:600">宁波万象城店</td><td>71</td><td>7.0</td><td>2.0</td><td>10.5</td><td>519</td><td>7.3</td><td>¥156,561</td></tr><tr><td>2026-03-16</td><td>杭州</td><td style="font-weight:600">杭州奥体印象城店</td><td>67</td><td>7.0</td><td>3.0</td><td>10.5</td><td>489</td><td>7.3</td><td>¥148,895</td></tr><tr><td>2026-03-16</td><td>杭州</td><td style="font-weight:600">城西银泰城店</td><td>31</td><td>7.5</td><td>3.0</td><td>10.5</td><td>243</td><td>7.8</td><td>¥79,454</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">石景山喜隆多店</td><td>47</td><td>3.0</td><td>0.0</td><td>10.5</td><td>147</td><td>3.1</td><td>¥45,805</td></tr><tr><td>2026-03-16</td><td>杭州</td><td style="font-weight:600">萧山万象汇店</td><td>40</td><td>7.0</td><td>2.0</td><td>10.5</td><td>292</td><td>7.3</td><td>¥88,203</td></tr><tr><td>2026-03-16</td><td>苏州</td><td style="font-weight:600">昆山万象汇店</td><td>52</td><td>0.0</td><td>0.0</td><td>10.5</td><td>0</td><td>0.0</td><td>¥0</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">亦庄天街店</td><td>45</td><td>4.0</td><td>0.0</td><td>10.5</td><td>188</td><td>4.2</td><td>¥58,474</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">西直门凯德店</td><td>39</td><td>6.0</td><td>3.0</td><td>10.5</td><td>244</td><td>6.3</td><td>¥76,592</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">中关村大融城店</td><td>34</td><td>9.5</td><td>3.5</td><td>10.5</td><td>337</td><td>9.9</td><td>¥105,724</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">北京荟聚店</td><td>42</td><td>6.0</td><td>2.0</td><td>10.5</td><td>263</td><td>6.3</td><td>¥81,864</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">北京世纪金源店</td><td>45</td><td>8.0</td><td>3.0</td><td>10.5</td><td>376</td><td>8.3</td><td>¥119,606</td></tr><tr><td>2026-03-16</td><td>杭州</td><td style="font-weight:600">银泰in77・D馆店</td><td>39</td><td>10.5</td><td>7.0</td><td>10.5</td><td>427</td><td>11.0</td><td>¥132,021</td></tr><tr><td>2026-03-16</td><td>苏州</td><td style="font-weight:600">獅山天街店</td><td>40</td><td>2.0</td><td>0.0</td><td>10.5</td><td>83</td><td>2.1</td><td>¥23,232</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">朝阳大悦城店</td><td>40</td><td>7.5</td><td>2.0</td><td>10.5</td><td>313</td><td>7.8</td><td>¥98,934</td></tr><tr><td>2026-03-16</td><td>苏州</td><td style="font-weight:600">苏州中心店</td><td>40</td><td>5.0</td><td>0.0</td><td>10.5</td><td>209</td><td>5.2</td><td>¥63,130</td></tr><tr><td>2026-03-16</td><td>天津</td><td style="font-weight:600">和平大悦城店</td><td>61</td><td>2.0</td><td>0.0</td><td>10.5</td><td>127</td><td>2.1</td><td>¥33,736</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">太阳宫凯德店</td><td>40</td><td>8.5</td><td>3.0</td><td>10.5</td><td>355</td><td>8.9</td><td>¥114,635</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">长楹天街店</td><td>62</td><td>4.0</td><td>0.0</td><td>10.5</td><td>259</td><td>4.2</td><td>¥78,733</td></tr><tr><td>2026-03-16</td><td>北京</td><td style="font-weight:600">西单大悦城店</td><td>50</td><td>7.5</td><td>2.0</td><td>10.5</td><td>391</td><td>7.8</td><td>¥126,436</td></tr><tr><td>2026-03-16</td><td>天津</td><td style="font-weight:600">天津天河城店</td><td>50</td><td>5.0</td><td>0.0</td><td>10.5</td><td>261</td><td>5.2</td><td>¥70,435</td></tr><tr><td>2026-03-16</td><td>天津</td><td style="font-weight:600">西青大悦汇店</td><td>37</td><td>0.0</td><td>0.0</td><td>10.5</td><td>0</td><td>0.0</td><td>¥0</td></tr><tr><td>2026-03-16</td><td>天津</td><td style="font-weight:600">天津南开大悦城</td><td>27</td><td>4.0</td><td>0.0</td><td>10.5</td><td>113</td><td>4.2</td><td>¥26,579</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">番禺万达广场店</td><td>34</td><td>4.5</td><td>3.0</td><td>10.5</td><td>160</td><td>4.7</td><td>¥33,512</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">万菱汇店</td><td>53</td><td>7.5</td><td>3.0</td><td>10.5</td><td>415</td><td>7.8</td><td>¥87,065</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">荔湾领展店</td><td>32</td><td>7.0</td><td>1.0</td><td>10.5</td><td>234</td><td>7.3</td><td>¥48,512</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">番禺天河城店</td><td>44</td><td>8.5</td><td>3.0</td><td>10.5</td><td>390</td><td>8.9</td><td>¥85,600</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">中华广场店</td><td>30</td><td>5.0</td><td>1.0</td><td>10.5</td><td>157</td><td>5.2</td><td>¥34,701</td></tr><tr><td>2026-03-16</td><td>惠州</td><td style="font-weight:600">华贸天地店</td><td>50</td><td>2.0</td><td>0.0</td><td>10.5</td><td>104</td><td>2.1</td><td>¥21,657</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">陈家祠扬韬店</td><td>28</td><td>5.5</td><td>2.0</td><td>10.5</td><td>161</td><td>5.7</td><td>¥34,489</td></tr><tr><td>2026-03-16</td><td>武汉</td><td style="font-weight:600">银泰创意城店</td><td>50</td><td>8.0</td><td>3.0</td><td>10.5</td><td>417</td><td>8.3</td><td>¥92,535</td></tr><tr><td>2026-03-16</td><td>东莞</td><td style="font-weight:600">民盈国贸城店</td><td>68</td><td>3.0</td><td>1.0</td><td>10.5</td><td>213</td><td>3.1</td><td>¥43,678</td></tr><tr><td>2026-03-16</td><td>武汉</td><td style="font-weight:600">武汉江宸天街店</td><td>64</td><td>4.0</td><td>0.0</td><td>10.5</td><td>267</td><td>4.2</td><td>¥66,115</td></tr><tr><td>2026-03-16</td><td>重庆</td><td style="font-weight:600">重庆时代天街店</td><td>53</td><td>0.0</td><td>0.0</td><td>10.5</td><td>0</td><td>0.0</td><td>¥0</td></tr><tr><td>2026-03-16</td><td>重庆</td><td style="font-weight:600">观音桥大融城店</td><td>50</td><td>2.0</td><td>0.0</td><td>10.5</td><td>104</td><td>2.1</td><td>¥21,411</td></tr><tr><td>2026-03-16</td><td>成都</td><td style="font-weight:600">成都万象城店</td><td>61</td><td>1.0</td><td>0.0</td><td>10.5</td><td>64</td><td>1.0</td><td>¥16,709</td></tr><tr><td>2026-03-16</td><td>成都</td><td style="font-weight:600">来福士广场店</td><td>50</td><td>2.0</td><td>0.0</td><td>10.5</td><td>104</td><td>2.1</td><td>¥24,856</td></tr><tr><td>2026-03-16</td><td>成都</td><td style="font-weight:600">IFS店</td><td>45</td><td>4.0</td><td>0.0</td><td>10.5</td><td>188</td><td>4.2</td><td>¥45,185</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">正佳广场店</td><td>42</td><td>8.5</td><td>3.0</td><td>10.5</td><td>373</td><td>8.9</td><td>¥79,952</td></tr><tr><td>2026-03-16</td><td>东莞</td><td style="font-weight:600">海德・汇一城店</td><td>20</td><td>3.0</td><td>2.0</td><td>10.5</td><td>63</td><td>3.1</td><td>¥13,290</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">江燕路万科里店</td><td>78</td><td>2.0</td><td>0.0</td><td>10.5</td><td>163</td><td>2.1</td><td>¥34,937</td></tr><tr><td>2026-03-16</td><td>东莞</td><td style="font-weight:600">松山湖万象汇店</td><td>60</td><td>3.0</td><td>0.0</td><td>10.5</td><td>188</td><td>3.1</td><td>¥38,983</td></tr><tr><td>2026-03-16</td><td>武汉</td><td style="font-weight:600">武汉摩尔城店</td><td>52</td><td>1.0</td><td>0.0</td><td>10.5</td><td>54</td><td>1.0</td><td>¥12,541</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">花城汇南区店</td><td>60</td><td>5.0</td><td>1.0</td><td>10.5</td><td>313</td><td>5.2</td><td>¥67,186</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">乐峰广场店</td><td>61</td><td>4.0</td><td>1.0</td><td>10.5</td><td>255</td><td>4.2</td><td>¥52,243</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">美林天地店</td><td>50</td><td>8.5</td><td>3.5</td><td>10.5</td><td>443</td><td>8.9</td><td>¥100,891</td></tr><tr><td>2026-03-16</td><td>佛山</td><td style="font-weight:600">王府井紫薇港店</td><td>70</td><td>4.0</td><td>0.0</td><td>10.5</td><td>292</td><td>4.2</td><td>¥60,640</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">南山天利名城店</td><td>72</td><td>1.0</td><td>0.0</td><td>10.5</td><td>75</td><td>1.0</td><td>¥21,795</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">福田卓悦Intown店</td><td>37</td><td>1.0</td><td>0.0</td><td>10.5</td><td>39</td><td>1.0</td><td>¥9,743</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">iN城市广场店</td><td>37</td><td>4.5</td><td>0.0</td><td>10.5</td><td>174</td><td>4.7</td><td>¥44,254</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">CCP雅宝店</td><td>50</td><td>2.0</td><td>0.0</td><td>10.5</td><td>104</td><td>2.1</td><td>¥25,304</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">天虹龙华店</td><td>30</td><td>2.0</td><td>0.0</td><td>10.5</td><td>63</td><td>2.1</td><td>¥14,471</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">海岸城店</td><td>58</td><td>1.0</td><td>0.0</td><td>10.5</td><td>61</td><td>1.0</td><td>¥15,416</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">卓悦汇店</td><td>61</td><td>2.0</td><td>0.0</td><td>10.5</td><td>127</td><td>2.1</td><td>¥30,025</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">KK ONE店</td><td>60</td><td>2.0</td><td>0.0</td><td>10.5</td><td>125</td><td>2.1</td><td>¥30,123</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">皇庭广场店</td><td>51</td><td>3.0</td><td>0.0</td><td>10.5</td><td>160</td><td>3.1</td><td>¥38,407</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">海雅缤纷城店</td><td>68</td><td>3.0</td><td>1.0</td><td>10.5</td><td>213</td><td>3.1</td><td>¥52,213</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">壹方天地店</td><td>56</td><td>2.0</td><td>0.0</td><td>10.5</td><td>117</td><td>2.1</td><td>¥27,288</td></tr><tr><td>2026-03-16</td><td>深圳</td><td style="font-weight:600">卓悦中心店</td><td>44</td><td>3.0</td><td>0.0</td><td>10.5</td><td>138</td><td>3.1</td><td>¥34,435</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">北京路粤潮楼店</td><td>40</td><td>5.0</td><td>1.0</td><td>10.5</td><td>209</td><td>5.2</td><td>¥43,806</td></tr><tr><td>2026-03-16</td><td>广州</td><td style="font-weight:600">东方宝泰店</td><td>42</td><td>7.5</td><td>2.0</td><td>10.5</td><td>329</td><td>7.8</td><td>¥69,770</td></tr><tr><td>2026-03-15</td><td>佛山</td><td style="font-weight:600">南海万科广场店</td><td>40</td><td>10.0</td><td>8.0</td><td>12.0</td><td>417</td><td>10.4</td><td>¥84,660</td></tr><tr><td>2026-03-15</td><td>广州</td><td style="font-weight:600">番禺永旺店</td><td>60</td><td>10.0</td><td>7.0</td><td>12.0</td><td>626</td><td>10.4</td><td>¥138,802</td></tr><tr><td>2026-03-15</td><td>广州</td><td style="font-weight:600">凯德云尚店</td><td>54</td><td>11.0</td><td>9.0</td><td>12.0</td><td>620</td><td>11.5</td><td>¥134,491</td></tr><tr><td>2026-03-15</td><td>广州</td><td style="font-weight:600">丽影广场店</td><td>41</td><td>11.0</td><td>8.0</td><td>12.0</td><td>471</td><td>11.5</td><td>¥103,223</td></tr><tr><td>2026-03-15</td><td>广州</td><td style="font-weight:600">富力海珠城店</td><td>44</td><td>10.0</td><td>6.0</td><td>12.0</td><td>459</td><td>10.4</td><td>¥97,457</td></tr><tr><td>2026-03-15</td><td>广州</td><td style="font-weight:600">悦汇城店</td><td>42</td><td>10.0</td><td>7.0</td><td>12.0</td><td>438</td><td>10.4</td><td>¥98,609</td></tr><tr><td>2026-03-15</td><td>江门</td><td style="font-weight:600">江门利和广场店</td><td>49</td><td>11.0</td><td>9.0</td><td>12.0</td><td>562</td><td>11.5</td><td>¥120,711</td></tr><tr><td>2026-03-15</td><td>厦门</td><td style="font-weight:600">SM厦门店</td><td>64</td><td>11.0</td><td>11.0</td><td>12.0</td><td>735</td><td>11.5</td><td>¥225,234</td></tr><tr><td>2026-03-15</td><td>广州</td><td style="font-weight:600">萝岗万达店</td><td>30</td><td>11.5</td><td>9.0</td><td>12.0</td><td>360</td><td>12.0</td><td>¥78,962</td></tr><tr><td>2026-03-15</td><td>珠海</td><td style="font-weight:600">南湾华发商都店</td><td>32</td><td>11.0</td><td>10.0</td><td>12.0</td><td>367</td><td>11.5</td><td>¥94,425</td></tr><tr><td>2026-03-15</td><td>北京</td><td style="font-weight:600">通州万象汇店</td><td>51</td><td>8.5</td><td>2.0</td><td>12.0</td><td>452</td><td>8.9</td><td>¥148,144</td></tr><tr><td>2026-03-15</td><td>济南</td><td style="font-weight:600">济南万象城店</td><td>50</td><td>11.5</td><td>8.5</td><td>12.0</td><td>600</td><td>12.0</td><td>¥205,189</td></tr><tr><td>2026-03-15</td><td>上海</td><td style="font-weight:600">虹桥新天地店</td><td>60</td><td>10.5</td><td>8.0</td><td>12.0</td><td>657</td><td>11.0</td><td>¥239,948</td></tr><tr><td>2026-03-15</td><td>北京</td><td style="font-weight:600">门头沟长安天街店</td><td>45</td><td>6.5</td><td>0.0</td><td>12.0</td><td>305</td><td>6.8</td><td>¥90,802</td></tr><tr><td>2026-03-15</td><td>上海</td><td style="font-weight:600">瑞虹新天地月亮湾店</td><td>40</td><td>10.5</td><td>10.5</td><td>12.0</td><td>438</td><td>11.0</td><td>¥164,348</td></tr><tr><td>2026-03-15</td><td>上海</td><td style="font-weight:600">南翔印象城MEGA店</td><td>47</td><td>10.5</td><td>9.0</td><td>12.0</td><td>515</td><td>11.0</td><td>¥189,247</td></tr><tr><td>2026-03-15</td><td>上海</td><td style="font-weight:600">陆家嘴中心店</td><td>55</td><td>11.0</td><td>10.0</td><td>12.0</td><td>631</td><td>11.5</td><td>¥246,209</td></tr><tr><td>2026-03-15</td><td>北京</td><td style="font-weight:600">通州万达店</td><td>35</td><td>11.0</td><td>5.0</td><td>12.0</td><td>402</td><td>11.5</td><td>¥134,583</td></tr><tr><td>2026-03-15</td><td>北京</td><td style="font-weight:600">熙悦天街店</td><td>49</td><td>11.5</td><td>5.0</td><td>12.0</td><td>588</td><td>12.0</td><td>¥180,810</td></tr><tr><td>2026-03-15</td><td>北京</td><td style="font-weight:600">朝阳合生汇店</td><td>75</td><td>11.0</td><td>10.0</td><td>12.0</td><td>861</td><td>11.5</td><td>¥307,761</td></tr><tr><td>2026-03-15</td><td>苏州</td><td style="font-weight:600">苏州吴江万象汇店</td><td>41</td><td>9.0</td><td>5.0</td><td>12.0</td><td>385</td><td>9.4</td><td>¥109,883</td></tr><tr><td>2026-03-15</td><td>苏州</td><td style="font-weight:600">苏州万象天地店</td><td>60</td><td>10.5</td><td>6.0</td><td>12.0</td><td>657</td><td>11.0</td><td>¥185,713</td></tr><tr><td>2026-03-15</td><td>上海</td><td style="font-weight:600">中山公园龙之梦店</td><td>55</td><td>11.0</td><td>10.0</td><td>12.0</td><td>631</td><td>11.5</td><td>¥239,896</td></tr><tr><td>2026-03-15</td><td>上海</td><td style="font-weight:600">上海环球港店</td><td>61</td><td>10.0</td><td>10.0</td><td>12.0</td><td>637</td><td>10.4</td><td>¥226,686</td></tr><tr><td>2026-03-15</td><td>无锡</td><td style="font-weight:600">无锡万象城店</td><td>59</td><td>10.5</td><td>9.0</td><td>12.0</td><td>646</td><td>11.0</td><td>¥187,527</td></tr><tr><td>2026-03-15</td><td>北京</td><td style="font-weight:600">丽泽天街店</td><td>59</td><td>11.0</td><td>9.0</td><td>12.0</td><td>677</td><td>11.5</td><td>¥225,175</td></tr><tr><td>2026-03-15</td><td>宁波</td><td style="font-weight:600">宁波万象城店</td><td>71</td><td>11.0</td><td>10.0</td><td>12.0</td><td>815</td><td>11.5</td><td>¥246,025</td></tr><tr><td>2026-03-15</td><td>杭州</td><td style="font-weight:600">杭州奥体印象城店</td><td>67</td><td>11.0</td><td>9.0</td><td>12.0</td><td>769</td><td>11.5</td><td>¥233,978</td></tr></tbody></table></div></div></div>
-  <div id="p-trend" class="hidden"><div class="g2"><div class="card"><h3>日均单店最低销售桌数趋势</h3><div id="t1"><svg width="100%" height="240" viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet" style="display: block;"><line x1="55" y1="15" x2="550" y2="15" stroke="#f0f0f0"></line><text x="49" y="18" text-anchor="end" font-size="9" fill="#999">582.2</text><line x1="55" y1="62.5" x2="550" y2="62.5" stroke="#f0f0f0"></line><text x="49" y="65.5" text-anchor="end" font-size="9" fill="#999">486.7</text><line x1="55" y1="110" x2="550" y2="110" stroke="#f0f0f0"></line><text x="49" y="113" text-anchor="end" font-size="9" fill="#999">391.3</text><line x1="55" y1="157.5" x2="550" y2="157.5" stroke="#f0f0f0"></line><text x="49" y="160.5" text-anchor="end" font-size="9" fill="#999">295.8</text><line x1="55" y1="205" x2="550" y2="205" stroke="#f0f0f0"></line><text x="49" y="208" text-anchor="end" font-size="9" fill="#999">200.3</text><text x="55" y="219" text-anchor="middle" font-size="9" fill="#999">03-06</text><text x="100" y="219" text-anchor="middle" font-size="9" fill="#999">03-07</text><text x="145" y="219" text-anchor="middle" font-size="9" fill="#999">03-08</text><text x="190" y="219" text-anchor="middle" font-size="9" fill="#999">03-09</text><text x="235" y="219" text-anchor="middle" font-size="9" fill="#999">03-10</text><text x="280" y="219" text-anchor="middle" font-size="9" fill="#999">03-11</text><text x="325" y="219" text-anchor="middle" font-size="9" fill="#999">03-12</text><text x="370" y="219" text-anchor="middle" font-size="9" fill="#999">03-13</text><text x="415" y="219" text-anchor="middle" font-size="9" fill="#999">03-14</text><text x="460" y="219" text-anchor="middle" font-size="9" fill="#999">03-15</text><text x="505" y="219" text-anchor="middle" font-size="9" fill="#999">03-16</text><text x="550" y="219" text-anchor="middle" font-size="9" fill="#999">03-17</text><path d="M55.0,119.6 L100.0,41.3 L145.0,44.1 L190.0,180.2 L235.0,177.4 L280.0,193.9 L325.0,172.5 L370.0,139.4 L415.0,45.8 L460.0,60.1 L505.0,184.1 L550.0,185.8 L550,205 L55,205 Z" fill="#e74c3c" opacity="0.1"></path><path d="M55.0,119.6 L100.0,41.3 L145.0,44.1 L190.0,180.2 L235.0,177.4 L280.0,193.9 L325.0,172.5 L370.0,139.4 L415.0,45.8 L460.0,60.1 L505.0,184.1 L550.0,185.8" fill="none" stroke="#e74c3c" stroke-width="2"></path><circle cx="55" cy="119.61533036751092" r="2.5" fill="#e74c3c"></circle><circle cx="55" cy="119.61533036751092" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="100" cy="41.33438405521406" r="2.5" fill="#e74c3c"></circle><circle cx="100" cy="41.33438405521406" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="145" cy="44.06301502522848" r="2.5" fill="#e74c3c"></circle><circle cx="145" cy="44.06301502522848" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="190" cy="180.24469164995668" r="2.5" fill="#e74c3c"></circle><circle cx="190" cy="180.24469164995668" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="235" cy="177.44640433849753" r="2.5" fill="#e74c3c"></circle><circle cx="235" cy="177.44640433849753" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="280" cy="193.924641710294" r="2.5" fill="#e74c3c"></circle><circle cx="280" cy="193.924641710294" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="325" cy="172.4810758463956" r="2.5" fill="#e74c3c"></circle><circle cx="325" cy="172.4810758463956" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="370" cy="139.4048431071295" r="2.5" fill="#e74c3c"></circle><circle cx="370" cy="139.4048431071295" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="415" cy="45.774512989479604" r="2.5" fill="#e74c3c"></circle><circle cx="415" cy="45.774512989479604" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="460" cy="60.06094762404001" r="2.5" fill="#e74c3c"></circle><circle cx="460" cy="60.06094762404001" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="505" cy="184.07816244768654" r="2.5" fill="#e74c3c"></circle><circle cx="505" cy="184.07816244768654" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="550" cy="185.8289433486826" r="2.5" fill="#e74c3c"></circle><circle cx="550" cy="185.8289433486826" r="10" fill="transparent" style="cursor:pointer"></circle></svg></div></div><div class="card"><h3>日均单店最低销售净额趋势</h3><div id="t2"><svg width="100%" height="240" viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet" style="display: block;"><line x1="55" y1="15" x2="550" y2="15" stroke="#f0f0f0"></line><text x="49" y="18" text-anchor="end" font-size="9" fill="#999">16万</text><line x1="55" y1="62.5" x2="550" y2="62.5" stroke="#f0f0f0"></line><text x="49" y="65.5" text-anchor="end" font-size="9" fill="#999">13万</text><line x1="55" y1="110" x2="550" y2="110" stroke="#f0f0f0"></line><text x="49" y="113" text-anchor="end" font-size="9" fill="#999">11万</text><line x1="55" y1="157.5" x2="550" y2="157.5" stroke="#f0f0f0"></line><text x="49" y="160.5" text-anchor="end" font-size="9" fill="#999">8万</text><line x1="55" y1="205" x2="550" y2="205" stroke="#f0f0f0"></line><text x="49" y="208" text-anchor="end" font-size="9" fill="#999">6万</text><text x="55" y="219" text-anchor="middle" font-size="9" fill="#999">03-06</text><text x="100" y="219" text-anchor="middle" font-size="9" fill="#999">03-07</text><text x="145" y="219" text-anchor="middle" font-size="9" fill="#999">03-08</text><text x="190" y="219" text-anchor="middle" font-size="9" fill="#999">03-09</text><text x="235" y="219" text-anchor="middle" font-size="9" fill="#999">03-10</text><text x="280" y="219" text-anchor="middle" font-size="9" fill="#999">03-11</text><text x="325" y="219" text-anchor="middle" font-size="9" fill="#999">03-12</text><text x="370" y="219" text-anchor="middle" font-size="9" fill="#999">03-13</text><text x="415" y="219" text-anchor="middle" font-size="9" fill="#999">03-14</text><text x="460" y="219" text-anchor="middle" font-size="9" fill="#999">03-15</text><text x="505" y="219" text-anchor="middle" font-size="9" fill="#999">03-16</text><text x="550" y="219" text-anchor="middle" font-size="9" fill="#999">03-17</text><path d="M55.0,103.6 L100.0,42.0 L145.0,45.7 L190.0,180.4 L235.0,177.1 L280.0,193.1 L325.0,171.9 L370.0,138.2 L415.0,45.9 L460.0,60.8 L505.0,184.7 L550.0,185.9 L550,205 L55,205 Z" fill="#e67e22" opacity="0.1"></path><path d="M55.0,103.6 L100.0,42.0 L145.0,45.7 L190.0,180.4 L235.0,177.1 L280.0,193.1 L325.0,171.9 L370.0,138.2 L415.0,45.9 L460.0,60.8 L505.0,184.7 L550.0,185.9" fill="none" stroke="#e67e22" stroke-width="2"></path><circle cx="55" cy="103.63055452710466" r="2.5" fill="#e67e22"></circle><circle cx="55" cy="103.63055452710466" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="100" cy="42.0021677717572" r="2.5" fill="#e67e22"></circle><circle cx="100" cy="42.0021677717572" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="145" cy="45.719224222754434" r="2.5" fill="#e67e22"></circle><circle cx="145" cy="45.719224222754434" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="190" cy="180.41315371886458" r="2.5" fill="#e67e22"></circle><circle cx="190" cy="180.41315371886458" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="235" cy="177.1019887434977" r="2.5" fill="#e67e22"></circle><circle cx="235" cy="177.1019887434977" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="280" cy="193.10846161229676" r="2.5" fill="#e67e22"></circle><circle cx="280" cy="193.10846161229676" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="325" cy="171.8857154467409" r="2.5" fill="#e67e22"></circle><circle cx="325" cy="171.8857154467409" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="370" cy="138.19163536341202" r="2.5" fill="#e67e22"></circle><circle cx="370" cy="138.19163536341202" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="415" cy="45.93849462473645" r="2.5" fill="#e67e22"></circle><circle cx="415" cy="45.93849462473645" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="460" cy="60.82861772889771" r="2.5" fill="#e67e22"></circle><circle cx="460" cy="60.82861772889771" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="505" cy="184.7034522352473" r="2.5" fill="#e67e22"></circle><circle cx="505" cy="184.7034522352473" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="550" cy="185.86631597027696" r="2.5" fill="#e67e22"></circle><circle cx="550" cy="185.86631597027696" r="10" fill="transparent" style="cursor:pointer"></circle></svg></div></div></div><div class="g2"><div class="card"><h3>排队时段占比趋势</h3><div id="t3"><svg width="100%" height="240" viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet" style="display: block;"><line x1="55" y1="15" x2="550" y2="15" stroke="#f0f0f0"></line><text x="49" y="18" text-anchor="end" font-size="9" fill="#999">1.0</text><line x1="55" y1="62.5" x2="550" y2="62.5" stroke="#f0f0f0"></line><text x="49" y="65.5" text-anchor="end" font-size="9" fill="#999">0.8</text><line x1="55" y1="110" x2="550" y2="110" stroke="#f0f0f0"></line><text x="49" y="113" text-anchor="end" font-size="9" fill="#999">0.7</text><line x1="55" y1="157.5" x2="550" y2="157.5" stroke="#f0f0f0"></line><text x="49" y="160.5" text-anchor="end" font-size="9" fill="#999">0.5</text><line x1="55" y1="205" x2="550" y2="205" stroke="#f0f0f0"></line><text x="49" y="208" text-anchor="end" font-size="9" fill="#999">0.4</text><text x="55" y="219" text-anchor="middle" font-size="9" fill="#999">03-06</text><text x="100" y="219" text-anchor="middle" font-size="9" fill="#999">03-07</text><text x="145" y="219" text-anchor="middle" font-size="9" fill="#999">03-08</text><text x="190" y="219" text-anchor="middle" font-size="9" fill="#999">03-09</text><text x="235" y="219" text-anchor="middle" font-size="9" fill="#999">03-10</text><text x="280" y="219" text-anchor="middle" font-size="9" fill="#999">03-11</text><text x="325" y="219" text-anchor="middle" font-size="9" fill="#999">03-12</text><text x="370" y="219" text-anchor="middle" font-size="9" fill="#999">03-13</text><text x="415" y="219" text-anchor="middle" font-size="9" fill="#999">03-14</text><text x="460" y="219" text-anchor="middle" font-size="9" fill="#999">03-15</text><text x="505" y="219" text-anchor="middle" font-size="9" fill="#999">03-16</text><text x="550" y="219" text-anchor="middle" font-size="9" fill="#999">03-17</text><path d="M55.0,91.5 L100.0,43.8 L145.0,47.3 L190.0,172.5 L235.0,169.1 L280.0,190.9 L325.0,163.0 L370.0,122.8 L415.0,49.3 L460.0,63.7 L505.0,177.5 L550.0,180.4 L550,205 L55,205 Z" fill="#3498db" opacity="0.1"></path><path d="M55.0,91.5 L100.0,43.8 L145.0,47.3 L190.0,172.5 L235.0,169.1 L280.0,190.9 L325.0,163.0 L370.0,122.8 L415.0,49.3 L460.0,63.7 L505.0,177.5 L550.0,180.4" fill="none" stroke="#3498db" stroke-width="2"></path><circle cx="55" cy="91.50432367742592" r="2.5" fill="#3498db"></circle><circle cx="55" cy="91.50432367742592" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="100" cy="43.81637234902894" r="2.5" fill="#3498db"></circle><circle cx="100" cy="43.81637234902894" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="145" cy="47.34818400183474" r="2.5" fill="#3498db"></circle><circle cx="145" cy="47.34818400183474" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="190" cy="172.54402694122902" r="2.5" fill="#3498db"></circle><circle cx="190" cy="172.54402694122902" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="235" cy="169.05808297222592" r="2.5" fill="#3498db"></circle><circle cx="235" cy="169.05808297222592" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="280" cy="190.89110046229797" r="2.5" fill="#3498db"></circle><circle cx="280" cy="190.89110046229797" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="325" cy="163.00354871027318" r="2.5" fill="#3498db"></circle><circle cx="325" cy="163.00354871027318" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="370" cy="122.82345769913213" r="2.5" fill="#3498db"></circle><circle cx="370" cy="122.82345769913213" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="415" cy="49.27462672154695" r="2.5" fill="#3498db"></circle><circle cx="415" cy="49.27462672154695" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="460" cy="63.72294711938878" r="2.5" fill="#3498db"></circle><circle cx="460" cy="63.72294711938878" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="505" cy="177.49773679191765" r="2.5" fill="#3498db"></circle><circle cx="505" cy="177.49773679191765" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="550" cy="180.4332685552887" r="2.5" fill="#3498db"></circle><circle cx="550" cy="180.4332685552887" r="10" fill="transparent" style="cursor:pointer"></circle></svg></div></div><div class="card"><h3>每日总最低销售净额趋势</h3><div id="t4"><svg width="100%" height="240" viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet" style="display: block;"><line x1="55" y1="15" x2="550" y2="15" stroke="#f0f0f0"></line><text x="49" y="18" text-anchor="end" font-size="9" fill="#999">1354万</text><line x1="55" y1="62.5" x2="550" y2="62.5" stroke="#f0f0f0"></line><text x="49" y="65.5" text-anchor="end" font-size="9" fill="#999">1138万</text><line x1="55" y1="110" x2="550" y2="110" stroke="#f0f0f0"></line><text x="49" y="113" text-anchor="end" font-size="9" fill="#999">921万</text><line x1="55" y1="157.5" x2="550" y2="157.5" stroke="#f0f0f0"></line><text x="49" y="160.5" text-anchor="end" font-size="9" fill="#999">705万</text><line x1="55" y1="205" x2="550" y2="205" stroke="#f0f0f0"></line><text x="49" y="208" text-anchor="end" font-size="9" fill="#999">488万</text><text x="55" y="219" text-anchor="middle" font-size="9" fill="#999">03-06</text><text x="100" y="219" text-anchor="middle" font-size="9" fill="#999">03-07</text><text x="145" y="219" text-anchor="middle" font-size="9" fill="#999">03-08</text><text x="190" y="219" text-anchor="middle" font-size="9" fill="#999">03-09</text><text x="235" y="219" text-anchor="middle" font-size="9" fill="#999">03-10</text><text x="280" y="219" text-anchor="middle" font-size="9" fill="#999">03-11</text><text x="325" y="219" text-anchor="middle" font-size="9" fill="#999">03-12</text><text x="370" y="219" text-anchor="middle" font-size="9" fill="#999">03-13</text><text x="415" y="219" text-anchor="middle" font-size="9" fill="#999">03-14</text><text x="460" y="219" text-anchor="middle" font-size="9" fill="#999">03-15</text><text x="505" y="219" text-anchor="middle" font-size="9" fill="#999">03-16</text><text x="550" y="219" text-anchor="middle" font-size="9" fill="#999">03-17</text><path d="M55.0,181.2 L100.0,42.0 L145.0,45.7 L190.0,180.4 L235.0,177.1 L280.0,193.1 L325.0,171.9 L370.0,138.2 L415.0,45.9 L460.0,60.8 L505.0,184.7 L550.0,185.9 L550,205 L55,205 Z" fill="#2ecc71" opacity="0.1"></path><path d="M55.0,181.2 L100.0,42.0 L145.0,45.7 L190.0,180.4 L235.0,177.1 L280.0,193.1 L325.0,171.9 L370.0,138.2 L415.0,45.9 L460.0,60.8 L505.0,184.7 L550.0,185.9" fill="none" stroke="#2ecc71" stroke-width="2"></path><circle cx="55" cy="181.17224418746724" r="2.5" fill="#2ecc71"></circle><circle cx="55" cy="181.17224418746724" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="100" cy="42.0021677717572" r="2.5" fill="#2ecc71"></circle><circle cx="100" cy="42.0021677717572" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="145" cy="45.719224222754434" r="2.5" fill="#2ecc71"></circle><circle cx="145" cy="45.719224222754434" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="190" cy="180.4131537188646" r="2.5" fill="#2ecc71"></circle><circle cx="190" cy="180.4131537188646" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="235" cy="177.1019887434977" r="2.5" fill="#2ecc71"></circle><circle cx="235" cy="177.1019887434977" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="280" cy="193.10846161229676" r="2.5" fill="#2ecc71"></circle><circle cx="280" cy="193.10846161229676" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="325" cy="171.8857154467409" r="2.5" fill="#2ecc71"></circle><circle cx="325" cy="171.8857154467409" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="370" cy="138.19163536341202" r="2.5" fill="#2ecc71"></circle><circle cx="370" cy="138.19163536341202" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="415" cy="45.93849462473645" r="2.5" fill="#2ecc71"></circle><circle cx="415" cy="45.93849462473645" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="460" cy="60.82861772889768" r="2.5" fill="#2ecc71"></circle><circle cx="460" cy="60.82861772889768" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="505" cy="184.7034522352473" r="2.5" fill="#2ecc71"></circle><circle cx="505" cy="184.7034522352473" r="10" fill="transparent" style="cursor:pointer"></circle><circle cx="550" cy="185.86631597027696" r="2.5" fill="#2ecc71"></circle><circle cx="550" cy="185.86631597027696" r="10" fill="transparent" style="cursor:pointer"></circle></svg></div></div></div></div>
-</div>
-<div class="tooltip" id="tt" style="display: none; left: 1331px; top: 425px;">济南万象城店: ¥190,495</div>
+    <!-- ====== 三出山 SECTION ====== -->
+    <div id="sec-hp_三出山" class="hidden">
+      <div class="tabs" id="hp_三出山Tabs">
+        <div class="tab blue active" onclick="hpBTab('hp_三出山','queue')">排队概览</div>
+        <div class="tab blue" onclick="hpBTab('hp_三出山','stores')">门店排行</div>
+        <div class="tab blue" onclick="hpBTab('hp_三出山','heat')">时段热力</div>
+        <div class="tab blue" onclick="hpBTab('hp_三出山','expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="hp_三出山Filters">
+        <div class="fg"><label>日期</label><select id="hp_三出山_fDate" onchange="hpBRender('hp_三出山')"></select></div>
+        <div class="fg"><label>城市</label><select id="hp_三出山_fCity" onchange="hpBRender('hp_三出山')"></select></div>
+        <div class="finfo" id="hp_三出山Count"></div>
+      </div>
+      <div id="sp-hp_三出山_queue"></div>
+      <div id="sp-hp_三出山_stores" class="hidden"></div>
+      <div id="sp-hp_三出山_heat" class="hidden"></div>
+      <div id="sp-hp_三出山_expand" class="hidden"></div>
+    </div>
+    <!-- ====== 八合里 SECTION ====== -->
+    <div id="sec-hp_八合里" class="hidden">
+      <div class="tabs" id="hp_八合里Tabs">
+        <div class="tab blue active" onclick="hpBTab('hp_八合里','queue')">排队概览</div>
+        <div class="tab blue" onclick="hpBTab('hp_八合里','stores')">门店排行</div>
+        <div class="tab blue" onclick="hpBTab('hp_八合里','heat')">时段热力</div>
+        <div class="tab blue" onclick="hpBTab('hp_八合里','expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="hp_八合里Filters">
+        <div class="fg"><label>日期</label><select id="hp_八合里_fDate" onchange="hpBRender('hp_八合里')"></select></div>
+        <div class="fg"><label>城市</label><select id="hp_八合里_fCity" onchange="hpBRender('hp_八合里')"></select></div>
+        <div class="finfo" id="hp_八合里Count"></div>
+      </div>
+      <div id="sp-hp_八合里_queue"></div>
+      <div id="sp-hp_八合里_stores" class="hidden"></div>
+      <div id="sp-hp_八合里_heat" class="hidden"></div>
+      <div id="sp-hp_八合里_expand" class="hidden"></div>
+    </div>
+    <!-- ====== 左庭右院 SECTION ====== -->
+    <div id="sec-hp_左庭右院" class="hidden">
+      <div class="tabs" id="hp_左庭右院Tabs">
+        <div class="tab blue active" onclick="hpBTab('hp_左庭右院','queue')">排队概览</div>
+        <div class="tab blue" onclick="hpBTab('hp_左庭右院','stores')">门店排行</div>
+        <div class="tab blue" onclick="hpBTab('hp_左庭右院','heat')">时段热力</div>
+        <div class="tab blue" onclick="hpBTab('hp_左庭右院','expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="hp_左庭右院Filters">
+        <div class="fg"><label>日期</label><select id="hp_左庭右院_fDate" onchange="hpBRender('hp_左庭右院')"></select></div>
+        <div class="fg"><label>城市</label><select id="hp_左庭右院_fCity" onchange="hpBRender('hp_左庭右院')"></select></div>
+        <div class="finfo" id="hp_左庭右院Count"></div>
+      </div>
+      <div id="sp-hp_左庭右院_queue"></div>
+      <div id="sp-hp_左庭右院_stores" class="hidden"></div>
+      <div id="sp-hp_左庭右院_heat" class="hidden"></div>
+      <div id="sp-hp_左庭右院_expand" class="hidden"></div>
+    </div>
+    <!-- ====== 朱光玉 SECTION ====== -->
+    <div id="sec-hp_朱光玉" class="hidden">
+      <div class="tabs" id="hp_朱光玉Tabs">
+        <div class="tab blue active" onclick="hpBTab('hp_朱光玉','queue')">排队概览</div>
+        <div class="tab blue" onclick="hpBTab('hp_朱光玉','stores')">门店排行</div>
+        <div class="tab blue" onclick="hpBTab('hp_朱光玉','heat')">时段热力</div>
+        <div class="tab blue" onclick="hpBTab('hp_朱光玉','expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="hp_朱光玉Filters">
+        <div class="fg"><label>日期</label><select id="hp_朱光玉_fDate" onchange="hpBRender('hp_朱光玉')"></select></div>
+        <div class="fg"><label>城市</label><select id="hp_朱光玉_fCity" onchange="hpBRender('hp_朱光玉')"></select></div>
+        <div class="finfo" id="hp_朱光玉Count"></div>
+      </div>
+      <div id="sp-hp_朱光玉_queue"></div>
+      <div id="sp-hp_朱光玉_stores" class="hidden"></div>
+      <div id="sp-hp_朱光玉_heat" class="hidden"></div>
+      <div id="sp-hp_朱光玉_expand" class="hidden"></div>
+    </div>
+    <!-- ====== 朱富贵 SECTION ====== -->
+    <div id="sec-hp_朱富贵" class="hidden">
+      <div class="tabs" id="hp_朱富贵Tabs">
+        <div class="tab blue active" onclick="hpBTab('hp_朱富贵','queue')">排队概览</div>
+        <div class="tab blue" onclick="hpBTab('hp_朱富贵','stores')">门店排行</div>
+        <div class="tab blue" onclick="hpBTab('hp_朱富贵','heat')">时段热力</div>
+        <div class="tab blue" onclick="hpBTab('hp_朱富贵','expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="hp_朱富贵Filters">
+        <div class="fg"><label>日期</label><select id="hp_朱富贵_fDate" onchange="hpBRender('hp_朱富贵')"></select></div>
+        <div class="fg"><label>城市</label><select id="hp_朱富贵_fCity" onchange="hpBRender('hp_朱富贵')"></select></div>
+        <div class="finfo" id="hp_朱富贵Count"></div>
+      </div>
+      <div id="sp-hp_朱富贵_queue"></div>
+      <div id="sp-hp_朱富贵_stores" class="hidden"></div>
+      <div id="sp-hp_朱富贵_heat" class="hidden"></div>
+      <div id="sp-hp_朱富贵_expand" class="hidden"></div>
+    </div>
+    <!-- ====== 潮发 SECTION ====== -->
+    <div id="sec-hp_潮发" class="hidden">
+      <div class="tabs" id="hp_潮发Tabs">
+        <div class="tab blue active" onclick="hpBTab('hp_潮发','queue')">排队概览</div>
+        <div class="tab blue" onclick="hpBTab('hp_潮发','stores')">门店排行</div>
+        <div class="tab blue" onclick="hpBTab('hp_潮发','heat')">时段热力</div>
+        <div class="tab blue" onclick="hpBTab('hp_潮发','expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="hp_潮发Filters">
+        <div class="fg"><label>日期</label><select id="hp_潮发_fDate" onchange="hpBRender('hp_潮发')"></select></div>
+        <div class="fg"><label>城市</label><select id="hp_潮发_fCity" onchange="hpBRender('hp_潮发')"></select></div>
+        <div class="finfo" id="hp_潮发Count"></div>
+      </div>
+      <div id="sp-hp_潮发_queue"></div>
+      <div id="sp-hp_潮发_stores" class="hidden"></div>
+      <div id="sp-hp_潮发_heat" class="hidden"></div>
+      <div id="sp-hp_潮发_expand" class="hidden"></div>
+    </div>
+    <!-- ====== 芈重山 SECTION ====== -->
+    <div id="sec-hp_芈重山" class="hidden">
+      <div class="tabs" id="hp_芈重山Tabs">
+        <div class="tab blue active" onclick="hpBTab('hp_芈重山','queue')">排队概览</div>
+        <div class="tab blue" onclick="hpBTab('hp_芈重山','stores')">门店排行</div>
+        <div class="tab blue" onclick="hpBTab('hp_芈重山','heat')">时段热力</div>
+        <div class="tab blue" onclick="hpBTab('hp_芈重山','expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="hp_芈重山Filters">
+        <div class="fg"><label>日期</label><select id="hp_芈重山_fDate" onchange="hpBRender('hp_芈重山')"></select></div>
+        <div class="fg"><label>城市</label><select id="hp_芈重山_fCity" onchange="hpBRender('hp_芈重山')"></select></div>
+        <div class="finfo" id="hp_芈重山Count"></div>
+      </div>
+      <div id="sp-hp_芈重山_queue"></div>
+      <div id="sp-hp_芈重山_stores" class="hidden"></div>
+      <div id="sp-hp_芈重山_heat" class="hidden"></div>
+      <div id="sp-hp_芈重山_expand" class="hidden"></div>
+    </div>
+  </div><!-- /content -->
+</div><!-- /main-wrap -->
+<div class="tooltip" id="tt"></div>
 
 <script>
-var COLORS=['#e74c3c','#e67e22','#3498db','#2ecc71','#9b59b6','#1abc9c','#f39c12','#34495e','#e84393','#00cec9','#6c5ce7','#fdcb6e'];
-var cityData=[],storeData=[],dailyData=[];
-var curTab='city',supabaseUrl='https://wvqvrefqtvjohersxviv.supabase.co',supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2cXZyZWZxdHZqb2hlcnN4dml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjM4MzUsImV4cCI6MjA4OTM5OTgzNX0.kt_Xf6vK_Ulhkfb_izEDM9Vd8JXSaPxCK9y8ojiQKNQ',dbOk=false;
-
 // === Config ===
-function saveConfig(){
-  supabaseUrl=document.getElementById('cfgUrl').value.trim().replace(/\/$/,'');
-  supabaseKey=document.getElementById('cfgKey').value.trim();
-  if(!supabaseUrl||!supabaseKey){document.getElementById('cfgStatus').textContent='请填完整';return;}
-  localStorage.setItem('sushiro_cfg',JSON.stringify({u:supabaseUrl,k:supabaseKey}));
-  document.getElementById('cfgStatus').textContent='已保存...';
-  loadData();
-}
-function loadConfig(){
-  try{var c=JSON.parse(localStorage.getItem('sushiro_cfg'));if(c&&c.u&&c.k){supabaseUrl=c.u;supabaseKey=c.k;}}catch(e){}
-  if(supabaseUrl&&supabaseKey){document.getElementById('cfgUrl').value=supabaseUrl;document.getElementById('cfgKey').value=supabaseKey;return true;}
-  return false;
-}
+var SUPA_URL = 'https://wvqvrefqtvjohersxviv.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2cXZyZWZxdHZqb2hlcnN4dml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjM4MzUsImV4cCI6MjA4OTM5OTgzNX0.kt_Xf6vK_Ulhkfb_izEDM9Vd8JXSaPxCK9y8ojiQKNQ';
+var BRANDS = ["三出山", "八合里", "左庭右院", "朱光玉", "朱富贵", "潮发", "芈重山"];
+var COLORS = ['#e74c3c','#3498db','#2ecc71','#e67e22','#9b59b6','#1abc9c','#f39c12','#e84393','#00b894','#6c5ce7','#fd79a8','#00cec9'];
+var BRAND_COLORS = {};
+BRANDS.forEach(function(b,i){ BRAND_COLORS[b] = COLORS[i % COLORS.length]; });
+
+// === Data stores ===
+var sushiroCityData=[], sushiroStoreData=[], sushiroDailyData=[];
+var hpBrandData=[], hpCityData=[], hpStoreData=[];
+var curSection='sushiro', curSTab='s_city', curHpSumTab='hps_queue';
+var curHpBrandTab = {}; // per brand
+BRANDS.forEach(function(b){ curHpBrandTab['hp_'+b] = 'queue'; });
 
 // === Supabase fetch ===
-function sbFetch(table,params){
-  return fetch(supabaseUrl+'/rest/v1/'+table+'?'+params,{
-    headers:{'apikey':supabaseKey,'Authorization':'Bearer '+supabaseKey}
-  }).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();});
+function supa(table, params) {
+  var url = SUPA_URL + '/rest/v1/' + table + '?select=*' + (params||'');
+  return fetch(url, {
+    headers: {'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY}
+  }).then(function(r){ return r.json(); });
 }
 
-function loadData(){
-  if(!supabaseUrl||!supabaseKey)return;
+// === Load all data ===
+function loadAllData() {
+  document.getElementById('srcLabel').innerHTML = '<span class="spin"></span> 加载中...';
+  
   Promise.all([
-    sbFetch('city_monthly','select=*&order=daily_avg_sales_tables.desc.nullslast&limit=500'),
-    sbFetch('store_monthly','select=*&order=daily_avg_sales_tables.desc.nullslast&limit=2000'),
-    sbFetch('store_daily','select=*&order=date.desc&limit=5000')
-  ]).then(function(res){
-    cityData=res[0]||[];storeData=res[1]||[];dailyData=res[2]||[];
-    dbOk=true;
-    document.getElementById('configPanel').classList.add('hidden');
-    document.getElementById('srcLabel').innerHTML='<span class="status-dot s-on"></span>已连接 ('+cityData.length+'/'+storeData.length+'/'+dailyData.length+')';
-    document.getElementById('refreshInfo').textContent='| 刷新于 '+new Date().toLocaleTimeString();
-    initFilters();render();
-  }).catch(function(e){
-    document.getElementById('cfgStatus').textContent='连接失败: '+e.message;
-    document.getElementById('srcLabel').innerHTML='<span class="status-dot s-off"></span>'+e.message;
+    // Sushiro data
+    supa('city_monthly_data', '&order=month.desc,city.asc'),
+    supa('store_monthly_data', '&order=month.desc,city.asc'),
+    supa('daily_store_data', '&order=date.desc,city.asc'),
+    // Hotpot data
+    supa('hotpot_brand_daily', '&order=date.desc,brand.asc'),
+    supa('hotpot_city_daily', '&order=date.desc,brand.asc,city.asc'),
+    supa('hotpot_store_daily', '&order=date.desc,brand.asc,city.asc')
+  ]).then(function(results) {
+    sushiroCityData = Array.isArray(results[0]) ? results[0] : [];
+    sushiroStoreData = Array.isArray(results[1]) ? results[1] : [];
+    sushiroDailyData = Array.isArray(results[2]) ? results[2] : [];
+    hpBrandData = Array.isArray(results[3]) ? results[3] : [];
+    hpCityData = Array.isArray(results[4]) ? results[4] : [];
+    hpStoreData = Array.isArray(results[5]) ? results[5] : [];
+    
+    var now = new Date();
+    document.getElementById('srcLabel').textContent = '数据已加载 | ' + now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+    
+    initAllFilters();
+    renderCurrentSection();
+  }).catch(function(e) {
+    document.getElementById('srcLabel').textContent = '加载失败: ' + e.message;
   });
 }
 
-function useDemoMode(){
-  // generate demo city data
-  var cities=['上海','北京','广州','深圳','杭州','宁波','厦门','成都','武汉','济南'];
-  cityData=[];storeData=[];dailyData=[];
-  ['2026-02','2026-03'].forEach(function(m){
-    cities.forEach(function(c,i){
-      var st=Math.floor(Math.random()*15+2);
-      cityData.push({month:m,city:c,store_count:st,avg_tables_per_store:Math.floor(Math.random()*30+40),data_days:m==='2026-02'?28:17,
-        daily_avg_sales_tables:Math.floor(Math.random()*500+200),daily_avg_sales_revenue:Math.floor(Math.random()*150000+50000),
-        monthly_turnover_rate:+(Math.random()*5+6).toFixed(2),queue_hour_pct:+(Math.random()*.4+.5).toFixed(3),queue50_hour_pct:+(Math.random()*.4+.3).toFixed(3),
-        total_sales_tables:Math.floor(Math.random()*20000+5000),total_sales_revenue:Math.floor(Math.random()*5000000+1000000),remark:''});
-      for(var s=0;s<Math.min(st,3);s++){
-        storeData.push({month:m,city:c,store_id:''+(i*10+s),store_name:c+'店'+(s+1),tables:Math.floor(Math.random()*30+40),unit_price:Math.floor(Math.random()*50+80),
-          data_days:m==='2026-02'?28:17,daily_avg_sales_tables:Math.floor(Math.random()*500+200),daily_avg_sales_revenue:Math.floor(Math.random()*150000+50000),
-          queue_hour_pct:+(Math.random()*.4+.5).toFixed(3),queue50_hour_pct:+(Math.random()*.4+.3).toFixed(3),monthly_turnover_rate:+(Math.random()*5+6).toFixed(2)});}
-    });
+// === Navigation ===
+function navTo(sec) {
+  curSection = sec;
+  // Update sidebar
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active','active-blue'); });
+  var items = document.querySelectorAll('.nav-item');
+  items.forEach(function(el){
+    if(el.getAttribute('onclick') && el.getAttribute('onclick').indexOf("'"+sec+"'") > -1) {
+      el.classList.add(sec === 'sushiro' ? 'active' : 'active-blue');
+    }
   });
-  var today=new Date();
-  for(var d=0;d<30;d++){var dt=new Date(today);dt.setDate(dt.getDate()-d);var ds=dt.toISOString().split('T')[0];
-  cities.slice(0,5).forEach(function(c,i){for(var s=0;s<2;s++){
-    dailyData.push({date:ds,store_id:''+(i*10+s),store_name:c+'店'+(s+1),city:c,tables:50,unit_price:100,
-      queue_hours:+(Math.random()*8+2).toFixed(1),queue50_hours:+(Math.random()*5).toFixed(1),biz_hours:12,
-      daily_sales_tables:Math.floor(Math.random()*500+200),daily_turnover_rate:+(Math.random()*5+6).toFixed(1),daily_sales_revenue:Math.floor(Math.random()*150000+50000)});}});}
-  document.getElementById('configPanel').classList.add('hidden');
-  document.getElementById('srcLabel').innerHTML='<span class="status-dot s-demo"></span>演示模式';
-  initFilters();render();
+  
+  // Show/hide sections
+  document.querySelectorAll('[id^="sec-"]').forEach(function(el){ el.classList.add('hidden'); });
+  var secEl = document.getElementById('sec-' + sec);
+  if(secEl) secEl.classList.remove('hidden');
+  
+  // Update title
+  var titles = {'sushiro':'🍣 寿司郎经营数据看板','hp_summary':'📊 火锅友商汇总看板'};
+  BRANDS.forEach(function(b){ titles['hp_'+b] = '🔥 ' + b + ' 数据看板'; });
+  document.getElementById('pageTitle').textContent = titles[sec] || sec;
+  
+  renderCurrentSection();
 }
 
-// === Filters ===
-function initFilters(){
-  var months={},cities={};
-  cityData.forEach(function(d){if(d.month)months[d.month]=1;if(d.city)cities[d.city]=1;});
-  storeData.forEach(function(d){if(d.month)months[d.month]=1;if(d.city)cities[d.city]=1;});
-  dailyData.forEach(function(d){if(d.city)cities[d.city]=1;});
-  var ms=Object.keys(months).sort();var cs=Object.keys(cities).sort();
-  var selM=document.getElementById('fMonth');selM.innerHTML='<option>全部</option>';
-  ms.forEach(function(m){selM.innerHTML+='<option>'+m+'</option>';});
-  if(ms.length)selM.value=ms[ms.length-1];// default latest month
-  var selC=document.getElementById('fCity');selC.innerHTML='<option>全部</option>';
-  cs.forEach(function(c){selC.innerHTML+='<option>'+c+'</option>';});
-  // date range
-  var dates=dailyData.map(function(d){return d.date;}).filter(Boolean).sort();
-  if(dates.length){document.getElementById('fDateFrom').value=dates[0];document.getElementById('fDateTo').value=dates[dates.length-1];}
+function renderCurrentSection() {
+  if(curSection === 'sushiro') sRender();
+  else if(curSection === 'hp_summary') hpSumRender();
+  else hpBRender(curSection);
 }
 
-function getFilters(){
-  return{month:document.getElementById('fMonth').value,city:document.getElementById('fCity').value,
-    dateFrom:document.getElementById('fDateFrom').value,dateTo:document.getElementById('fDateTo').value};
-}
-
-// === Tab ===
-function go(t){curTab=t;document.querySelectorAll('.tab').forEach(function(el,i){el.classList.toggle('active',['city','store','daily','trend'][i]===t);});
-['city','store','daily','trend'].forEach(function(p){document.getElementById('p-'+p).classList.toggle('hidden',p!==t);});
-var showDate=(t==='daily'||t==='trend');
-document.getElementById('fgDateFrom').style.display=showDate?'':'none';
-document.getElementById('fgDateTo').style.display=showDate?'':'none';
-document.getElementById('fgDateHint').style.display=showDate?'':'none';
-render();}
-
-// === SVG tools ===
+// === SVG Tools ===
 function svgEl(t,a,txt){var e=document.createElementNS('http://www.w3.org/2000/svg',t);if(a)Object.keys(a).forEach(function(k){e.setAttribute(k,a[k]);});if(txt!==undefined)e.textContent=txt;return e;}
 function mkSvg(w,h){var s=svgEl('svg',{width:'100%',height:h,viewBox:'0 0 '+w+' '+h,preserveAspectRatio:'xMidYMid meet'});s.style.display='block';return s;}
 function showTip(e,t){var tt=document.getElementById('tt');tt.textContent=t;tt.style.display='block';tt.style.left=(e.pageX+10)+'px';tt.style.top=(e.pageY-28)+'px';}
 function hideTip(){document.getElementById('tt').style.display='none';}
 
-function drawBarH(container,items,valKey,labelKey,fmtFn){
+function fmtInt(v){return v==null?'-':Math.round(v).toLocaleString();}
+function fmtPct(v){return v==null?'-':(v*100).toFixed(1)+'%';}
+function fmtRate(v){return v==null?'-':(+v).toFixed(1);}
+function fmtMoney(v){return v==null?'-':'¥'+Math.round(v).toLocaleString();}
+
+function drawBarH(container,items,valKey,labelKey,fmtFn,color){
   if(!items.length){container.innerHTML='<div style="color:#999;text-align:center;padding:30px">暂无数据</div>';return;}
-  var W=560,barH=28,gap=5,pad={l:80,r:50,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
+  var W=560,barH=26,gap=4,pad={l:90,r:55,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
   var mx=Math.max.apply(null,items.map(function(d){return d[valKey]||0;}))||1;var cw=W-pad.l-pad.r;
-  items.forEach(function(d,i){var y=pad.t+i*(barH+gap);var w=((d[valKey]||0)/mx)*cw;var c=COLORS[i%COLORS.length];
-  var lbl=d[labelKey]||'';if(lbl.length>6)lbl=lbl.substring(0,6)+'…';
+  items.forEach(function(d,i){var y=pad.t+i*(barH+gap);var w=((d[valKey]||0)/mx)*cw;var c=color||COLORS[i%COLORS.length];
+  var lbl=d[labelKey]||'';if(lbl.length>7)lbl=lbl.substring(0,7)+'…';
   svg.appendChild(svgEl('text',{x:pad.l-6,y:y+barH/2+4,'text-anchor':'end','font-size':11,fill:'#333'},lbl));
-  var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:3,fill:c,style:'cursor:pointer'});
+  var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:3,fill:c,opacity:.85,style:'cursor:pointer'});
   rect.addEventListener('mouseenter',function(e){showTip(e,d[labelKey]+': '+(fmtFn?fmtFn(d[valKey]):d[valKey]));});
   rect.addEventListener('mouseleave',hideTip);svg.appendChild(rect);
   svg.appendChild(svgEl('text',{x:pad.l+w+4,y:y+barH/2+4,'font-size':10,fill:'#666'},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
+  container.innerHTML='';container.appendChild(svg);
+}
+
+function drawGroupedBar(container, brands, vals, labelKey) {
+  if(!brands.length){container.innerHTML='<div style="color:#999;text-align:center;padding:30px">暂无数据</div>';return;}
+  var W=600,barH=22,gap=3,groupGap=10,pad={l:70,r:60,t:5,b:5};
+  var keys=Object.keys(vals);var nk=keys.length;
+  var groupH=nk*(barH+gap)+groupGap;
+  var H=pad.t+brands.length*groupH+pad.b;var svg=mkSvg(W,H);
+  var mx=0;keys.forEach(function(k){vals[k].forEach(function(v){if(v>mx)mx=v;});});if(!mx)mx=1;
+  var cw=W-pad.l-pad.r;
+  
+  brands.forEach(function(b,bi){
+    var gy=pad.t+bi*groupH;
+    var lbl=b;if(lbl.length>5)lbl=lbl.substring(0,5)+'…';
+    svg.appendChild(svgEl('text',{x:pad.l-6,y:gy+groupH/2,'text-anchor':'end','font-size':11,fill:'#333',dy:'.35em'},lbl));
+    keys.forEach(function(k,ki){
+      var y=gy+ki*(barH+gap);var v=vals[k][bi]||0;var w=(v/mx)*cw;
+      var c=BRAND_COLORS[k]||COLORS[ki%COLORS.length];
+      svg.appendChild(svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:3,fill:c,opacity:.8}));
+      svg.appendChild(svgEl('text',{x:pad.l+w+4,y:y+barH/2+4,'font-size':10,fill:'#666'},fmtInt(v)));
+    });
+  });
   container.innerHTML='';container.appendChild(svg);
 }
 
@@ -238,10 +428,9 @@ function drawLineChart(container,data,keys,colors,labels,opts){
   for(var i=0;i<5;i++){var y=pad.t+ch*i/4;svg.appendChild(svgEl('line',{x1:pad.l,y1:y,x2:W-pad.r,y2:y,stroke:'#f0f0f0'}));
   var v=mx-(mx-mn)*i/4;svg.appendChild(svgEl('text',{x:pad.l-6,y:y+3,'text-anchor':'end','font-size':9,fill:'#999'},opts.yFmt?opts.yFmt(v):v.toFixed(1)));}
   var step=Math.max(1,Math.floor(data.length/10));
-  data.forEach(function(d,i){if(i%step===0||i===data.length-1){svg.appendChild(svgEl('text',{x:pad.l+i*xStep,y:H-pad.b+14,'text-anchor':'middle','font-size':9,fill:'#999'},d._label||''));}});
+  data.forEach(function(d,i){if(i%step===0||i===data.length-1){svg.appendChild(svgEl('text',{x:pad.l+i*xStep,y:H-pad.b+14,'text-anchor':'middle','font-size':9,fill:'#999',transform:'rotate(-20,'+( pad.l+i*xStep)+','+(H-pad.b+14)+')'},d._label||'')));}});
   keys.forEach(function(k,ki){var pts=[];data.forEach(function(d,i){if(d[k]!=null&&!isNaN(d[k]))pts.push({x:pad.l+i*xStep,y:yS(+d[k]),v:+d[k],l:d._label||''});});
   if(pts.length<2)return;var pathD=pts.map(function(p,i){return(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
-  if(opts.fill!==false&&keys.length===1){svg.appendChild(svgEl('path',{d:pathD+' L'+pts[pts.length-1].x+','+(pad.t+ch)+' L'+pts[0].x+','+(pad.t+ch)+' Z',fill:colors[ki],opacity:.1}));}
   svg.appendChild(svgEl('path',{d:pathD,fill:'none',stroke:colors[ki],'stroke-width':2}));
   pts.forEach(function(p){var c=svgEl('circle',{cx:p.x,cy:p.y,r:10,fill:'transparent',style:'cursor:pointer'});
   c.addEventListener('mouseenter',function(e){showTip(e,labels[ki]+': '+(opts.tipFmt?opts.tipFmt(p.v):p.v.toFixed(1))+' ('+p.l+')');});
@@ -251,154 +440,572 @@ function drawLineChart(container,data,keys,colors,labels,opts){
   container.appendChild(svg);
 }
 
-// === Render ===
-function render(){
-  var f=getFilters();
-  if(curTab==='city')renderCity(f);
-  else if(curTab==='store')renderStore(f);
-  else if(curTab==='daily')renderDaily(f);
-  else renderTrend(f);
+// ============================
+// SUSHIRO SECTION
+// ============================
+function initSushiroFilters(){
+  var months={},cities={};
+  sushiroCityData.forEach(function(d){if(d.month)months[d.month]=1;if(d.city)cities[d.city]=1;});
+  sushiroStoreData.forEach(function(d){if(d.month)months[d.month]=1;if(d.city)cities[d.city]=1;});
+  var ms=Object.keys(months).sort();var cs=Object.keys(cities).sort();
+  var selM=document.getElementById('sfMonth');selM.innerHTML='<option>全部</option>';
+  ms.forEach(function(m){selM.innerHTML+='<option>'+m+'</option>';});
+  if(ms.length)selM.value=ms[ms.length-1];
+  var selC=document.getElementById('sfCity');selC.innerHTML='<option>全部</option>';
+  cs.forEach(function(c){selC.innerHTML+='<option>'+c+'</option>';});
+  var dates=sushiroDailyData.map(function(d){return d.date;}).filter(Boolean).sort();
+  if(dates.length){document.getElementById('sfDateFrom').value=dates[0];document.getElementById('sfDateTo').value=dates[dates.length-1];}
 }
 
-function fmtInt(v){return v==null?'-':Math.round(v).toLocaleString();}
-function fmtPct(v){return v==null?'-':(v*100).toFixed(1)+'%';}
-function fmtRate(v){return v==null?'-':(+v).toFixed(1);}
-function fmtMoney(v){return v==null?'-':'¥'+Math.round(v).toLocaleString();}
+function sTab(t){
+  curSTab=t;
+  var tabs=['s_city','s_store','s_daily','s_trend','s_expand'];
+  document.querySelectorAll('#sushiroTabs .tab').forEach(function(el,i){el.classList.toggle('active',tabs[i]===t);});
+  tabs.forEach(function(p){document.getElementById('sp-'+p).classList.toggle('hidden',p!==t);});
+  var showDate=(t==='s_daily'||t==='s_trend');
+  document.getElementById('sfgDateFrom').style.display=showDate?'':'none';
+  document.getElementById('sfgDateTo').style.display=showDate?'':'none';
+  sRender();
+}
 
-function renderCity(f){
-  var d=cityData.filter(function(r){return(f.month==='全部'||r.month===f.month)&&(f.city==='全部'||r.city===f.city)&&r.city!=='总计';});
-  document.getElementById('dc').textContent='城市: '+d.length+' 条';
-  var el=document.getElementById('p-city');
-  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据。请先运行 sync_to_supabase.py 同步数据。</div>';return;}
+function sRender(){
+  var f={month:document.getElementById('sfMonth').value,city:document.getElementById('sfCity').value,
+    dateFrom:document.getElementById('sfDateFrom').value,dateTo:document.getElementById('sfDateTo').value};
+  if(curSTab==='s_city') renderSCity(f);
+  else if(curSTab==='s_store') renderSStore(f);
+  else if(curSTab==='s_daily') renderSDaily(f);
+  else if(curSTab==='s_trend') renderSTrend(f);
+  else renderSExpand(f);
+}
 
-  // KPI
+function renderSCity(f){
+  var d=sushiroCityData.filter(function(r){return(f.month==='全部'||r.month===f.month)&&(f.city==='全部'||r.city===f.city)&&r.city!=='总计';});
+  document.getElementById('sDataCount').textContent='城市: '+d.length+' 条';
+  var el=document.getElementById('sp-s_city');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var n=d.length;
   var sumRev=d.reduce(function(s,r){return s+(r.total_sales_revenue||0);},0);
   var avgTurn=d.reduce(function(s,r){return s+(r.monthly_turnover_rate||0);},0)/n;
   var avgQueue=d.reduce(function(s,r){return s+(r.queue_hour_pct||0);},0)/n;
   var avgQ50=d.reduce(function(s,r){return s+(r.queue50_hour_pct||0);},0)/n;
   var totalStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
-  var avgDailySales=d.reduce(function(s,r){return s+(r.daily_avg_sales_tables||0);},0)/n;
 
   el.innerHTML='<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">累计最低销售净额</div><div class="kv">¥'+(sumRev/10000).toFixed(0)+'万</div><div class="ks">'+n+' 个城市合计</div></div>'
-    +'<div class="kpi"><div class="kl">平均翻台率</div><div class="kv">'+avgTurn.toFixed(1)+'</div><div class="ks">城市均值</div></div>'
+    +'<div class="kpi"><div class="kl">平均翻台率</div><div class="kv">'+avgTurn.toFixed(1)+'</div></div>'
     +'<div class="kpi"><div class="kl">平均排队时段占比</div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">排50号以上占比</div><div class="kv">'+(avgQ50*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+totalStores+'</div></div>'
-    +'<div class="kpi"><div class="kl">城市日均单店销售桌数</div><div class="kv">'+avgDailySales.toFixed(0)+'</div></div>'
     +'</div>'
-    +'<div class="g2"><div class="card"><h3>城市日均单店最低销售桌数排行</h3><div id="c1"></div></div>'
-    +'<div class="card"><h3>城市日均单店最低销售净额排行</h3><div id="c2"></div></div></div>'
+    +'<div class="g2"><div class="card"><h3>城市日均单店最低销售桌数排行</h3><div id="sc1"></div></div>'
+    +'<div class="card"><h3>城市日均单店最低销售净额排行</h3><div id="sc2"></div></div></div>'
     +'<div class="card"><h3>城市月滚动汇总明细</h3><div class="scroll-table"><table><thead><tr>'
-    +'<th>月份</th><th>城市</th><th>门店数</th><th>单店平均桌数</th><th>数据天数</th>'
-    +'<th>日均单店销售桌数</th><th>日均单店销售净额</th><th>累计最低翻台率</th>'
-    +'<th>排队时段占比</th><th>排50号以上占比</th><th>备注</th>'
-    +'</tr></thead><tbody id="cityTbl"></tbody></table></div></div>';
+    +'<th>月份</th><th>城市</th><th>门店数</th><th>日均单店销售桌数</th><th>日均单店销售净额</th><th>翻台率</th><th>排队时段占比</th><th>排50号以上</th>'
+    +'</tr></thead><tbody id="sCityTbl"></tbody></table></div></div>';
 
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,15);
-  drawBarH(document.getElementById('c1'),top,'daily_avg_sales_tables','city',fmtInt);
+  drawBarH(document.getElementById('sc1'),top,'daily_avg_sales_tables','city',fmtInt);
   var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);}).slice(0,15);
-  drawBarH(document.getElementById('c2'),top2,'daily_avg_sales_revenue','city',fmtMoney);
-
-  var tbody=document.getElementById('cityTbl');
+  drawBarH(document.getElementById('sc2'),top2,'daily_avg_sales_revenue','city',fmtMoney);
+  var tbody=document.getElementById('sCityTbl');
   d.forEach(function(r){
-    var turnBadge=r.monthly_turnover_rate>=10?'<span class="badge bg-g">'+fmtRate(r.monthly_turnover_rate)+'</span>':r.monthly_turnover_rate>=8?'<span class="badge bg-o">'+fmtRate(r.monthly_turnover_rate)+'</span>':'<span class="badge bg-r">'+fmtRate(r.monthly_turnover_rate)+'</span>';
-    tbody.innerHTML+='<tr><td>'+r.month+'</td><td style="font-weight:600">'+r.city+'</td><td>'+fmtInt(r.store_count)+'</td><td>'+fmtInt(r.avg_tables_per_store)+'</td><td>'+fmtInt(r.data_days)+'</td>'
-    +'<td>'+fmtInt(r.daily_avg_sales_tables)+'</td><td>'+fmtMoney(r.daily_avg_sales_revenue)+'</td><td>'+turnBadge+'</td>'
-    +'<td>'+fmtPct(r.queue_hour_pct)+'</td><td>'+fmtPct(r.queue50_hour_pct)+'</td><td style="white-space:normal;max-width:200px">'+(r.remark||'')+'</td></tr>';
+    var tb=r.monthly_turnover_rate>=10?'bg-g':r.monthly_turnover_rate>=8?'bg-o':'bg-r';
+    tbody.innerHTML+='<tr><td>'+r.month+'</td><td style="font-weight:600">'+r.city+'</td><td>'+fmtInt(r.store_count)+'</td>'
+    +'<td>'+fmtInt(r.daily_avg_sales_tables)+'</td><td>'+fmtMoney(r.daily_avg_sales_revenue)+'</td>'
+    +'<td><span class="badge '+tb+'">'+fmtRate(r.monthly_turnover_rate)+'</span></td>'
+    +'<td>'+fmtPct(r.queue_hour_pct)+'</td><td>'+fmtPct(r.queue50_hour_pct)+'</td></tr>';
   });
 }
 
-function renderStore(f){
-  var d=storeData.filter(function(r){return(f.month==='全部'||r.month===f.month)&&(f.city==='全部'||r.city===f.city);});
-  document.getElementById('dc').textContent='门店: '+d.length+' 条';
-  var el=document.getElementById('p-store');
+function renderSStore(f){
+  var d=sushiroStoreData.filter(function(r){return(f.month==='全部'||r.month===f.month)&&(f.city==='全部'||r.city===f.city);});
+  document.getElementById('sDataCount').textContent='门店: '+d.length+' 条';
+  var el=document.getElementById('sp-s_store');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-
-  el.innerHTML='<div class="g2"><div class="card"><h3>门店日均最低销售桌数 TOP 20</h3><div id="s1"></div></div>'
-    +'<div class="card"><h3>门店日均最低销售净额 TOP 20</h3><div id="s2"></div></div></div>'
+  el.innerHTML='<div class="g2"><div class="card"><h3>门店日均最低销售桌数 TOP20</h3><div id="ss1"></div></div>'
+    +'<div class="card"><h3>门店日均最低销售净额 TOP20</h3><div id="ss2"></div></div></div>'
     +'<div class="card"><h3>门店月滚动汇总</h3><div class="scroll-table"><table><thead><tr>'
-    +'<th>月份</th><th>城市</th><th>门店名称</th><th>桌子数</th><th>客单价</th><th>数据天数</th>'
-    +'<th>日均销售桌数</th><th>日均销售净额</th><th>排队占比</th><th>排50号占比</th><th>累计翻台率</th>'
-    +'</tr></thead><tbody id="storeTbl"></tbody></table></div></div>';
-
+    +'<th>月份</th><th>城市</th><th>门店</th><th>桌数</th><th>客单价</th>'
+    +'<th>日均销售桌数</th><th>日均销售净额</th><th>排队占比</th><th>翻台率</th>'
+    +'</tr></thead><tbody id="sStoreTbl"></tbody></table></div></div>';
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,20);
-  drawBarH(document.getElementById('s1'),top,'daily_avg_sales_tables','store_name',fmtInt);
+  drawBarH(document.getElementById('ss1'),top,'daily_avg_sales_tables','store_name',fmtInt);
   var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);}).slice(0,20);
-  drawBarH(document.getElementById('s2'),top2,'daily_avg_sales_revenue','store_name',fmtMoney);
-
-  var tbody=document.getElementById('storeTbl');
+  drawBarH(document.getElementById('ss2'),top2,'daily_avg_sales_revenue','store_name',fmtMoney);
+  var tbody=document.getElementById('sStoreTbl');
   d.slice(0,100).forEach(function(r){
     tbody.innerHTML+='<tr><td>'+r.month+'</td><td>'+r.city+'</td><td style="font-weight:600">'+(r.store_name||r.store_id)+'</td>'
-    +'<td>'+fmtInt(r.tables)+'</td><td>'+fmtMoney(r.unit_price)+'</td><td>'+fmtInt(r.data_days)+'</td>'
+    +'<td>'+fmtInt(r.tables)+'</td><td>'+fmtMoney(r.unit_price)+'</td>'
     +'<td>'+fmtInt(r.daily_avg_sales_tables)+'</td><td>'+fmtMoney(r.daily_avg_sales_revenue)+'</td>'
-    +'<td>'+fmtPct(r.queue_hour_pct)+'</td><td>'+fmtPct(r.queue50_hour_pct)+'</td><td>'+fmtRate(r.monthly_turnover_rate)+'</td></tr>';
+    +'<td>'+fmtPct(r.queue_hour_pct)+'</td><td>'+fmtRate(r.monthly_turnover_rate)+'</td></tr>';
   });
 }
 
-function renderDaily(f){
-  var d=dailyData.filter(function(r){
+function renderSDaily(f){
+  var d=sushiroDailyData.filter(function(r){
     var mc=f.city==='全部'||r.city===f.city;
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
   });
-  document.getElementById('dc').textContent='日明细: '+d.length+' 条';
-  var el=document.getElementById('p-daily');
+  document.getElementById('sDataCount').textContent='日明细: '+d.length+' 条';
+  var el=document.getElementById('sp-s_daily');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-
-  el.innerHTML='<div class="card"><h3>门店每日明细 ('+d.length+' 条，最多显示200条)</h3>'
+  el.innerHTML='<div class="card"><h3>门店每日明细 ('+d.length+'条，最多200条)</h3>'
     +'<div class="scroll-table"><table><thead><tr>'
-    +'<th>日期</th><th>城市</th><th>门店名称</th><th>桌子数</th>'
-    +'<th>排队小时数</th><th>排50号小时数</th><th>营业小时数</th>'
-    +'<th>最低销售桌数</th><th>最低翻台率</th><th>最低销售额</th>'
-    +'</tr></thead><tbody id="dailyTbl"></tbody></table></div></div>';
-
-  var tbody=document.getElementById('dailyTbl');
+    +'<th>日期</th><th>城市</th><th>门店</th><th>排队小时</th><th>营业小时</th>'
+    +'<th>销售桌数</th><th>翻台率</th><th>销售净额</th>'
+    +'</tr></thead><tbody id="sDailyTbl"></tbody></table></div></div>';
+  var tbody=document.getElementById('sDailyTbl');
   d.slice(0,200).forEach(function(r){
     tbody.innerHTML+='<tr><td>'+r.date+'</td><td>'+r.city+'</td><td style="font-weight:600">'+(r.store_name||r.store_id)+'</td>'
-    +'<td>'+fmtInt(r.tables)+'</td><td>'+fmtRate(r.queue_hours)+'</td><td>'+fmtRate(r.queue50_hours)+'</td><td>'+fmtRate(r.biz_hours)+'</td>'
+    +'<td>'+fmtRate(r.queue_hours)+'</td><td>'+fmtRate(r.biz_hours)+'</td>'
     +'<td>'+fmtInt(r.daily_sales_tables)+'</td><td>'+fmtRate(r.daily_turnover_rate)+'</td><td>'+fmtMoney(r.daily_sales_revenue)+'</td></tr>';
   });
 }
 
-function renderTrend(f){
-  // 按日期聚合 dailyData
-  var d=dailyData.filter(function(r){
+function renderSTrend(f){
+  var d=sushiroDailyData.filter(function(r){
     var mc=f.city==='全部'||r.city===f.city;
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
   });
-  document.getElementById('dc').textContent='趋势: '+d.length+' 条原始';
-  var el=document.getElementById('p-trend');
-  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无每日数据</div>';return;}
-
+  document.getElementById('sDataCount').textContent='趋势: '+d.length+' 条';
+  var el=document.getElementById('sp-s_trend');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var g={};d.forEach(function(r){
     if(!g[r.date])g[r.date]={_label:r.date.slice(5),rev:0,tables:0,qh:0,bh:0,n:0};
     g[r.date].rev+=(r.daily_sales_revenue||0);g[r.date].tables+=(r.daily_sales_tables||0);
     g[r.date].qh+=(r.queue_hours||0);g[r.date].bh+=(r.biz_hours||0);g[r.date].n++;
   });
   var trend=Object.keys(g).sort().map(function(k){var o=g[k];return{_label:o._label,avgRev:o.n?o.rev/o.n:0,avgTables:o.n?o.tables/o.n:0,queuePct:o.bh?o.qh/o.bh:0,totalRev:o.rev};});
-
   el.innerHTML='<div class="g2">'
-    +'<div class="card"><h3>日均单店最低销售桌数趋势</h3><div id="t1"></div></div>'
-    +'<div class="card"><h3>日均单店最低销售净额趋势</h3><div id="t2"></div></div></div>'
+    +'<div class="card"><h3>日均单店销售桌数趋势</h3><div id="st1"></div></div>'
+    +'<div class="card"><h3>日均单店销售净额趋势</h3><div id="st2"></div></div></div>'
     +'<div class="g2">'
-    +'<div class="card"><h3>排队时段占比趋势</h3><div id="t3"></div></div>'
-    +'<div class="card"><h3>每日总最低销售净额趋势</h3><div id="t4"></div></div></div>';
-
-  drawLineChart(document.getElementById('t1'),trend,['avgTables'],[COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';}});
-  drawLineChart(document.getElementById('t2'),trend,['avgRev'],[COLORS[1]],['日均单店销售净额'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
-  drawLineChart(document.getElementById('t3'),trend,['queuePct'],[COLORS[2]],['排队时段占比'],{tipFmt:fmtPct});
-  drawLineChart(document.getElementById('t4'),trend,['totalRev'],[COLORS[3]],['总销售净额'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
+    +'<div class="card"><h3>排队时段占比趋势</h3><div id="st3"></div></div>'
+    +'<div class="card"><h3>每日总销售净额趋势</h3><div id="st4"></div></div></div>';
+  drawLineChart(document.getElementById('st1'),trend,['avgTables'],[COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';}});
+  drawLineChart(document.getElementById('st2'),trend,['avgRev'],[COLORS[1]],['日均单店销售净额'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
+  drawLineChart(document.getElementById('st3'),trend,['queuePct'],[COLORS[2]],['排队时段占比'],{tipFmt:fmtPct});
+  drawLineChart(document.getElementById('st4'),trend,['totalRev'],[COLORS[3]],['总销售净额'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
 }
 
-// === Auto refresh ===
-setInterval(function(){if(dbOk)loadData();},5*60*1000);
+function renderSExpand(f){
+  // Sushiro expansion overview: city coverage matrix, scale overview, store changes
+  var d=sushiroCityData.filter(function(r){return r.city!=='总计';});
+  var el=document.getElementById('sp-s_expand');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  
+  var months=[...new Set(d.map(function(r){return r.month;}))].sort();
+  var cities=[...new Set(d.map(function(r){return r.city;}))].sort();
+  
+  // Build city-month matrix
+  var cm={};d.forEach(function(r){cm[r.city+'|'+r.month]=r.store_count||0;});
+  
+  var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+cities.length+' 城市 × '+months.length+' 月)</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
+  months.forEach(function(m){matrixHtml+='<th>'+m+'</th>';});
+  matrixHtml+='</tr></thead><tbody>';
+  cities.forEach(function(c){
+    matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
+    months.forEach(function(m){
+      var v=cm[c+'|'+m]||0;
+      var bg=v>0?'#e6f7ff':'#f5f5f5';
+      matrixHtml+='<td style="background:'+bg+';text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';
+    });
+    matrixHtml+='</tr>';
+  });
+  matrixHtml+='</tbody></table></div></div>';
+  
+  // Scale overview per latest month
+  var latest=months[months.length-1]||'';
+  var latestD=d.filter(function(r){return r.month===latest;});
+  var totalS=latestD.reduce(function(s,r){return s+(r.store_count||0);},0);
+  
+  el.innerHTML='<div class="kpi-row">'
+    +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+cities.length+'</div><div class="ks">截至 '+latest+'</div></div>'
+    +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+totalS+'</div><div class="ks">'+latest+'</div></div>'
+    +'<div class="kpi"><div class="kl">数据月份</div><div class="kv">'+months.length+'</div></div>'
+    +'</div>' + matrixHtml;
+}
+
+// ============================
+// HOTPOT SUMMARY SECTION
+// ============================
+function initHpSumFilters(){
+  var dates=[...new Set(hpBrandData.map(function(d){return d.date;}))].sort();
+  var sel=document.getElementById('hpsfDate');
+  sel.innerHTML='<option>全部</option>';
+  dates.forEach(function(d){sel.innerHTML+='<option>'+d+'</option>';});
+  if(dates.length)sel.value=dates[dates.length-1];
+}
+
+function hpSumTab(t){
+  curHpSumTab=t;
+  var tabs=['hps_queue','hps_rate','hps_expand'];
+  document.querySelectorAll('#hpSumTabs .tab').forEach(function(el,i){el.classList.toggle('active',tabs[i]===t);});
+  tabs.forEach(function(p){document.getElementById('sp-'+p).classList.toggle('hidden',p!==t);});
+  hpSumRender();
+}
+
+function hpSumRender(){
+  var fDate=document.getElementById('hpsfDate').value;
+  if(curHpSumTab==='hps_queue') renderHpSumQueue(fDate);
+  else if(curHpSumTab==='hps_rate') renderHpSumRate(fDate);
+  else renderHpSumExpand(fDate);
+}
+
+function renderHpSumQueue(fDate){
+  var d=hpBrandData.filter(function(r){return fDate==='全部'||r.date===fDate;});
+  document.getElementById('hpSumCount').textContent=d.length+' 条';
+  var el=document.getElementById('sp-hps_queue');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  
+  // Aggregate by brand
+  var bg={};d.forEach(function(r){
+    if(!bg[r.brand])bg[r.brand]={brand:r.brand,total_queue:0,total_stores:0,stores_with_queue:0,days:0};
+    bg[r.brand].total_queue+=r.total_queue||0;
+    bg[r.brand].total_stores+=r.total_stores||0;
+    bg[r.brand].stores_with_queue+=r.stores_with_queue||0;
+    bg[r.brand].days++;
+  });
+  var brands=Object.values(bg).sort(function(a,b){return b.total_queue-a.total_queue;});
+  
+  el.innerHTML='<div class="kpi-row">'
+    +'<div class="kpi"><div class="kl">品牌数</div><div class="kv">'+brands.length+'</div></div>'
+    +'<div class="kpi"><div class="kl">总排队号数</div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_queue;},0))+'</div></div>'
+    +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_stores;},0)/Math.max(brands[0]?brands[0].days:1,1))+'</div><div class="ks">日均</div></div>'
+    +'</div>'
+    +'<div class="g2"><div class="card"><h3>品牌排队号数对比</h3><div id="hpq1"></div></div>'
+    +'<div class="card"><h3>品牌门店数对比</h3><div id="hpq2"></div></div></div>'
+    +'<div class="card"><h3>品牌排队汇总明细</h3><div class="scroll-table"><table><thead><tr>'
+    +'<th>品牌</th><th>数据天数</th><th>总排队号数</th><th>日均门店数</th><th>日均排队门店</th><th>日均排队号数</th>'
+    +'</tr></thead><tbody id="hpqTbl"></tbody></table></div></div>';
+  
+  drawBarH(document.getElementById('hpq1'),brands,'total_queue','brand',fmtInt);
+  var storeView=brands.map(function(b){return{brand:b.brand,avg_stores:Math.round(b.total_stores/b.days)};});
+  drawBarH(document.getElementById('hpq2'),storeView,'avg_stores','brand',fmtInt);
+  
+  var tbody=document.getElementById('hpqTbl');
+  brands.forEach(function(r){
+    tbody.innerHTML+='<tr><td style="font-weight:600;color:'+(BRAND_COLORS[r.brand]||'#333')+'">'+r.brand+'</td>'
+    +'<td>'+r.days+'</td><td>'+fmtInt(r.total_queue)+'</td>'
+    +'<td>'+Math.round(r.total_stores/r.days)+'</td>'
+    +'<td>'+Math.round(r.stores_with_queue/r.days)+'</td>'
+    +'<td>'+Math.round(r.total_queue/r.days)+'</td></tr>';
+  });
+}
+
+function renderHpSumRate(fDate){
+  var d=hpBrandData.filter(function(r){return fDate==='全部'||r.date===fDate;});
+  var el=document.getElementById('sp-hps_rate');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  
+  // Trend by date per brand
+  var dates=[...new Set(d.map(function(r){return r.date;}))].sort();
+  if(fDate!=='全部'){
+    // Single date view: show queue_store_pct bar chart
+    var items=d.map(function(r){return{brand:r.brand,pct:r.queue_store_pct||0};}).sort(function(a,b){return b.pct-a.pct;});
+    el.innerHTML='<div class="card"><h3>排队门店率对比 ('+fDate+')</h3><div id="hpr1"></div></div>'
+      +'<div class="card"><h3>排队门店率明细</h3><div class="scroll-table"><table><thead><tr>'
+      +'<th>品牌</th><th>总门店</th><th>排队门店</th><th>排队门店率</th><th>总排队号</th><th>店均排队</th>'
+      +'</tr></thead><tbody id="hprTbl"></tbody></table></div></div>';
+    var pctItems=items.map(function(r){return{brand:r.brand,val:+(r.pct*100).toFixed(1)};});
+    drawBarH(document.getElementById('hpr1'),pctItems,'val','brand',function(v){return v+'%';});
+    var tbody=document.getElementById('hprTbl');
+    d.sort(function(a,b){return(b.queue_store_pct||0)-(a.queue_store_pct||0);}).forEach(function(r){
+      tbody.innerHTML+='<tr><td style="font-weight:600">'+r.brand+'</td><td>'+fmtInt(r.total_stores)+'</td>'
+      +'<td>'+fmtInt(r.stores_with_queue)+'</td><td><span class="badge '+(r.queue_store_pct>.5?'bg-g':r.queue_store_pct>.3?'bg-o':'bg-r')+'">'+fmtPct(r.queue_store_pct)+'</span></td>'
+      +'<td>'+fmtInt(r.total_queue)+'</td><td>'+fmtRate(r.avg_queue_per_store)+'</td></tr>';
+    });
+  } else {
+    // Multi-date: show trend lines
+    var byBrand={};d.forEach(function(r){
+      if(!byBrand[r.brand])byBrand[r.brand]=[];
+      byBrand[r.brand].push({date:r.date,pct:r.queue_store_pct||0});
+    });
+    var trendData=dates.map(function(dt){
+      var row={_label:dt.slice(5)};
+      Object.keys(byBrand).forEach(function(b){
+        var found=byBrand[b].find(function(r){return r.date===dt;});
+        row[b]=found?(found.pct*100):null;
+      });
+      return row;
+    });
+    var bNames=Object.keys(byBrand);
+    var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
+    el.innerHTML='<div class="card"><h3>各品牌排队门店率趋势</h3><div id="hpr1"></div></div>';
+    drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';}});
+  }
+}
+
+function renderHpSumExpand(fDate){
+  var el=document.getElementById('sp-hps_expand');
+  var cd=hpCityData;
+  if(!cd.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  
+  // City coverage matrix by brand
+  var dates=[...new Set(cd.map(function(r){return r.date;}))].sort();
+  var latest=fDate!=='全部'?fDate:(dates[dates.length-1]||'');
+  var latestD=cd.filter(function(r){return r.date===latest;});
+  
+  var brandCities={};latestD.forEach(function(r){
+    if(!brandCities[r.brand])brandCities[r.brand]=new Set();
+    brandCities[r.brand].add(r.city);
+  });
+  
+  var allCities=[...new Set(latestD.map(function(r){return r.city;}))].sort();
+  var brandNames=Object.keys(brandCities).sort();
+  
+  var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+latest+')</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
+  brandNames.forEach(function(b){matrixHtml+='<th style="color:'+(BRAND_COLORS[b]||'#333')+'">'+b+'</th>';});
+  matrixHtml+='<th>品牌数</th></tr></thead><tbody>';
+  allCities.forEach(function(c){
+    matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
+    var cnt=0;
+    brandNames.forEach(function(b){
+      var has=brandCities[b]&&brandCities[b].has(c);
+      if(has)cnt++;
+      matrixHtml+='<td style="text-align:center">'+(has?'<span style="color:#52c41a;font-weight:700">✓</span>':'<span style="color:#ddd">—</span>')+'</td>';
+    });
+    matrixHtml+='<td style="text-align:center;font-weight:600">'+cnt+'</td></tr>';
+  });
+  matrixHtml+='</tbody></table></div></div>';
+  
+  // Brand scale summary
+  var scaleHtml='<div class="card"><h3>品牌规模概览 ('+latest+')</h3><div class="scroll-table"><table><thead><tr>'
+    +'<th>品牌</th><th>覆盖城市</th><th>门店总数</th><th>排队门店</th><th>排队门店率</th><th>总排队号</th>'
+    +'</tr></thead><tbody>';
+  
+  var bd=hpBrandData.filter(function(r){return r.date===latest;}).sort(function(a,b){return(b.total_stores||0)-(a.total_stores||0);});
+  bd.forEach(function(r){
+    var nCities=brandCities[r.brand]?brandCities[r.brand].size:0;
+    scaleHtml+='<tr><td style="font-weight:600;color:'+(BRAND_COLORS[r.brand]||'#333')+'">'+r.brand+'</td>'
+    +'<td>'+nCities+'</td><td>'+fmtInt(r.total_stores)+'</td><td>'+fmtInt(r.stores_with_queue)+'</td>'
+    +'<td><span class="badge '+(r.queue_store_pct>.5?'bg-g':r.queue_store_pct>.3?'bg-o':'bg-r')+'">'+fmtPct(r.queue_store_pct)+'</span></td>'
+    +'<td>'+fmtInt(r.total_queue)+'</td></tr>';
+  });
+  scaleHtml+='</tbody></table></div></div>';
+  
+  // Monthly store count trend
+  var monthlyStores={};hpBrandData.forEach(function(r){
+    var m=r.date.slice(0,7);
+    var key=r.brand+'|'+m;
+    if(!monthlyStores[key]||r.total_stores>monthlyStores[key].stores){
+      monthlyStores[key]={brand:r.brand,month:m,stores:r.total_stores};
+    }
+  });
+  var allMonths=[...new Set(Object.values(monthlyStores).map(function(r){return r.month;}))].sort();
+  var trendData=allMonths.map(function(m){
+    var row={_label:m};
+    BRANDS.forEach(function(b){
+      var v=monthlyStores[b+'|'+m];
+      row[b]=v?v.stores:null;
+    });
+    return row;
+  });
+  
+  el.innerHTML='<div class="kpi-row">'
+    +'<div class="kpi"><div class="kl">覆盖城市</div><div class="kv">'+allCities.length+'</div></div>'
+    +'<div class="kpi"><div class="kl">品牌数</div><div class="kv">'+brandNames.length+'</div></div>'
+    +'</div>'
+    +scaleHtml+matrixHtml
+    +'<div class="card"><h3>各品牌门店数月度趋势</h3><div id="hpe1"></div></div>';
+  
+  if(trendData.length>1){
+    var bColors=BRANDS.map(function(b){return BRAND_COLORS[b]||'#999';});
+    drawLineChart(document.getElementById('hpe1'),trendData,BRANDS,bColors,BRANDS,{tipFmt:function(v){return v+'家';}});
+  }
+}
+
+// ============================
+// HOTPOT INDIVIDUAL BRAND
+// ============================
+function initHpBrandFilters(bid){
+  var brand=bid.replace('hp_','');
+  var dates=[...new Set(hpStoreData.filter(function(r){return r.brand===brand;}).map(function(r){return r.date;}))].sort();
+  var cities=[...new Set(hpStoreData.filter(function(r){return r.brand===brand;}).map(function(r){return r.city;}).filter(Boolean))].sort();
+  
+  var selD=document.getElementById(bid+'_fDate');
+  if(selD){selD.innerHTML='<option>全部</option>';dates.forEach(function(d){selD.innerHTML+='<option>'+d+'</option>';});if(dates.length)selD.value=dates[dates.length-1];}
+  var selC=document.getElementById(bid+'_fCity');
+  if(selC){selC.innerHTML='<option>全部</option>';cities.forEach(function(c){selC.innerHTML+='<option>'+c+'</option>';});}
+}
+
+function hpBTab(bid,t){
+  curHpBrandTab[bid]=t;
+  var tabs=['queue','stores','heat','expand'];
+  var tabsEl=document.getElementById(bid+'Tabs');
+  if(tabsEl)tabsEl.querySelectorAll('.tab').forEach(function(el,i){el.classList.toggle('active',tabs[i]===t);});
+  tabs.forEach(function(p){var e=document.getElementById('sp-'+bid+'_'+p);if(e)e.classList.toggle('hidden',p!==t);});
+  hpBRender(bid);
+}
+
+function hpBRender(bid){
+  var brand=bid.replace('hp_','');
+  var selD=document.getElementById(bid+'_fDate');
+  var selC=document.getElementById(bid+'_fCity');
+  var fDate=selD?selD.value:'全部';
+  var fCity=selC?selC.value:'全部';
+  var tab=curHpBrandTab[bid]||'queue';
+  
+  if(tab==='queue') renderHpBQueue(bid,brand,fDate,fCity);
+  else if(tab==='stores') renderHpBStores(bid,brand,fDate,fCity);
+  else if(tab==='heat') renderHpBHeat(bid,brand,fDate,fCity);
+  else renderHpBExpand(bid,brand,fDate,fCity);
+}
+
+function renderHpBQueue(bid,brand,fDate,fCity){
+  var d=hpCityData.filter(function(r){return r.brand===brand&&(fDate==='全部'||r.date===fDate)&&(fCity==='全部'||r.city===fCity);});
+  var countEl=document.getElementById(bid+'Count');
+  if(countEl)countEl.textContent=d.length+' 条';
+  var el=document.getElementById('sp-'+bid+'_queue');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  
+  // KPIs from brand data
+  var bd=hpBrandData.filter(function(r){return r.brand===brand&&(fDate==='全部'||r.date===fDate);});
+  var totalQ=bd.reduce(function(s,r){return s+(r.total_queue||0);},0);
+  var totalS=bd.length?bd[bd.length-1].total_stores:0;
+  var avgPct=bd.reduce(function(s,r){return s+(r.queue_store_pct||0);},0)/(bd.length||1);
+  
+  // Aggregate by city
+  var cg={};d.forEach(function(r){
+    if(!cg[r.city])cg[r.city]={city:r.city,queue:0,stores:0,days:0};
+    cg[r.city].queue+=r.total_queue||0;
+    cg[r.city].stores=Math.max(cg[r.city].stores,r.store_count||0);
+    cg[r.city].days++;
+  });
+  var cities=Object.values(cg).sort(function(a,b){return b.queue-a.queue;});
+  
+  el.innerHTML='<div class="kpi-row">'
+    +'<div class="kpi"><div class="kl">总排队号数</div><div class="kv">'+fmtInt(totalQ)+'</div></div>'
+    +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+fmtInt(totalS)+'</div></div>'
+    +'<div class="kpi"><div class="kl">排队门店率</div><div class="kv">'+fmtPct(avgPct)+'</div></div>'
+    +'<div class="kpi"><div class="kl">覆盖城市</div><div class="kv">'+cities.length+'</div></div>'
+    +'</div>'
+    +'<div class="g2"><div class="card"><h3>城市排队号数排行</h3><div id="'+bid+'q1"></div></div>'
+    +'<div class="card"><h3>城市门店数</h3><div id="'+bid+'q2"></div></div></div>'
+    +'<div class="card"><h3>城市排队明细</h3><div class="scroll-table"><table><thead><tr>'
+    +'<th>城市</th><th>数据天数</th><th>门店数</th><th>总排队号</th><th>日均排队</th>'
+    +'</tr></thead><tbody id="'+bid+'qTbl"></tbody></table></div></div>';
+  
+  drawBarH(document.getElementById(bid+'q1'),cities.slice(0,15),'queue','city',fmtInt,BRAND_COLORS[brand]);
+  drawBarH(document.getElementById(bid+'q2'),cities.slice(0,15),'stores','city',fmtInt,BRAND_COLORS[brand]);
+  
+  var tbody=document.getElementById(bid+'qTbl');
+  cities.forEach(function(r){
+    tbody.innerHTML+='<tr><td style="font-weight:600">'+r.city+'</td><td>'+r.days+'</td><td>'+r.stores+'</td>'
+    +'<td>'+fmtInt(r.queue)+'</td><td>'+Math.round(r.queue/r.days)+'</td></tr>';
+  });
+}
+
+function renderHpBStores(bid,brand,fDate,fCity){
+  var d=hpStoreData.filter(function(r){return r.brand===brand&&(fDate==='全部'||r.date===fDate)&&(fCity==='全部'||r.city===fCity);});
+  var el=document.getElementById('sp-'+bid+'_stores');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  
+  // Aggregate by store
+  var sg={};d.forEach(function(r){
+    var key=r.store_id;
+    if(!sg[key])sg[key]={store_name:r.store_name,city:r.city,district:r.district||'',max_queue:0,total_slots:0,days:0};
+    sg[key].max_queue=Math.max(sg[key].max_queue,r.max_queue||0);
+    sg[key].total_slots+=(r.queue_slots||0);
+    sg[key].days++;
+  });
+  var stores=Object.values(sg).sort(function(a,b){return b.max_queue-a.max_queue;});
+  
+  el.innerHTML='<div class="card"><h3>门店最大排队号排行 TOP30</h3><div id="'+bid+'s1"></div></div>'
+    +'<div class="card"><h3>门店排队明细 ('+stores.length+'家)</h3><div class="scroll-table"><table><thead><tr>'
+    +'<th>门店</th><th>城市</th><th>区域</th><th>最大排队号</th><th>日均排队时段</th><th>数据天数</th>'
+    +'</tr></thead><tbody id="'+bid+'sTbl"></tbody></table></div></div>';
+  
+  drawBarH(document.getElementById(bid+'s1'),stores.slice(0,30),'max_queue','store_name',fmtInt,BRAND_COLORS[brand]);
+  
+  var tbody=document.getElementById(bid+'sTbl');
+  stores.slice(0,200).forEach(function(r){
+    tbody.innerHTML+='<tr><td style="font-weight:600">'+r.store_name+'</td><td>'+r.city+'</td><td>'+r.district+'</td>'
+    +'<td>'+fmtInt(r.max_queue)+'</td><td>'+fmtRate(r.total_slots/r.days)+'</td><td>'+r.days+'</td></tr>';
+  });
+}
+
+function renderHpBHeat(bid,brand,fDate,fCity){
+  var d=hpStoreData.filter(function(r){return r.brand===brand&&(fDate==='全部'||r.date===fDate)&&(fCity==='全部'||r.city===fCity);});
+  var el=document.getElementById('sp-'+bid+'_heat');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  
+  // Daily queue trend
+  var dayG={};d.forEach(function(r){
+    if(!dayG[r.date])dayG[r.date]={date:r.date,total_queue:0,stores:0,queue_stores:0};
+    dayG[r.date].total_queue+=(r.max_queue||0);
+    dayG[r.date].stores++;
+    if(r.max_queue>0)dayG[r.date].queue_stores++;
+  });
+  var trend=Object.values(dayG).sort(function(a,b){return a.date>b.date?1:-1;}).map(function(r){
+    return{_label:r.date.slice(5),total:r.total_queue,stores:r.stores,rate:r.stores?(r.queue_stores/r.stores):0};
+  });
+  
+  // Time slot analysis from total_slots
+  var slotG={};d.forEach(function(r){
+    if(!slotG[r.date])slotG[r.date]=0;
+    slotG[r.date]+=(r.queue_slots||0);
+  });
+  var slotTrend=Object.keys(slotG).sort().map(function(dt){return{_label:dt.slice(5),slots:slotG[dt]};});
+  
+  el.innerHTML='<div class="g2">'
+    +'<div class="card"><h3>每日总排队号数趋势</h3><div id="'+bid+'h1"></div></div>'
+    +'<div class="card"><h3>每日排队时段数趋势</h3><div id="'+bid+'h2"></div></div></div>';
+  
+  if(trend.length>1){
+    drawLineChart(document.getElementById(bid+'h1'),trend,['total'],[BRAND_COLORS[brand]||COLORS[0]],['总排队号'],{tipFmt:fmtInt});
+    drawLineChart(document.getElementById(bid+'h2'),slotTrend,['slots'],[BRAND_COLORS[brand]||COLORS[1]],['排队时段数'],{tipFmt:fmtInt});
+  } else {
+    document.getElementById(bid+'h1').innerHTML='<div style="color:#999;text-align:center;padding:20px">选择"全部"日期可查看趋势</div>';
+    document.getElementById(bid+'h2').innerHTML='<div style="color:#999;text-align:center;padding:20px">选择"全部"日期可查看趋势</div>';
+  }
+}
+
+function renderHpBExpand(bid,brand,fDate,fCity){
+  var el=document.getElementById('sp-'+bid+'_expand');
+  var cd=hpCityData.filter(function(r){return r.brand===brand;});
+  if(!cd.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  
+  var dates=[...new Set(cd.map(function(r){return r.date;}))].sort();
+  var latest=fDate!=='全部'?fDate:(dates[dates.length-1]||'');
+  var latestD=cd.filter(function(r){return r.date===latest;});
+  var allCities=[...new Set(latestD.map(function(r){return r.city;}))].sort();
+  var totalStores=latestD.reduce(function(s,r){return s+(r.store_count||0);},0);
+  
+  // Monthly store counts
+  var monthlyStores={};cd.forEach(function(r){
+    var m=r.date.slice(0,7);
+    if(!monthlyStores[m])monthlyStores[m]=0;
+    monthlyStores[m]=Math.max(monthlyStores[m],r.store_count||0);
+  });
+  
+  // city-date matrix
+  var matrixHtml='<div class="card"><h3>城市覆盖矩阵</h3><div class="scroll-table"><table><thead><tr><th>城市</th><th>门店数</th><th>排队门店</th><th>排队号</th></tr></thead><tbody>';
+  latestD.sort(function(a,b){return(b.store_count||0)-(a.store_count||0);}).forEach(function(r){
+    matrixHtml+='<tr><td style="font-weight:600">'+r.city+'</td><td>'+fmtInt(r.store_count)+'</td>'
+    +'<td>'+fmtInt(r.queue_stores)+'</td><td>'+fmtInt(r.total_queue)+'</td></tr>';
+  });
+  matrixHtml+='</tbody></table></div></div>';
+  
+  el.innerHTML='<div class="kpi-row">'
+    +'<div class="kpi"><div class="kl">覆盖城市</div><div class="kv">'+allCities.length+'</div><div class="ks">'+latest+'</div></div>'
+    +'<div class="kpi"><div class="kl">门店总数</div><div class="kv">'+totalStores+'</div></div>'
+    +'</div>'+matrixHtml;
+}
 
 // === Init ===
-if(loadConfig())loadData();
+function initAllFilters(){
+  initSushiroFilters();
+  initHpSumFilters();
+  BRANDS.forEach(function(b){initHpBrandFilters('hp_'+b);});
+}
+
+// Auto refresh
+setInterval(function(){loadAllData();}, 10*60*1000);
+
+// Boot
+loadAllData();
 </script>
-
-
 </body></html>
