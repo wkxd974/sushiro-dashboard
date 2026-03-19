@@ -627,16 +627,20 @@ function renderSCity(f){
   var avgTurn=d.reduce(function(s,r){return s+(r.monthly_turnover_rate||0);},0)/n;
   var avgQueue=d.reduce(function(s,r){return s+(r.queue_hour_pct||0);},0)/n;
   var avgQ50=d.reduce(function(s,r){return s+(r.queue50_hour_pct||0);},0)/n;
-  var totalStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
+  var dataStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
 
-  // Count open stores: use avg_tables_per_store > 0 or data_days > 0 as proxy for open stores
-  var openStores=d.reduce(function(s,r){return s+((r.data_days>0||r.daily_avg_sales_tables>0)?(r.store_count||0):0);},0);
+  // Get authoritative total store count from city_monthly
+  var cmMonth=f.month!=='全部'?f.month:(sushiroCityData.length?sushiroCityData[0].month:'');
+  var cmData=sushiroCityData.filter(function(r){return(cmMonth?r.month===cmMonth:true)&&r.city!=='总计'&&(f.city==='全部'||r.city===f.city);});
+  var totalStoresAuth=cmData.reduce(function(s,r){return s+(r.store_count||0);},0);
+  if(!totalStoresAuth) totalStoresAuth=dataStores; // fallback
+
   el.innerHTML='<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">累计最低销售净额</div><div class="kv">¥'+(sumRev/10000).toFixed(0)+'万</div><div class="ks">'+n+' 个城市合计</div></div>'
     +'<div class="kpi"><div class="kl">平均翻台率</div><div class="kv">'+avgTurn.toFixed(1)+'</div></div>'
     +'<div class="kpi"><div class="kl">平均排队时段占比</div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">排50号以上占比</div><div class="kv">'+(avgQ50*100).toFixed(1)+'%</div></div>'
-    +'<div class="kpi"><div class="kl">总门店数<span style="font-size:10px;color:#999;display:block">含未开业门店</span></div><div class="kv">'+totalStores+'</div><div class="ks">开业门店: '+openStores+'</div></div>'
+    +'<div class="kpi"><div class="kl">总门店数<span style="font-size:10px;color:#999;display:block">含未开业门店</span></div><div class="kv">'+totalStoresAuth+'</div><div class="ks">有数据门店: '+dataStores+'</div></div>'
     +'</div>'
     +'<div class="g2"><div class="card"><h3>城市日均单店最低销售桌数排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选月份内每日销售桌数的<b>日均值</b>（总桌数÷数据天数÷门店数）</div><div id="sc1"></div></div>'
     +'<div class="card"><h3>城市日均单店最低销售净额排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选月份内每日销售净额的<b>日均值</b>（总净额÷数据天数÷门店数）</div><div id="sc2"></div></div></div>'
