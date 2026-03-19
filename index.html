@@ -595,12 +595,13 @@ function renderSCity(f){
   // Build city-level aggregates from daily data
   var cg={};dd.forEach(function(r){
     if(!r.city)return;
-    if(!cg[r.city])cg[r.city]={city:r.city,stores:{},dates:{},rev:0,tables:0,qh:0,bh:0,turnSum:0,turnN:0};
+    if(!cg[r.city])cg[r.city]={city:r.city,stores:{},dates:{},rev:0,tables:0,qh:0,q50h:0,bh:0,turnSum:0,turnN:0};
     cg[r.city].stores[r.store_id||r.store_name]=1;
     cg[r.city].dates[r.date]=1;
     cg[r.city].rev+=(r.daily_sales_revenue||0);
     cg[r.city].tables+=(r.daily_sales_tables||0);
     cg[r.city].qh+=(r.queue_hours||0);
+    cg[r.city].q50h+=(r.queue50_hours||0);
     cg[r.city].bh+=(r.biz_hours||0);
     cg[r.city].turnSum+=(r.daily_turnover_rate||0);
     cg[r.city].turnN++;
@@ -615,7 +616,7 @@ function renderSCity(f){
       daily_avg_sales_revenue:nStores&&nDays?c.rev/nDays/nStores:0,
       monthly_turnover_rate:c.turnN?c.turnSum/c.turnN:0,
       queue_hour_pct:c.bh?c.qh/c.bh:0,
-      queue50_hour_pct:0,
+      queue50_hour_pct:c.bh?c.q50h/c.bh:0,
       total_sales_revenue:c.rev
     };
   });
