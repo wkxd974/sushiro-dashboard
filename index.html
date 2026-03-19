@@ -415,10 +415,19 @@ function drawBarH(container,items,valKey,labelKey,fmtFn,color){
   if(!items.length){container.innerHTML='<div style="color:#999;text-align:center;padding:30px">暂无数据</div>';return;}
   var W=560,barH=26,gap=4,pad={l:90,r:55,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
   var mx=Math.max.apply(null,items.map(function(d){return d[valKey]||0;}))||1;var cw=W-pad.l-pad.r;
-  items.forEach(function(d,i){var y=pad.t+i*(barH+gap);var w=((d[valKey]||0)/mx)*cw;var c=color||COLORS[i%COLORS.length];
+  items.forEach(function(d,i){var y=pad.t+i*(barH+gap);var w=((d[valKey]||0)/mx)*cw;
+  var c;
+  if(color){
+    // Single color or gradient: darken to lighten based on rank
+    var t=items.length>1?i/(items.length-1):0;
+    var opacity=1-t*0.55;// top bar full color, bottom bar 45% opacity
+    c=color;d._barOpacity=opacity;
+  } else {
+    c=COLORS[i%COLORS.length];d._barOpacity=0.85;
+  }
   var lbl=d[labelKey]||'';if(lbl.length>7)lbl=lbl.substring(0,7)+'…';
   svg.appendChild(svgEl('text',{x:pad.l-6,y:y+barH/2+4,'text-anchor':'end','font-size':11,fill:'#333'},lbl));
-  var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:3,fill:c,opacity:.85,style:'cursor:pointer'});
+  var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:3,fill:c,opacity:d._barOpacity||.85,style:'cursor:pointer'});
   rect.addEventListener('mouseenter',function(e){showTip(e,d[labelKey]+': '+(fmtFn?fmtFn(d[valKey]):d[valKey]));});
   rect.addEventListener('mouseleave',hideTip);svg.appendChild(rect);
   svg.appendChild(svgEl('text',{x:pad.l+w+4,y:y+barH/2+4,'font-size':10,fill:'#666'},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
@@ -602,9 +611,9 @@ function renderSCity(f){
     +'</tr></thead><tbody id="sCityTbl"></tbody></table></div></div>';
 
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,15);
-  drawBarH(document.getElementById('sc1'),top,'daily_avg_sales_tables','city',fmtInt);
+  drawBarH(document.getElementById('sc1'),top,'daily_avg_sales_tables','city',fmtInt,'#e74c3c');
   var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);}).slice(0,15);
-  drawBarH(document.getElementById('sc2'),top2,'daily_avg_sales_revenue','city',fmtMoney);
+  drawBarH(document.getElementById('sc2'),top2,'daily_avg_sales_revenue','city',fmtMoney,'#e74c3c');
   var tbody=document.getElementById('sCityTbl');
   d.forEach(function(r){
     var tb=r.monthly_turnover_rate>=10?'bg-g':r.monthly_turnover_rate>=8?'bg-o':'bg-r';
@@ -627,9 +636,9 @@ function renderSStore(f){
     +'<th>日均销售桌数</th><th>日均销售净额</th><th>排队占比</th><th>翻台率</th>'
     +'</tr></thead><tbody id="sStoreTbl"></tbody></table></div></div>';
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,20);
-  drawBarH(document.getElementById('ss1'),top,'daily_avg_sales_tables','store_name',fmtInt);
+  drawBarH(document.getElementById('ss1'),top,'daily_avg_sales_tables','store_name',fmtInt,'#e74c3c');
   var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);}).slice(0,20);
-  drawBarH(document.getElementById('ss2'),top2,'daily_avg_sales_revenue','store_name',fmtMoney);
+  drawBarH(document.getElementById('ss2'),top2,'daily_avg_sales_revenue','store_name',fmtMoney,'#e74c3c');
   var tbody=document.getElementById('sStoreTbl');
   d.slice(0,100).forEach(function(r){
     tbody.innerHTML+='<tr><td>'+r.month+'</td><td>'+r.city+'</td><td style="font-weight:600">'+(r.store_name||r.store_id)+'</td>'
