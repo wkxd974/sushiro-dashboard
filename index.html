@@ -124,10 +124,10 @@ tr:hover td{background:#fef5f5}
         <div class="tab" onclick="sTab('s_expand')">拓展概览</div>
       </div>
       <div class="filters" id="sushiroFilters">
-        <div class="fg"><label>月份</label><select id="sfMonth" onchange="sRender()"></select></div>
+        <div class="fg"><label>月份</label><select id="sfMonth" onchange="onMonthChange()"></select></div>
         <div class="fg"><label>城市</label><select id="sfCity" onchange="sRender()"></select></div>
-        <div class="fg" id="sfgDateFrom" style="display:none"><label>开始日期</label><input type="date" id="sfDateFrom" onchange="sRender()"></div>
-        <div class="fg" id="sfgDateTo" style="display:none"><label>结束日期</label><input type="date" id="sfDateTo" onchange="sRender()"></div>
+        <div class="fg" id="sfgDateFrom" style="display:none"><label>开始日期</label><input type="date" id="sfDateFrom" onchange="onDateManualChange()"></div>
+        <div class="fg" id="sfgDateTo" style="display:none"><label>结束日期</label><input type="date" id="sfDateTo" onchange="onDateManualChange()"></div>
         <div class="finfo" id="sDataCount"></div>
       </div>
       <div id="sp-s_city"></div>
@@ -299,7 +299,7 @@ var curSection='sushiro', curSTab='s_city', curHpSumTab='hps_queue';
 var curHpBrandTab = {}; // per brand
 BRANDS.forEach(function(b){ curHpBrandTab['hp_'+b] = 'queue'; });
 
-// === Supabase fetch ===
+// === Supabase fetch (single page, max 1000) ===
 function supa(table, params) {
   var url = SUPA_URL + '/rest/v1/' + table + '?select=*' + (params||'');
   return fetch(url, {
@@ -307,19 +307,47 @@ function supa(table, params) {
   }).then(function(r){ return r.json(); });
 }
 
+// === Paginated fetch for large tables (auto-paginates past 1000-row limit) ===
+function supaAll(table, order) {
+  var PAGE = 1000;
+  function fetchPage(offset) {
+    var url = SUPA_URL + '/rest/v1/' + table + '?select=*&order=' + order + '&limit=' + PAGE + '&offset=' + offset;
+    return fetch(url, {
+      headers: {'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY}
+    }).then(function(r){ return r.json(); });
+  }
+  return fetchPage(0).then(function(first) {
+    if(!Array.isArray(first)) return [];
+    if(first.length < PAGE) return first;
+    // Need more pages
+    var pages = [];
+    var total = first.length;
+    // Estimate: fetch up to 50 pages (50k rows max)
+    function nextPage(offset, acc) {
+      return fetchPage(offset).then(function(data) {
+        if(!Array.isArray(data) || !data.length) return acc;
+        acc = acc.concat(data);
+        if(data.length < PAGE) return acc;
+        return nextPage(offset + PAGE, acc);
+      });
+    }
+    return nextPage(PAGE, first);
+  });
+}
+
 // === Load all data ===
 function loadAllData() {
   document.getElementById('srcLabel').innerHTML = '<span class="spin"></span> 加载中...';
-  
+
   Promise.all([
-    // Sushiro data (actual table names)
-    supa('city_monthly', '&order=month.desc,city.asc&limit=5000'),
-    supa('store_monthly', '&order=month.desc,city.asc&limit=5000'),
-    supa('store_daily', '&order=date.desc,city.asc&limit=5000'),
-    // Hotpot data
-    supa('hotpot_brand_daily', '&order=date.desc,brand.asc&limit=5000'),
-    supa('hotpot_city_daily', '&order=date.desc,brand.asc,city.asc&limit=10000'),
-    supa('hotpot_store_daily', '&order=date.desc,brand.asc,city.asc&limit=30000')
+    // Small tables (< 1000 rows): single fetch is fine
+    supa('city_monthly', '&order=month.desc,city.asc'),
+    supa('store_monthly', '&order=month.desc,city.asc'),
+    // Large tables: use paginated fetch
+    supaAll('store_daily', 'date.desc,city.asc'),
+    supa('hotpot_brand_daily', '&order=date.desc,brand.asc'),
+    supaAll('hotpot_city_daily', 'date.desc,brand.asc,city.asc'),
+    supaAll('hotpot_store_daily', 'date.desc,brand.asc,city.asc')
   ]).then(function(results) {
     sushiroCityData = Array.isArray(results[0]) ? results[0] : [];
     sushiroStoreData = Array.isArray(results[1]) ? results[1] : [];
@@ -327,10 +355,12 @@ function loadAllData() {
     hpBrandData = Array.isArray(results[3]) ? results[3] : [];
     hpCityData = Array.isArray(results[4]) ? results[4] : [];
     hpStoreData = Array.isArray(results[5]) ? results[5] : [];
-    
+
+    var counts = [sushiroCityData.length, sushiroStoreData.length, sushiroDailyData.length, hpBrandData.length, hpCityData.length, hpStoreData.length];
+    var total = counts.reduce(function(a,b){return a+b;},0);
     var now = new Date();
-    document.getElementById('srcLabel').textContent = '数据已加载 | ' + now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
-    
+    document.getElementById('srcLabel').textContent = '已加载 ' + total + ' 条 | ' + now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+
     initAllFilters();
     renderCurrentSection();
   }).catch(function(e) {
@@ -430,11 +460,12 @@ function drawLineChart(container,data,keys,colors,labels,opts){
   var step=Math.max(1,Math.floor(data.length/10));
   data.forEach(function(d,i){if(i%step===0||i===data.length-1){svg.appendChild(svgEl('text',{x:pad.l+i*xStep,y:H-pad.b+14,'text-anchor':'middle','font-size':9,fill:'#999',transform:'rotate(-20,'+( pad.l+i*xStep)+','+(H-pad.b+14)+')'},d._label||''));}});
   keys.forEach(function(k,ki){var pts=[];data.forEach(function(d,i){if(d[k]!=null&&!isNaN(d[k]))pts.push({x:pad.l+i*xStep,y:yS(+d[k]),v:+d[k],l:d._label||''});});
-  if(pts.length<2)return;var pathD=pts.map(function(p,i){return(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
-  svg.appendChild(svgEl('path',{d:pathD,fill:'none',stroke:colors[ki],'stroke-width':2}));
+  if(!pts.length)return;
+  if(pts.length>=2){var pathD=pts.map(function(p,i){return(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+  svg.appendChild(svgEl('path',{d:pathD,fill:'none',stroke:colors[ki],'stroke-width':2}));}
   pts.forEach(function(p){var c=svgEl('circle',{cx:p.x,cy:p.y,r:10,fill:'transparent',style:'cursor:pointer'});
   c.addEventListener('mouseenter',function(e){showTip(e,labels[ki]+': '+(opts.tipFmt?opts.tipFmt(p.v):p.v.toFixed(1))+' ('+p.l+')');});
-  c.addEventListener('mouseleave',hideTip);svg.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:2.5,fill:colors[ki]}));svg.appendChild(c);});});
+  c.addEventListener('mouseleave',hideTip);svg.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:3.5,fill:colors[ki]}));svg.appendChild(c);});});
   container.innerHTML='';
   if(labels.length>1){var lg=document.createElement('div');lg.className='legend';labels.forEach(function(l,i){var s=document.createElement('span');s.innerHTML='<span class="dot" style="background:'+colors[i]+'"></span>'+l;lg.appendChild(s);});container.appendChild(lg);}
   container.appendChild(svg);
@@ -443,18 +474,82 @@ function drawLineChart(container,data,keys,colors,labels,opts){
 // ============================
 // SUSHIRO SECTION
 // ============================
+// Cache of daily dates grouped by month for quick lookup
+var _dailyDatesByMonth = {};
+
 function initSushiroFilters(){
   var months={},cities={};
   sushiroCityData.forEach(function(d){if(d.month)months[d.month]=1;if(d.city)cities[d.city]=1;});
   sushiroStoreData.forEach(function(d){if(d.month)months[d.month]=1;if(d.city)cities[d.city]=1;});
+  // Also include months from daily data
+  sushiroDailyData.forEach(function(d){if(d.date){var m=d.date.slice(0,7);months[m]=1;}if(d.city)cities[d.city]=1;});
   var ms=Object.keys(months).sort();var cs=Object.keys(cities).sort();
   var selM=document.getElementById('sfMonth');selM.innerHTML='<option>全部</option>';
   ms.forEach(function(m){selM.innerHTML+='<option>'+m+'</option>';});
   if(ms.length)selM.value=ms[ms.length-1];
   var selC=document.getElementById('sfCity');selC.innerHTML='<option>全部</option>';
   cs.forEach(function(c){selC.innerHTML+='<option>'+c+'</option>';});
-  var dates=sushiroDailyData.map(function(d){return d.date;}).filter(Boolean).sort();
-  if(dates.length){document.getElementById('sfDateFrom').value=dates[0];document.getElementById('sfDateTo').value=dates[dates.length-1];}
+  // Build daily dates index by month
+  _dailyDatesByMonth={};
+  sushiroDailyData.forEach(function(d){
+    if(!d.date)return;var m=d.date.slice(0,7);
+    if(!_dailyDatesByMonth[m])_dailyDatesByMonth[m]=[];
+    if(_dailyDatesByMonth[m].indexOf(d.date)===-1)_dailyDatesByMonth[m].push(d.date);
+  });
+  Object.keys(_dailyDatesByMonth).forEach(function(m){_dailyDatesByMonth[m].sort();});
+  // Set initial date range based on selected month
+  syncDateRangeToMonth();
+}
+
+// When month dropdown changes: auto-set date range to that month's available dates
+function onMonthChange(){
+  var isDailyTab=(curSTab==='s_daily'||curSTab==='s_trend');
+  if(isDailyTab) syncDateRangeToMonth();
+  sRender();
+}
+
+// When user manually changes date pickers: update month selector to match
+function onDateManualChange(){
+  var from=document.getElementById('sfDateFrom').value;
+  var to=document.getElementById('sfDateTo').value;
+  var selM=document.getElementById('sfMonth');
+  if(from && to){
+    var mFrom=from.slice(0,7), mTo=to.slice(0,7);
+    if(mFrom===mTo){
+      // Both dates in same month: sync month selector
+      var hasOpt=false;
+      for(var i=0;i<selM.options.length;i++){if(selM.options[i].value===mFrom){hasOpt=true;break;}}
+      if(hasOpt) selM.value=mFrom;
+    } else {
+      selM.value='全部';
+    }
+  }
+  sRender();
+}
+
+// Sync dateFrom/dateTo to the selected month's available daily dates
+function syncDateRangeToMonth(){
+  var m=document.getElementById('sfMonth').value;
+  if(m==='全部'){
+    // Set to full available range
+    var allDates=sushiroDailyData.map(function(d){return d.date;}).filter(Boolean).sort();
+    if(allDates.length){
+      document.getElementById('sfDateFrom').value=allDates[0];
+      document.getElementById('sfDateTo').value=allDates[allDates.length-1];
+    }
+  } else {
+    var dates=_dailyDatesByMonth[m];
+    if(dates && dates.length){
+      document.getElementById('sfDateFrom').value=dates[0];
+      document.getElementById('sfDateTo').value=dates[dates.length-1];
+    } else {
+      // No daily data for this month, set to month boundaries
+      document.getElementById('sfDateFrom').value=m+'-01';
+      var y=parseInt(m.slice(0,4)),mo=parseInt(m.slice(5,7));
+      var lastDay=new Date(y,mo,0).getDate();
+      document.getElementById('sfDateTo').value=m+'-'+String(lastDay).padStart(2,'0');
+    }
+  }
 }
 
 function sTab(t){
@@ -465,6 +560,8 @@ function sTab(t){
   var showDate=(t==='s_daily'||t==='s_trend');
   document.getElementById('sfgDateFrom').style.display=showDate?'':'none';
   document.getElementById('sfgDateTo').style.display=showDate?'':'none';
+  // When switching to daily/trend tab, sync date range to current month selection
+  if(showDate) syncDateRangeToMonth();
   sRender();
 }
 
@@ -571,14 +668,21 @@ function renderSTrend(f){
   });
   document.getElementById('sDataCount').textContent='趋势: '+d.length+' 条';
   var el=document.getElementById('sp-s_trend');
-  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">所选日期范围内暂无数据（数据可能尚未入库）</div>';return;}
   var g={};d.forEach(function(r){
     if(!g[r.date])g[r.date]={_label:r.date.slice(5),rev:0,tables:0,qh:0,bh:0,n:0};
     g[r.date].rev+=(r.daily_sales_revenue||0);g[r.date].tables+=(r.daily_sales_tables||0);
     g[r.date].qh+=(r.queue_hours||0);g[r.date].bh+=(r.biz_hours||0);g[r.date].n++;
   });
-  var trend=Object.keys(g).sort().map(function(k){var o=g[k];return{_label:o._label,avgRev:o.n?o.rev/o.n:0,avgTables:o.n?o.tables/o.n:0,queuePct:o.bh?o.qh/o.bh:0,totalRev:o.rev};});
-  el.innerHTML='<div class="g2">'
+  // Build complete date range from filter dates
+  var allDates=Object.keys(g).sort();
+  var startD=f.dateFrom||allDates[0], endD=f.dateTo||allDates[allDates.length-1];
+  var fullDates=[];
+  (function(){var cur=new Date(startD+'T00:00:00');var end=new Date(endD+'T00:00:00');while(cur<=end){var ds=cur.toISOString().slice(0,10);fullDates.push(ds);cur.setDate(cur.getDate()+1);}})();
+  var trend=fullDates.map(function(ds){var o=g[ds];if(o)return{_label:ds.slice(5),avgRev:o.n?o.rev/o.n:0,avgTables:o.n?o.tables/o.n:0,queuePct:o.bh?o.qh/o.bh:0,totalRev:o.rev,_hasData:true};return{_label:ds.slice(5),avgRev:null,avgTables:null,queuePct:null,totalRev:null,_hasData:false};});
+  var missingDates=fullDates.filter(function(ds){return !g[ds];});
+  var dataTip=missingDates.length>0?'<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">⚠ 所选范围 '+fullDates.length+' 天中，'+allDates.length+' 天有数据，'+missingDates.length+' 天暂无数据（'+missingDates.map(function(d){return d.slice(5);}).join(', ')+'）</div>':'';
+  el.innerHTML=dataTip+'<div class="g2">'
     +'<div class="card"><h3>日均单店销售桌数趋势</h3><div id="st1"></div></div>'
     +'<div class="card"><h3>日均单店销售净额趋势</h3><div id="st2"></div></div></div>'
     +'<div class="g2">'
