@@ -146,6 +146,7 @@ tr:hover td{background:#fef5f5}
       </div>
       <div class="filters" id="hpSumFilters">
         <div class="fg"><label>日期</label><select id="hpsfDate" onchange="hpSumRender()"></select></div>
+        <div class="fg"><label>城市</label><select id="hpsfCity" onchange="hpSumRender()"><option>全部</option></select></div>
         <div class="finfo" id="hpSumCount"></div>
       </div>
       <div id="sp-hps_queue"></div>
@@ -678,7 +679,7 @@ function renderSTrend(f){
   var allDates=Object.keys(g).sort();
   var startD=f.dateFrom||allDates[0], endD=f.dateTo||allDates[allDates.length-1];
   var fullDates=[];
-  (function(){var cur=new Date(startD+'T00:00:00');var end=new Date(endD+'T00:00:00');while(cur<=end){var ds=cur.toISOString().slice(0,10);fullDates.push(ds);cur.setDate(cur.getDate()+1);}})();
+  (function(){var cur=new Date(startD+'T00:00:00');var end=new Date(endD+'T00:00:00');while(cur<=end){var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');fullDates.push(ds);cur.setDate(cur.getDate()+1);}})();
   var trend=fullDates.map(function(ds){var o=g[ds];if(o)return{_label:ds.slice(5),avgRev:o.n?o.rev/o.n:0,avgTables:o.n?o.tables/o.n:0,queuePct:o.bh?o.qh/o.bh:0,totalRev:o.rev,_hasData:true};return{_label:ds.slice(5),avgRev:null,avgTables:null,queuePct:null,totalRev:null,_hasData:false};});
   var missingDates=fullDates.filter(function(ds){return !g[ds];});
   var dataTip=missingDates.length>0?'<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">⚠ 所选范围 '+fullDates.length+' 天中，'+allDates.length+' 天有数据，'+missingDates.length+' 天暂无数据（'+missingDates.map(function(d){return d.slice(5);}).join(', ')+'）</div>':'';
@@ -741,6 +742,11 @@ function initHpSumFilters(){
   sel.innerHTML='<option>全部</option>';
   dates.forEach(function(d){sel.innerHTML+='<option>'+d+'</option>';});
   if(dates.length)sel.value=dates[dates.length-1];
+  // Populate city filter from hpCityData
+  var cities=[...new Set(hpCityData.map(function(d){return d.city;}).filter(Boolean))].sort();
+  var selC=document.getElementById('hpsfCity');
+  selC.innerHTML='<option>全部</option>';
+  cities.forEach(function(c){selC.innerHTML+='<option>'+c+'</option>';});
 }
 
 function hpSumTab(t){
@@ -753,42 +759,50 @@ function hpSumTab(t){
 
 function hpSumRender(){
   var fDate=document.getElementById('hpsfDate').value;
-  if(curHpSumTab==='hps_queue') renderHpSumQueue(fDate);
-  else if(curHpSumTab==='hps_rate') renderHpSumRate(fDate);
-  else renderHpSumExpand(fDate);
+  var fCity=document.getElementById('hpsfCity').value;
+  if(curHpSumTab==='hps_queue') renderHpSumQueue(fDate,fCity);
+  else if(curHpSumTab==='hps_rate') renderHpSumRate(fDate,fCity);
+  else renderHpSumExpand(fDate,fCity);
 }
 
-function renderHpSumQueue(fDate){
-  var d=hpBrandData.filter(function(r){return fDate==='全部'||r.date===fDate;});
-  document.getElementById('hpSumCount').textContent=d.length+' 条';
+function renderHpSumQueue(fDate,fCity){
+  // Use city-level data when a city is selected, brand-level when "全部"
+  var d;
+  if(fCity && fCity!=='全部'){
+    d=hpCityData.filter(function(r){return (fDate==='全部'||r.date===fDate)&&r.city===fCity;});
+  } else {
+    d=hpBrandData.filter(function(r){return fDate==='全部'||r.date===fDate;});
+  }
+  var cityLabel=fCity&&fCity!=='全部'?' ('+fCity+')':'';
+  document.getElementById('hpSumCount').textContent=d.length+' 条'+cityLabel;
   var el=document.getElementById('sp-hps_queue');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-  
+
   // Aggregate by brand
   var bg={};d.forEach(function(r){
     if(!bg[r.brand])bg[r.brand]={brand:r.brand,total_queue:0,total_stores:0,stores_with_queue:0,days:0};
-    bg[r.brand].total_queue+=r.total_queue||0;
-    bg[r.brand].total_stores+=r.total_stores||0;
-    bg[r.brand].stores_with_queue+=r.stores_with_queue||0;
+    bg[r.brand].total_queue+=(r.total_queue||0);
+    bg[r.brand].total_stores+=(r.total_stores||r.store_count||0);
+    bg[r.brand].stores_with_queue+=(r.stores_with_queue||r.queue_stores||0);
     bg[r.brand].days++;
   });
   var brands=Object.values(bg).sort(function(a,b){return b.total_queue-a.total_queue;});
-  
+
   el.innerHTML='<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">品牌数</div><div class="kv">'+brands.length+'</div></div>'
-    +'<div class="kpi"><div class="kl">总排队号数</div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_queue;},0))+'</div></div>'
-    +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_stores;},0)/Math.max(brands[0]?brands[0].days:1,1))+'</div><div class="ks">日均</div></div>'
+    +'<div class="kpi"><div class="kl">总排队号数'+cityLabel+'</div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_queue;},0))+'</div></div>'
+    +'<div class="kpi"><div class="kl">总门店数'+cityLabel+'</div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_stores;},0)/Math.max(brands[0]?brands[0].days:1,1))+'</div><div class="ks">日均</div></div>'
     +'</div>'
-    +'<div class="g2"><div class="card"><h3>品牌排队号数对比</h3><div id="hpq1"></div></div>'
-    +'<div class="card"><h3>品牌门店数对比</h3><div id="hpq2"></div></div></div>'
-    +'<div class="card"><h3>品牌排队汇总明细</h3><div class="scroll-table"><table><thead><tr>'
+    +'<div class="g2"><div class="card"><h3>品牌排队号数对比'+cityLabel+'</h3><div id="hpq1"></div></div>'
+    +'<div class="card"><h3>品牌门店数对比'+cityLabel+'</h3><div id="hpq2"></div></div></div>'
+    +'<div class="card"><h3>品牌排队汇总明细'+cityLabel+'</h3><div class="scroll-table"><table><thead><tr>'
     +'<th>品牌</th><th>数据天数</th><th>总排队号数</th><th>日均门店数</th><th>日均排队门店</th><th>日均排队号数</th>'
     +'</tr></thead><tbody id="hpqTbl"></tbody></table></div></div>';
-  
+
   drawBarH(document.getElementById('hpq1'),brands,'total_queue','brand',fmtInt);
   var storeView=brands.map(function(b){return{brand:b.brand,avg_stores:Math.round(b.total_stores/b.days)};});
   drawBarH(document.getElementById('hpq2'),storeView,'avg_stores','brand',fmtInt);
-  
+
   var tbody=document.getElementById('hpqTbl');
   brands.forEach(function(r){
     tbody.innerHTML+='<tr><td style="font-weight:600;color:'+(BRAND_COLORS[r.brand]||'#333')+'">'+r.brand+'</td>'
@@ -799,54 +813,87 @@ function renderHpSumQueue(fDate){
   });
 }
 
-function renderHpSumRate(fDate){
-  var d=hpBrandData.filter(function(r){return fDate==='全部'||r.date===fDate;});
+function renderHpSumRate(fDate,fCity){
+  var cityLabel=fCity&&fCity!=='全部'?' ('+fCity+')':'';
   var el=document.getElementById('sp-hps_rate');
-  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-  
-  // Trend by date per brand
-  var dates=[...new Set(d.map(function(r){return r.date;}))].sort();
-  if(fDate!=='全部'){
-    // Single date view: show queue_store_pct bar chart
-    var items=d.map(function(r){return{brand:r.brand,pct:r.queue_store_pct||0};}).sort(function(a,b){return b.pct-a.pct;});
-    el.innerHTML='<div class="card"><h3>排队门店率对比 ('+fDate+')</h3><div id="hpr1"></div></div>'
-      +'<div class="card"><h3>排队门店率明细</h3><div class="scroll-table"><table><thead><tr>'
-      +'<th>品牌</th><th>总门店</th><th>排队门店</th><th>排队门店率</th><th>总排队号</th><th>店均排队</th>'
-      +'</tr></thead><tbody id="hprTbl"></tbody></table></div></div>';
-    var pctItems=items.map(function(r){return{brand:r.brand,val:+(r.pct*100).toFixed(1)};});
-    drawBarH(document.getElementById('hpr1'),pctItems,'val','brand',function(v){return v+'%';});
-    var tbody=document.getElementById('hprTbl');
-    d.sort(function(a,b){return(b.queue_store_pct||0)-(a.queue_store_pct||0);}).forEach(function(r){
-      tbody.innerHTML+='<tr><td style="font-weight:600">'+r.brand+'</td><td>'+fmtInt(r.total_stores)+'</td>'
-      +'<td>'+fmtInt(r.stores_with_queue)+'</td><td><span class="badge '+(r.queue_store_pct>.5?'bg-g':r.queue_store_pct>.3?'bg-o':'bg-r')+'">'+fmtPct(r.queue_store_pct)+'</span></td>'
-      +'<td>'+fmtInt(r.total_queue)+'</td><td>'+fmtRate(r.avg_queue_per_store)+'</td></tr>';
-    });
-  } else {
-    // Multi-date: show trend lines
-    var byBrand={};d.forEach(function(r){
-      if(!byBrand[r.brand])byBrand[r.brand]=[];
-      byBrand[r.brand].push({date:r.date,pct:r.queue_store_pct||0});
-    });
-    var trendData=dates.map(function(dt){
-      var row={_label:dt.slice(5)};
-      Object.keys(byBrand).forEach(function(b){
-        var found=byBrand[b].find(function(r){return r.date===dt;});
-        row[b]=found?(found.pct*100):null;
+
+  if(fCity && fCity!=='全部'){
+    // City-level: use hpCityData, compute pct manually
+    var cd=hpCityData.filter(function(r){return (fDate==='全部'||r.date===fDate)&&r.city===fCity;});
+    if(!cd.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+    var dates=[...new Set(cd.map(function(r){return r.date;}))].sort();
+    if(fDate!=='全部'){
+      var items=cd.map(function(r){var pct=(r.store_count>0?(r.queue_stores||0)/r.store_count:0);return{brand:r.brand,pct:pct,total_stores:r.store_count,queue_stores:r.queue_stores||0,total_queue:r.total_queue||0};}).sort(function(a,b){return b.pct-a.pct;});
+      el.innerHTML='<div class="card"><h3>排队门店率对比'+cityLabel+' ('+fDate+')</h3><div id="hpr1"></div></div>'
+        +'<div class="card"><h3>排队门店率明细'+cityLabel+'</h3><div class="scroll-table"><table><thead><tr>'
+        +'<th>品牌</th><th>门店数</th><th>排队门店</th><th>排队门店率</th><th>总排队号</th>'
+        +'</tr></thead><tbody id="hprTbl"></tbody></table></div></div>';
+      var pctItems=items.map(function(r){return{brand:r.brand,val:+(r.pct*100).toFixed(1)};});
+      drawBarH(document.getElementById('hpr1'),pctItems,'val','brand',function(v){return v+'%';});
+      var tbody=document.getElementById('hprTbl');
+      items.forEach(function(r){
+        tbody.innerHTML+='<tr><td style="font-weight:600">'+r.brand+'</td><td>'+fmtInt(r.total_stores)+'</td>'
+        +'<td>'+fmtInt(r.queue_stores)+'</td><td><span class="badge '+(r.pct>.5?'bg-g':r.pct>.3?'bg-o':'bg-r')+'">'+fmtPct(r.pct)+'</span></td>'
+        +'<td>'+fmtInt(r.total_queue)+'</td></tr>';
       });
-      return row;
-    });
-    var bNames=Object.keys(byBrand);
-    var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
-    el.innerHTML='<div class="card"><h3>各品牌排队门店率趋势</h3><div id="hpr1"></div></div>';
-    drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';}});
+    } else {
+      var byBrand={};cd.forEach(function(r){
+        if(!byBrand[r.brand])byBrand[r.brand]=[];
+        var pct=(r.store_count>0?(r.queue_stores||0)/r.store_count:0);
+        byBrand[r.brand].push({date:r.date,pct:pct});
+      });
+      var trendData=dates.map(function(dt){
+        var row={_label:dt.slice(5)};
+        Object.keys(byBrand).forEach(function(b){var found=byBrand[b].find(function(r){return r.date===dt;});row[b]=found?(found.pct*100):null;});
+        return row;
+      });
+      var bNames=Object.keys(byBrand);var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
+      el.innerHTML='<div class="card"><h3>各品牌排队门店率趋势'+cityLabel+'</h3><div id="hpr1"></div></div>';
+      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';}});
+    }
+  } else {
+    // National level: use hpBrandData as before
+    var d=hpBrandData.filter(function(r){return fDate==='全部'||r.date===fDate;});
+    if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+    var dates=[...new Set(d.map(function(r){return r.date;}))].sort();
+    if(fDate!=='全部'){
+      var items=d.map(function(r){return{brand:r.brand,pct:r.queue_store_pct||0};}).sort(function(a,b){return b.pct-a.pct;});
+      el.innerHTML='<div class="card"><h3>排队门店率对比 ('+fDate+')</h3><div id="hpr1"></div></div>'
+        +'<div class="card"><h3>排队门店率明细</h3><div class="scroll-table"><table><thead><tr>'
+        +'<th>品牌</th><th>总门店</th><th>排队门店</th><th>排队门店率</th><th>总排队号</th><th>店均排队</th>'
+        +'</tr></thead><tbody id="hprTbl"></tbody></table></div></div>';
+      var pctItems=items.map(function(r){return{brand:r.brand,val:+(r.pct*100).toFixed(1)};});
+      drawBarH(document.getElementById('hpr1'),pctItems,'val','brand',function(v){return v+'%';});
+      var tbody=document.getElementById('hprTbl');
+      d.sort(function(a,b){return(b.queue_store_pct||0)-(a.queue_store_pct||0);}).forEach(function(r){
+        tbody.innerHTML+='<tr><td style="font-weight:600">'+r.brand+'</td><td>'+fmtInt(r.total_stores)+'</td>'
+        +'<td>'+fmtInt(r.stores_with_queue)+'</td><td><span class="badge '+(r.queue_store_pct>.5?'bg-g':r.queue_store_pct>.3?'bg-o':'bg-r')+'">'+fmtPct(r.queue_store_pct)+'</span></td>'
+        +'<td>'+fmtInt(r.total_queue)+'</td><td>'+fmtRate(r.avg_queue_per_store)+'</td></tr>';
+      });
+    } else {
+      var byBrand={};d.forEach(function(r){
+        if(!byBrand[r.brand])byBrand[r.brand]=[];
+        byBrand[r.brand].push({date:r.date,pct:r.queue_store_pct||0});
+      });
+      var trendData=dates.map(function(dt){
+        var row={_label:dt.slice(5)};
+        Object.keys(byBrand).forEach(function(b){var found=byBrand[b].find(function(r){return r.date===dt;});row[b]=found?(found.pct*100):null;});
+        return row;
+      });
+      var bNames=Object.keys(byBrand);var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
+      el.innerHTML='<div class="card"><h3>各品牌排队门店率趋势</h3><div id="hpr1"></div></div>';
+      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';}});
+    }
   }
 }
 
-function renderHpSumExpand(fDate){
+function renderHpSumExpand(fDate,fCity){
   var el=document.getElementById('sp-hps_expand');
   var cd=hpCityData;
+  if(fCity && fCity!=='全部') cd=cd.filter(function(r){return r.city===fCity;});
   if(!cd.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-  
+  var cityLabel=fCity&&fCity!=='全部'?' ('+fCity+')':'';
+
   // City coverage matrix by brand
   var dates=[...new Set(cd.map(function(r){return r.date;}))].sort();
   var latest=fDate!=='全部'?fDate:(dates[dates.length-1]||'');
