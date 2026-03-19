@@ -312,14 +312,14 @@ function loadAllData() {
   document.getElementById('srcLabel').innerHTML = '<span class="spin"></span> 加载中...';
   
   Promise.all([
-    // Sushiro data
-    supa('city_monthly_data', '&order=month.desc,city.asc'),
-    supa('store_monthly_data', '&order=month.desc,city.asc'),
-    supa('daily_store_data', '&order=date.desc,city.asc'),
+    // Sushiro data (actual table names)
+    supa('city_monthly', '&order=month.desc,city.asc&limit=5000'),
+    supa('store_monthly', '&order=month.desc,city.asc&limit=5000'),
+    supa('store_daily', '&order=date.desc,city.asc&limit=5000'),
     // Hotpot data
-    supa('hotpot_brand_daily', '&order=date.desc,brand.asc'),
-    supa('hotpot_city_daily', '&order=date.desc,brand.asc,city.asc'),
-    supa('hotpot_store_daily', '&order=date.desc,brand.asc,city.asc')
+    supa('hotpot_brand_daily', '&order=date.desc,brand.asc&limit=5000'),
+    supa('hotpot_city_daily', '&order=date.desc,brand.asc,city.asc&limit=10000'),
+    supa('hotpot_store_daily', '&order=date.desc,brand.asc,city.asc&limit=30000')
   ]).then(function(results) {
     sushiroCityData = Array.isArray(results[0]) ? results[0] : [];
     sushiroStoreData = Array.isArray(results[1]) ? results[1] : [];
