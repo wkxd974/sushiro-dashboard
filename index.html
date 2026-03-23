@@ -431,19 +431,22 @@ function fmtMoney(v){return v==null?'-':'¥'+Math.round(v).toLocaleString();}
 
 function drawBarH(container,items,valKey,labelKey,fmtFn,color){
   if(!items.length){container.innerHTML='<div style="color:#999;text-align:center;padding:30px">暂无数据</div>';return;}
-  var W=560,barH=30,gap=5,pad={l:95,r:65,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
+  // Auto-detect max label length to set left padding
+  var maxLblLen=0;items.forEach(function(d){var l=(d[labelKey]||'').length;if(l>maxLblLen)maxLblLen=l;});
+  var truncLen=Math.min(Math.max(maxLblLen,8),14);
+  var padL=Math.min(Math.max(truncLen*11,95),165);
+  var W=560+(padL-95),barH=30,gap=5,pad={l:padL,r:65,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
   var mx=Math.max.apply(null,items.map(function(d){return d[valKey]||0;}))||1;var cw=W-pad.l-pad.r;
   items.forEach(function(d,i){var y=pad.t+i*(barH+gap);var w=((d[valKey]||0)/mx)*cw;
   var c;
   if(color){
-    // Single color or gradient: darken to lighten based on rank
     var t=items.length>1?i/(items.length-1):0;
-    var opacity=1-t*0.55;// top bar full color, bottom bar 45% opacity
+    var opacity=1-t*0.55;
     c=color;d._barOpacity=opacity;
   } else {
     c=COLORS[i%COLORS.length];d._barOpacity=0.85;
   }
-  var lbl=d[labelKey]||'';if(lbl.length>8)lbl=lbl.substring(0,8)+'…';
+  var lbl=d[labelKey]||'';if(lbl.length>truncLen)lbl=lbl.substring(0,truncLen)+'…';
   svg.appendChild(svgEl('text',{x:pad.l-6,y:y+barH/2+5,'text-anchor':'end','font-size':13,fill:'#333','font-weight':500},lbl));
   var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:3,fill:c,opacity:d._barOpacity||.85,style:'cursor:pointer'});
   rect.addEventListener('mouseenter',function(e){showTip(e,d[labelKey]+': '+(fmtFn?fmtFn(d[valKey]):d[valKey]));});
@@ -1264,6 +1267,15 @@ function renderHpBStores(bid,brand,fDateFrom,fDateTo,fCity){
   });
   var stores=Object.values(sg).sort(function(a,b){return b.max_queue-a.max_queue;});
 
+  // Strip brand prefix for chart display (e.g. "三出山火锅(苏州中心店)" → "苏州中心店")
+  var brandPrefixes=[brand,brand+'火锅',brand+'牛肉火锅',brand+'海鲜火锅'];
+  stores.forEach(function(s){
+    var n=s.store_name||'';
+    brandPrefixes.forEach(function(p){if(n.indexOf(p)===0)n=n.substring(p.length);});
+    n=n.replace(/^\s*[\(（]\s*/,'').replace(/\s*[\)）]\s*$/,'');
+    s.short_name=n||s.store_name;
+  });
+
   el.innerHTML='<div class="card"><h3>门店最大排号排行 TOP30</h3><div id="'+bid+'s1"></div></div>'
     +'<div class="card"><h3>门店排号明细 ('+stores.length+'家)</h3>'
     +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">时间范围：'+rangeLabel+'</div>'
@@ -1274,7 +1286,7 @@ function renderHpBStores(bid,brand,fDateFrom,fDateTo,fCity){
     +'<th>数据天数</th>'
     +'</tr></thead><tbody id="'+bid+'sTbl"></tbody></table></div></div>';
 
-  drawBarH(document.getElementById(bid+'s1'),stores.slice(0,30),'max_queue','store_name',fmtInt,BRAND_COLORS[brand]);
+  drawBarH(document.getElementById(bid+'s1'),stores.slice(0,30),'max_queue','short_name',fmtInt,BRAND_COLORS[brand]);
 
   var tbody=document.getElementById(bid+'sTbl');
   stores.slice(0,200).forEach(function(r){
