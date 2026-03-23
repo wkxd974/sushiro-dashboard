@@ -429,6 +429,16 @@ function fmtPct(v){return v==null?'-':(v*100).toFixed(1)+'%';}
 function fmtRate(v){return v==null?'-':(+v).toFixed(1);}
 function fmtMoney(v){return v==null?'-':'¥'+Math.round(v).toLocaleString();}
 
+// Strip brand prefix from store name: "三出山火锅(苏州中心店)" → "苏州中心店"
+function stripBrandName(name,brand){
+  var n=name||'';if(!brand)return n;
+  // Longest prefix first so "三出山火锅" matches before "三出山"
+  var prefixes=[brand+'牛肉火锅馆',brand+'海鲜火锅馆',brand+'火锅馆',brand+'牛肉火锅',brand+'海鲜火锅',brand+'火锅',brand];
+  for(var i=0;i<prefixes.length;i++){if(n.indexOf(prefixes[i])===0){n=n.substring(prefixes[i].length);break;}}
+  n=n.replace(/^\s*[\(（]\s*/,'').replace(/\s*[\)）]\s*$/,'');
+  return n||name;
+}
+
 function drawBarH(container,items,valKey,labelKey,fmtFn,color){
   if(!items.length){container.innerHTML='<div style="color:#999;text-align:center;padding:30px">暂无数据</div>';return;}
   // Auto-detect max label length to set left padding
@@ -1268,13 +1278,7 @@ function renderHpBStores(bid,brand,fDateFrom,fDateTo,fCity){
   var stores=Object.values(sg).sort(function(a,b){return b.max_queue-a.max_queue;});
 
   // Strip brand prefix for chart display (e.g. "三出山火锅(苏州中心店)" → "苏州中心店")
-  var brandPrefixes=[brand,brand+'火锅',brand+'牛肉火锅',brand+'海鲜火锅'];
-  stores.forEach(function(s){
-    var n=s.store_name||'';
-    brandPrefixes.forEach(function(p){if(n.indexOf(p)===0)n=n.substring(p.length);});
-    n=n.replace(/^\s*[\(（]\s*/,'').replace(/\s*[\)）]\s*$/,'');
-    s.short_name=n||s.store_name;
-  });
+  stores.forEach(function(s){ s.short_name=stripBrandName(s.store_name,brand); });
 
   el.innerHTML='<div class="card"><h3>门店最大排号排行 TOP30</h3><div id="'+bid+'s1"></div></div>'
     +'<div class="card"><h3>门店排号明细 ('+stores.length+'家)</h3>'
@@ -1290,7 +1294,7 @@ function renderHpBStores(bid,brand,fDateFrom,fDateTo,fCity){
 
   var tbody=document.getElementById(bid+'sTbl');
   stores.slice(0,200).forEach(function(r){
-    tbody.innerHTML+='<tr><td style="font-weight:600">'+r.store_name+'</td><td>'+r.city+'</td><td>'+r.district+'</td>'
+    tbody.innerHTML+='<tr><td style="font-weight:600">'+r.short_name+'</td><td>'+r.city+'</td><td>'+r.district+'</td>'
     +'<td>'+fmtInt(r.max_queue)+'</td><td>'+fmtRate(r.total_slots/r.days)+'</td><td>'+r.days+'</td></tr>';
   });
 }
