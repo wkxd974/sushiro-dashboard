@@ -429,14 +429,18 @@ function fmtPct(v){return v==null?'-':(v*100).toFixed(1)+'%';}
 function fmtRate(v){return v==null?'-':(+v).toFixed(1);}
 function fmtMoney(v){return v==null?'-':'¥'+Math.round(v).toLocaleString();}
 
-// Strip brand prefix from store name: "三出山火锅(苏州中心店)" → "苏州中心店"
+// Strip brand prefix from store name: "八合里潮汕鲜牛肉火锅(上海世纪汇店)" → "上海世纪汇店"
+// Logic: if name starts with brand, skip all text until first (, extract content inside ()
 function stripBrandName(name,brand){
-  var n=name||'';if(!brand)return n;
-  // Longest prefix first so "三出山火锅" matches before "三出山"
-  var prefixes=[brand+'牛肉火锅馆',brand+'海鲜火锅馆',brand+'火锅馆',brand+'牛肉火锅',brand+'海鲜火锅',brand+'火锅',brand];
-  for(var i=0;i<prefixes.length;i++){if(n.indexOf(prefixes[i])===0){n=n.substring(prefixes[i].length);break;}}
-  n=n.replace(/^\s*[\(（]\s*/,'').replace(/\s*[\)）]\s*$/,'');
-  return n||name;
+  var n=name||'';if(!brand||n.indexOf(brand)!==0)return n;
+  var rest=n.substring(brand.length);
+  for(var i=0;i<rest.length;i++){
+    if(rest[i]==='('||rest[i]==='（'){
+      var inner=rest.substring(i+1).replace(/[\)）]\s*$/,'');
+      return inner||name;
+    }
+  }
+  return rest||name;
 }
 
 function drawBarH(container,items,valKey,labelKey,fmtFn,color){
