@@ -1262,7 +1262,7 @@ function renderHpSumQueue(fDateFrom,fDateTo,fCity){
   var brands=Object.values(bg).sort(function(a,b){return b.total_queue-a.total_queue;});
 
   var peakNote='<div style="font-size:11px;color:#888;margin:4px 0 8px;padding:4px 8px;background:#f0f7ff;border-radius:4px;border:1px solid #d6e8fa">'
-    +'📋 <b>排号数</b> = 各门店当日在美味不用等平台上的最大排队号之和（统计时段：全天）<br>'
+    +'📋 <b>排号数</b> = 各门店当日在小程序/大众点评上的最大排队号之和（统计时段：全天）<br>'
     +'💡 建议仅关注用餐高峰期（午市11:00-14:00，晚市17:00-21:00）的排号数据，后续版本将支持高峰期筛选</div>';
 
   el.innerHTML=peakNote
@@ -1543,7 +1543,7 @@ function renderHpBQueue(bid,brand,fDateFrom,fDateTo,fCity){
   var cities=Object.values(cg).sort(function(a,b){return b.queue-a.queue;});
 
   el.innerHTML='<div style="font-size:11px;color:#888;margin:0 0 8px;padding:4px 8px;background:#f0f7ff;border-radius:4px;border:1px solid #d6e8fa">'
-    +'📋 <b>排号数</b> = 各门店当日在美味不用等平台上的最大排队号之和（统计时段：全天）</div>'
+    +'📋 <b>排号数</b> = 各门店当日在小程序/大众点评上的最大排队号之和（统计时段：全天）</div>'
     +'<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">总排号数<span class="metric-note">所选时段内累计</span></div><div class="kv">'+fmtInt(totalQ)+'</div></div>'
     +'<div class="kpi"><div class="kl">门店数<span class="metric-note">默认已开业，不确定状态视为已开业</span></div><div class="kv">'+fmtInt(totalS)+'</div></div>'
