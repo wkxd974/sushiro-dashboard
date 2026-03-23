@@ -91,6 +91,13 @@ tr:hover td{background:#fef5f5}
   <div class="nav-divider"></div>
 
   <div class="nav-section">
+    <div class="nav-header">巴奴火锅</div>
+    <div class="nav-item" onclick="navTo('banu')">🥘 巴奴看板</div>
+  </div>
+
+  <div class="nav-divider"></div>
+
+  <div class="nav-section">
     <div class="nav-header">火锅友商</div>
     <div class="nav-item" onclick="navTo('hp_summary')">📊 汇总看板</div>
     <div class="nav-sub">
@@ -137,6 +144,29 @@ tr:hover td{background:#fef5f5}
       <div id="sp-s_daily" class="hidden"></div>
       <div id="sp-s_trend" class="hidden"></div>
       <div id="sp-s_expand" class="hidden"></div>
+    </div>
+
+    <!-- ====== BANU SECTION ====== -->
+    <div id="sec-banu" class="hidden">
+      <div class="tabs" id="banuTabs">
+        <div class="tab active" onclick="bTab('b_city')">城市看板</div>
+        <div class="tab" onclick="bTab('b_store')">门店看板</div>
+        <div class="tab" onclick="bTab('b_daily')">每日明细</div>
+        <div class="tab" onclick="bTab('b_trend')">趋势分析</div>
+        <div class="tab" onclick="bTab('b_expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="banuFilters">
+        <div class="fg"><label>月份</label><select id="bfMonth" onchange="onBMonthChange()"></select></div>
+        <div class="fg"><label>城市</label><select id="bfCity" onchange="bRender()"></select></div>
+        <div class="fg" id="bfgDateFrom" style="display:none"><label>开始日期</label><input type="date" id="bfDateFrom" onchange="onBDateManualChange()"></div>
+        <div class="fg" id="bfgDateTo" style="display:none"><label>结束日期</label><input type="date" id="bfDateTo" onchange="onBDateManualChange()"></div>
+        <div class="finfo" id="bDataCount"></div>
+      </div>
+      <div id="sp-b_city"></div>
+      <div id="sp-b_store" class="hidden"></div>
+      <div id="sp-b_daily" class="hidden"></div>
+      <div id="sp-b_trend" class="hidden"></div>
+      <div id="sp-b_expand" class="hidden"></div>
     </div>
 
     <!-- ====== HOTPOT SUMMARY SECTION ====== -->
@@ -313,8 +343,9 @@ BRANDS.forEach(function(b,i){ BRAND_COLORS[b] = COLORS[i % COLORS.length]; });
 
 // === Data stores ===
 var sushiroCityData=[], sushiroStoreData=[], sushiroDailyData=[];
+var banuCityData=[], banuStoreData=[], banuDailyData=[];
 var hpBrandData=[], hpCityData=[], hpStoreData=[];
-var curSection='sushiro', curSTab='s_city', curHpSumTab='hps_queue';
+var curSection='sushiro', curSTab='s_city', curBTab='b_city', curHpSumTab='hps_queue';
 var curHpBrandTab = {}; // per brand
 BRANDS.forEach(function(b){ curHpBrandTab['hp_'+b] = 'queue'; });
 
@@ -364,6 +395,11 @@ function loadAllData() {
     supa('store_monthly', '&order=month.desc,city.asc'),
     // Large tables: use paginated fetch
     supaAll('store_daily', 'date.desc,city.asc'),
+    // Banu tables
+    supa('banu_city_monthly', '&order=month.desc,city.asc'),
+    supa('banu_store_monthly', '&order=month.desc,city.asc'),
+    supaAll('banu_store_daily', 'date.desc,city.asc'),
+    // Hotpot tables
     supa('hotpot_brand_daily', '&order=date.desc,brand.asc'),
     supaAll('hotpot_city_daily', 'date.desc,brand.asc,city.asc'),
     supaAll('hotpot_store_daily', 'date.desc,brand.asc,city.asc')
@@ -371,11 +407,14 @@ function loadAllData() {
     sushiroCityData = Array.isArray(results[0]) ? results[0] : [];
     sushiroStoreData = Array.isArray(results[1]) ? results[1] : [];
     sushiroDailyData = Array.isArray(results[2]) ? results[2] : [];
-    hpBrandData = Array.isArray(results[3]) ? results[3] : [];
-    hpCityData = Array.isArray(results[4]) ? results[4] : [];
-    hpStoreData = Array.isArray(results[5]) ? results[5] : [];
+    banuCityData = Array.isArray(results[3]) ? results[3] : [];
+    banuStoreData = Array.isArray(results[4]) ? results[4] : [];
+    banuDailyData = Array.isArray(results[5]) ? results[5] : [];
+    hpBrandData = Array.isArray(results[6]) ? results[6] : [];
+    hpCityData = Array.isArray(results[7]) ? results[7] : [];
+    hpStoreData = Array.isArray(results[8]) ? results[8] : [];
 
-    var counts = [sushiroCityData.length, sushiroStoreData.length, sushiroDailyData.length, hpBrandData.length, hpCityData.length, hpStoreData.length];
+    var counts = [sushiroCityData.length, sushiroStoreData.length, sushiroDailyData.length, banuCityData.length, banuStoreData.length, banuDailyData.length, hpBrandData.length, hpCityData.length, hpStoreData.length];
     var total = counts.reduce(function(a,b){return a+b;},0);
     var now = new Date();
     document.getElementById('srcLabel').textContent = '已加载 ' + total + ' 条 | ' + now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
@@ -395,7 +434,7 @@ function navTo(sec) {
   var items = document.querySelectorAll('.nav-item');
   items.forEach(function(el){
     if(el.getAttribute('onclick') && el.getAttribute('onclick').indexOf("'"+sec+"'") > -1) {
-      el.classList.add(sec === 'sushiro' ? 'active' : 'active-blue');
+      el.classList.add(sec === 'sushiro' || sec === 'banu' ? 'active' : 'active-blue');
     }
   });
 
@@ -405,7 +444,7 @@ function navTo(sec) {
   if(secEl) secEl.classList.remove('hidden');
 
   // Update title
-  var titles = {'sushiro':'🍣 寿司郎经营数据看板','hp_summary':'📊 火锅友商汇总看板'};
+  var titles = {'sushiro':'🍣 寿司郎经营数据看板','banu':'🥘 巴奴火锅经营数据看板','hp_summary':'📊 火锅友商汇总看板'};
   BRANDS.forEach(function(b){ titles['hp_'+b] = '🔥 ' + b + ' 数据看板'; });
   document.getElementById('pageTitle').textContent = titles[sec] || sec;
 
@@ -414,6 +453,7 @@ function navTo(sec) {
 
 function renderCurrentSection() {
   if(curSection === 'sushiro') sRender();
+  else if(curSection === 'banu') bRender();
   else if(curSection === 'hp_summary') hpSumRender();
   else hpBRender(curSection);
 }
@@ -824,6 +864,272 @@ function renderSExpand(f){
   matrixHtml+='</tbody></table></div></div>';
 
   // Scale overview per latest month
+  var latest=months[months.length-1]||'';
+  var latestD=d.filter(function(r){return r.month===latest;});
+  var totalS=latestD.reduce(function(s,r){return s+(r.store_count||0);},0);
+
+  el.innerHTML='<div class="kpi-row">'
+    +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+cities.length+'</div><div class="ks">截至 '+latest+'</div></div>'
+    +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+totalS+'</div><div class="ks">'+latest+'</div></div>'
+    +'<div class="kpi"><div class="kl">数据月份</div><div class="kv">'+months.length+'</div></div>'
+    +'</div>' + matrixHtml;
+}
+
+// ============================
+// BANU SECTION
+// ============================
+function bTab(t){
+  curBTab=t;
+  document.querySelectorAll('#banuTabs .tab').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('#banuTabs .tab').forEach(function(el,i){if(['b_city','b_store','b_daily','b_trend','b_expand'][i]===t)el.classList.add('active');});
+  ['b_city','b_store','b_daily','b_trend','b_expand'].forEach(function(s){
+    var e=document.getElementById('sp-'+s);if(e)e.classList.toggle('hidden',s!==t);
+  });
+  // Show/hide date filters for daily/trend tabs
+  var showDates=(t==='b_daily'||t==='b_trend'||t==='b_store');
+  document.getElementById('bfgDateFrom').style.display=showDates?'':'none';
+  document.getElementById('bfgDateTo').style.display=showDates?'':'none';
+  bRender();
+}
+
+function initBanuFilters(){
+  var dates=[...new Set(banuDailyData.map(function(d){return d.date;}).filter(Boolean))].sort();
+  var months=[...new Set(dates.map(function(d){return d.slice(0,7);}))].sort();
+  var cities=[...new Set(banuDailyData.map(function(d){return d.city;}).filter(Boolean))].sort();
+
+  var selM=document.getElementById('bfMonth');
+  selM.innerHTML='<option>全部</option>';
+  months.forEach(function(m){selM.innerHTML+='<option>'+m+'</option>';});
+  if(months.length)selM.value=months[months.length-1];
+
+  var selC=document.getElementById('bfCity');
+  selC.innerHTML='<option>全部</option>';
+  cities.forEach(function(c){selC.innerHTML+='<option>'+c+'</option>';});
+
+  syncBanuDates();
+}
+
+function onBMonthChange(){
+  syncBanuDates();
+  bRender();
+}
+function onBDateManualChange(){ bRender(); }
+
+function syncBanuDates(){
+  var m=document.getElementById('bfMonth').value;
+  var allDates=[...new Set(banuDailyData.map(function(d){return d.date;}).filter(Boolean))].sort();
+  if(m==='全部'){
+    if(allDates.length){document.getElementById('bfDateFrom').value=allDates[0];document.getElementById('bfDateTo').value=allDates[allDates.length-1];}
+  } else {
+    var dates=allDates.filter(function(d){return d.slice(0,7)===m;});
+    if(dates.length){document.getElementById('bfDateFrom').value=dates[0];document.getElementById('bfDateTo').value=dates[dates.length-1];}
+  }
+}
+
+function bRender(){
+  var f={month:document.getElementById('bfMonth').value,city:document.getElementById('bfCity').value,
+    dateFrom:document.getElementById('bfDateFrom').value,dateTo:document.getElementById('bfDateTo').value};
+  if(curBTab==='b_city') renderBCity(f);
+  else if(curBTab==='b_store') renderBStore(f);
+  else if(curBTab==='b_daily') renderBDaily(f);
+  else if(curBTab==='b_trend') renderBTrend(f);
+  else renderBExpand(f);
+}
+
+function renderBCity(f){
+  var dd=banuDailyData.filter(function(r){
+    var mc=f.city==='全部'||r.city===f.city;
+    var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
+    return mc&&md;
+  });
+  var cg={};dd.forEach(function(r){
+    if(!r.city)return;
+    if(!cg[r.city])cg[r.city]={city:r.city,stores:{},dates:{},tables:0,qh:0,bh:0,turnSum:0,turnN:0};
+    cg[r.city].stores[r.store_id||r.store_name]=1;
+    cg[r.city].dates[r.date]=1;
+    cg[r.city].tables+=(r.daily_sales_tables||0);
+    cg[r.city].qh+=(r.queue_hours||0);
+    cg[r.city].bh+=(r.biz_hours||0);
+    cg[r.city].turnSum+=(r.daily_turnover_rate||0);
+    cg[r.city].turnN++;
+  });
+  var d=Object.values(cg).map(function(c){
+    var nStores=Object.keys(c.stores).length;
+    var nDays=Object.keys(c.dates).length;
+    return{
+      month:f.dateFrom&&f.dateTo?(f.dateFrom+'~'+f.dateTo):(f.month||''),
+      city:c.city,store_count:nStores,data_days:nDays,
+      daily_avg_sales_tables:nStores&&nDays?c.tables/nDays/nStores:0,
+      monthly_turnover_rate:c.turnN?c.turnSum/c.turnN:0,
+      queue_hour_pct:c.bh?c.qh/c.bh:0
+    };
+  });
+  document.getElementById('bDataCount').textContent='城市: '+d.length+' 条 ('+dd.length+' 条日数据)';
+  var el=document.getElementById('sp-b_city');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  var n=d.length;
+  var avgTurn=d.reduce(function(s,r){return s+(r.monthly_turnover_rate||0);},0)/n;
+  var avgQueue=d.reduce(function(s,r){return s+(r.queue_hour_pct||0);},0)/n;
+  var dataStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
+
+  var cmMonth=f.month!=='全部'?f.month:(banuCityData.length?banuCityData[0].month:'');
+  var cmData=banuCityData.filter(function(r){return(cmMonth?r.month===cmMonth:true)&&(f.city==='全部'||r.city===f.city);});
+  var totalStoresAuth=cmData.reduce(function(s,r){return s+(r.store_count||0);},0);
+  if(!totalStoresAuth) totalStoresAuth=dataStores;
+
+  el.innerHTML='<div class="kpi-row">'
+    +'<div class="kpi"><div class="kl">平均翻台率<span class="metric-note">ML模型预测</span></div><div class="kv">'+avgTurn.toFixed(2)+'</div></div>'
+    +'<div class="kpi"><div class="kl">平均排队时段占比</div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
+    +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+n+'</div></div>'
+    +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+totalStoresAuth+'</div><div class="ks">有数据门店: '+dataStores+'</div></div>'
+    +'</div>'
+    +'<div class="g2"><div class="card"><h3>城市日均单店销售桌数排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选月份内每日销售桌数的<b>日均值</b>（翻台率×桌数）</div><div id="bc1"></div></div>'
+    +'<div class="card"><h3>城市平均翻台率排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 ML模型预测翻台率</div><div id="bc2"></div></div></div>'
+    +'<div class="card"><h3>城市月滚动汇总明细</h3>'
+    +'<div style="font-size:11px;color:#888;margin:4px 0 8px;padding:4px 8px;background:#f9f9f9;border-radius:4px;border:1px solid #eee">💡 翻台率由 Gradient Boosting 模型（v7）基于排队数据预测</div>'
+    +'<div class="scroll-table"><table><thead><tr>'
+    +'<th>月份</th><th>城市</th><th>门店数</th><th>日均单店销售桌数</th><th>翻台率</th><th>排队时段占比</th>'
+    +'</tr></thead><tbody id="bCityTbl"></tbody></table></div></div>';
+
+  var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,15);
+  drawBarH(document.getElementById('bc1'),top,'daily_avg_sales_tables','city',fmtInt,'#e74c3c');
+  var top2=d.slice().sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);}).slice(0,15);
+  drawBarH(document.getElementById('bc2'),top2,'monthly_turnover_rate','city',function(v){return v==null?'-':(+v).toFixed(2);},'#e67e22');
+  var tbody=document.getElementById('bCityTbl');
+  d.sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);}).forEach(function(r){
+    var tb=r.monthly_turnover_rate>=5?'bg-g':r.monthly_turnover_rate>=3?'bg-o':'bg-r';
+    tbody.innerHTML+='<tr><td>'+r.month+'</td><td style="font-weight:600">'+r.city+'</td><td>'+fmtInt(r.store_count)+'</td>'
+    +'<td>'+fmtInt(r.daily_avg_sales_tables)+'</td>'
+    +'<td><span class="badge '+tb+'">'+fmtRate(r.monthly_turnover_rate)+'</span></td>'
+    +'<td>'+fmtPct(r.queue_hour_pct)+'</td></tr>';
+  });
+}
+
+function renderBStore(f){
+  var dd=banuDailyData.filter(function(r){
+    var mc=f.city==='全部'||r.city===f.city;
+    var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
+    return mc&&md;
+  });
+  var sg={};dd.forEach(function(r){
+    var key=r.store_id||r.store_name;if(!key)return;
+    if(!sg[key])sg[key]={store_name:r.store_name||r.store_id,store_id:r.store_id,city:r.city,tables:0,qh:0,bh:0,turnSum:0,n:0,tbls:r.tables||0};
+    sg[key].tables+=(r.daily_sales_tables||0);
+    sg[key].qh+=(r.queue_hours||0);sg[key].bh+=(r.biz_hours||0);
+    sg[key].turnSum+=(r.daily_turnover_rate||0);sg[key].n++;
+  });
+  var d=Object.values(sg).map(function(s){
+    return{month:f.dateFrom&&f.dateTo?(f.dateFrom+'~'+f.dateTo):(f.month||''),city:s.city,store_name:s.store_name,store_id:s.store_id,tables:s.tbls,
+      daily_avg_sales_tables:s.n?s.tables/s.n:0,
+      queue_hour_pct:s.bh?s.qh/s.bh:0,monthly_turnover_rate:s.n?s.turnSum/s.n:0,data_days:s.n};
+  });
+  document.getElementById('bDataCount').textContent='门店: '+d.length+' 家 ('+dd.length+' 条日数据)';
+  var el=document.getElementById('sp-b_store');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  el.innerHTML='<div class="g2"><div class="card"><h3>门店日均销售桌数 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="bs1"></div></div>'
+    +'<div class="card"><h3>门店翻台率 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 ML模型预测翻台率</div><div id="bs2"></div></div></div>'
+    +'<div class="card"><h3>门店汇总明细</h3><div class="scroll-table"><table><thead><tr>'
+    +'<th>日期范围</th><th>城市</th><th>门店</th><th>桌数</th><th>数据天数</th>'
+    +'<th>日均销售桌数</th><th>排队占比</th><th>翻台率</th>'
+    +'</tr></thead><tbody id="bStoreTbl"></tbody></table></div></div>';
+  var topItems=d.map(function(r){return{store_name:stripBrandName(r.store_name,'巴奴毛肚火锅'),daily_avg_sales_tables:r.daily_avg_sales_tables};});
+  topItems.sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);});
+  drawBarH(document.getElementById('bs1'),topItems.slice(0,20),'daily_avg_sales_tables','store_name',fmtInt,'#e74c3c');
+  var topItems2=d.map(function(r){return{store_name:stripBrandName(r.store_name,'巴奴毛肚火锅'),monthly_turnover_rate:r.monthly_turnover_rate};});
+  topItems2.sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);});
+  drawBarH(document.getElementById('bs2'),topItems2.slice(0,20),'monthly_turnover_rate','store_name',function(v){return v==null?'-':(+v).toFixed(2);},'#e67e22');
+  var tbody=document.getElementById('bStoreTbl');
+  d.sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);}).slice(0,200).forEach(function(r){
+    var tb=r.monthly_turnover_rate>=5?'bg-g':r.monthly_turnover_rate>=3?'bg-o':'bg-r';
+    tbody.innerHTML+='<tr><td>'+r.month+'</td><td>'+r.city+'</td><td style="font-weight:600">'+stripBrandName(r.store_name,'巴奴毛肚火锅')+'</td>'
+    +'<td>'+fmtInt(r.tables)+'</td><td>'+r.data_days+'</td>'
+    +'<td>'+fmtInt(r.daily_avg_sales_tables)+'</td>'
+    +'<td>'+fmtPct(r.queue_hour_pct)+'</td><td><span class="badge '+tb+'">'+fmtRate(r.monthly_turnover_rate)+'</span></td></tr>';
+  });
+}
+
+function renderBDaily(f){
+  var d=banuDailyData.filter(function(r){
+    var mc=f.city==='全部'||r.city===f.city;
+    var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
+    return mc&&md;
+  });
+  document.getElementById('bDataCount').textContent='日明细: '+d.length+' 条';
+  var el=document.getElementById('sp-b_daily');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  el.innerHTML='<div class="card"><h3>门店每日明细 ('+d.length+'条，最多200条)</h3>'
+    +'<div class="scroll-table"><table><thead><tr>'
+    +'<th>日期</th><th>城市</th><th>门店</th><th>桌数</th><th>排队小时</th>'
+    +'<th>最大排号</th><th>总排号</th><th>销售桌数</th><th>翻台率</th>'
+    +'</tr></thead><tbody id="bDailyTbl"></tbody></table></div></div>';
+  var tbody=document.getElementById('bDailyTbl');
+  d.slice(0,200).forEach(function(r){
+    var tb=r.daily_turnover_rate>=5?'bg-g':r.daily_turnover_rate>=3?'bg-o':'bg-r';
+    tbody.innerHTML+='<tr><td>'+r.date+'</td><td>'+r.city+'</td><td style="font-weight:600">'+stripBrandName(r.store_name,'巴奴毛肚火锅')+'</td>'
+    +'<td>'+fmtInt(r.tables)+'</td><td>'+fmtRate(r.queue_hours)+'</td>'
+    +'<td>'+fmtInt(r.max_queue)+'</td><td>'+fmtInt(r.total_queue)+'</td>'
+    +'<td>'+fmtInt(r.daily_sales_tables)+'</td><td><span class="badge '+tb+'">'+fmtRate(r.daily_turnover_rate)+'</span></td></tr>';
+  });
+}
+
+function renderBTrend(f){
+  var d=banuDailyData.filter(function(r){
+    var mc=f.city==='全部'||r.city===f.city;
+    var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
+    return mc&&md;
+  });
+  document.getElementById('bDataCount').textContent='趋势: '+d.length+' 条';
+  var el=document.getElementById('sp-b_trend');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  var g={};d.forEach(function(r){
+    if(!g[r.date])g[r.date]={_label:r.date.slice(5),tables:0,qh:0,bh:0,turnSum:0,n:0,totalQueue:0};
+    g[r.date].tables+=(r.daily_sales_tables||0);
+    g[r.date].qh+=(r.queue_hours||0);g[r.date].bh+=(r.biz_hours||0);
+    g[r.date].turnSum+=(r.daily_turnover_rate||0);g[r.date].n++;
+    g[r.date].totalQueue+=(r.total_queue||0);
+  });
+  var allDates=Object.keys(g).sort();
+  var startD=f.dateFrom||allDates[0], endD=f.dateTo||allDates[allDates.length-1];
+  var fullDates=[];
+  (function(){var cur=new Date(startD+'T00:00:00');var end=new Date(endD+'T00:00:00');while(cur<=end){var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');fullDates.push(ds);cur.setDate(cur.getDate()+1);}})();
+  var trend=fullDates.map(function(ds){var o=g[ds];if(o)return{_label:ds.slice(5),avgTables:o.n?o.tables/o.n:0,avgTurn:o.n?o.turnSum/o.n:0,queuePct:o.bh?(o.qh/o.bh)*100:0,avgQueue:o.n?o.totalQueue/o.n:0,_hasData:true};return{_label:ds.slice(5),avgTables:null,avgTurn:null,queuePct:null,avgQueue:null,_hasData:false};});
+
+  el.innerHTML='<div class="g2">'
+    +'<div class="card"><h3>日均单店销售桌数趋势</h3><div id="bt1"></div></div>'
+    +'<div class="card"><h3>日均翻台率趋势 (ML预测)</h3><div id="bt2"></div></div></div>'
+    +'<div class="g2">'
+    +'<div class="card"><h3>排队时段占比趋势</h3><div id="bt3"></div></div>'
+    +'<div class="card"><h3>日均单店排号数趋势</h3><div id="bt4"></div></div></div>';
+  drawLineChart(document.getElementById('bt1'),trend,['avgTables'],[COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
+  drawLineChart(document.getElementById('bt2'),trend,['avgTurn'],[COLORS[3]],['日均翻台率'],{tipFmt:function(v){return v.toFixed(2);},yFmt:function(v){return v.toFixed(1);}});
+  drawLineChart(document.getElementById('bt3'),trend,['queuePct'],[COLORS[2]],['排队时段占比'],{tipFmt:function(v){return v.toFixed(1)+'%';},yFmt:function(v){return v.toFixed(0)+'%';}});
+  drawLineChart(document.getElementById('bt4'),trend,['avgQueue'],[COLORS[1]],['日均单店排号'],{tipFmt:function(v){return v.toFixed(0)+'号';},yFmt:function(v){return Math.round(v);}});
+}
+
+function renderBExpand(f){
+  var d=banuCityData.filter(function(r){return true;});
+  var el=document.getElementById('sp-b_expand');
+  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+
+  var months=[...new Set(d.map(function(r){return r.month;}))].sort();
+  var cities=[...new Set(d.map(function(r){return r.city;}))].sort();
+
+  var cm={};d.forEach(function(r){cm[r.city+'|'+r.month]=r.store_count||0;});
+
+  var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+cities.length+' 城市 × '+months.length+' 月)</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
+  months.forEach(function(m){matrixHtml+='<th>'+m+'</th>';});
+  matrixHtml+='</tr></thead><tbody>';
+  cities.forEach(function(c){
+    matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
+    months.forEach(function(m){
+      var v=cm[c+'|'+m]||0;
+      var bg=v>0?'#e6f7ff':'#f5f5f5';
+      matrixHtml+='<td style="background:'+bg+';text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';
+    });
+    matrixHtml+='</tr>';
+  });
+  matrixHtml+='</tbody></table></div></div>';
+
   var latest=months[months.length-1]||'';
   var latestD=d.filter(function(r){return r.month===latest;});
   var totalS=latestD.reduce(function(s,r){return s+(r.store_count||0);},0);
@@ -1396,6 +1702,7 @@ function renderHpBExpand(bid,brand,fDateFrom,fDateTo,fCity){
 // === Init ===
 function initAllFilters(){
   initSushiroFilters();
+  initBanuFilters();
   initHpSumFilters();
   BRANDS.forEach(function(b){initHpBrandFilters('hp_'+b);});
 }
