@@ -341,6 +341,10 @@ var COLORS = ['#e74c3c','#3498db','#2ecc71','#e67e22','#9b59b6','#1abc9c','#f39c
 var BRAND_COLORS = {};
 BRANDS.forEach(function(b,i){ BRAND_COLORS[b] = COLORS[i % COLORS.length]; });
 
+// === Banu excluded dates (data quality < 80% hourly coverage) ===
+var BANU_EXCLUDED_DATES = ['2026-03-11'];
+var BANU_EXCLUDED_NOTE = '⚠️ 以下日期因数据采集异常（小时覆盖率<80%）已排除：2026-03-11（仅凌晨0点1小时数据，覆盖率8.3%）';
+
 // === Data stores ===
 var sushiroCityData=[], sushiroStoreData=[], sushiroDailyData=[];
 var banuCityData=[], banuStoreData=[], banuDailyData=[];
@@ -977,7 +981,8 @@ function renderBCity(f){
   var totalStoresAuth=cmData.reduce(function(s,r){return s+(r.store_count||0);},0);
   if(!totalStoresAuth) totalStoresAuth=dataStores;
 
-  el.innerHTML='<div class="kpi-row">'
+  el.innerHTML='<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">'+BANU_EXCLUDED_NOTE+'</div>'
+    +'<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">平均翻台率<span class="metric-note">ML模型预测</span></div><div class="kv">'+avgTurn.toFixed(2)+'</div></div>'
     +'<div class="kpi"><div class="kl">平均排队时段占比</div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+n+'</div></div>'
@@ -1026,7 +1031,8 @@ function renderBStore(f){
   document.getElementById('bDataCount').textContent='门店: '+d.length+' 家 ('+dd.length+' 条日数据)';
   var el=document.getElementById('sp-b_store');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-  el.innerHTML='<div class="g2"><div class="card"><h3>门店日均销售桌数 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="bs1"></div></div>'
+  el.innerHTML='<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">'+BANU_EXCLUDED_NOTE+'</div>'
+    +'<div class="g2"><div class="card"><h3>门店日均销售桌数 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="bs1"></div></div>'
     +'<div class="card"><h3>门店翻台率 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 ML模型预测翻台率</div><div id="bs2"></div></div></div>'
     +'<div class="card"><h3>门店汇总明细</h3><div class="scroll-table"><table><thead><tr>'
     +'<th>日期范围</th><th>城市</th><th>门店</th><th>桌数</th><th>数据天数</th>'
@@ -1057,7 +1063,8 @@ function renderBDaily(f){
   document.getElementById('bDataCount').textContent='日明细: '+d.length+' 条';
   var el=document.getElementById('sp-b_daily');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-  el.innerHTML='<div class="card"><h3>门店每日明细 ('+d.length+'条，最多200条)</h3>'
+  el.innerHTML='<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">'+BANU_EXCLUDED_NOTE+'</div>'
+    +'<div class="card"><h3>门店每日明细 ('+d.length+'条，最多200条)</h3>'
     +'<div class="scroll-table"><table><thead><tr>'
     +'<th>日期</th><th>城市</th><th>门店</th><th>桌数</th><th>排队小时</th>'
     +'<th>最大排号</th><th>总排号</th><th>销售桌数</th><th>翻台率</th>'
@@ -1092,9 +1099,16 @@ function renderBTrend(f){
   var startD=f.dateFrom||allDates[0], endD=f.dateTo||allDates[allDates.length-1];
   var fullDates=[];
   (function(){var cur=new Date(startD+'T00:00:00');var end=new Date(endD+'T00:00:00');while(cur<=end){var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');fullDates.push(ds);cur.setDate(cur.getDate()+1);}})();
-  var trend=fullDates.map(function(ds){var o=g[ds];if(o)return{_label:ds.slice(5),avgTables:o.n?o.tables/o.n:0,avgTurn:o.n?o.turnSum/o.n:0,queuePct:o.bh?(o.qh/o.bh)*100:0,avgQueue:o.n?o.totalQueue/o.n:0,_hasData:true};return{_label:ds.slice(5),avgTables:null,avgTurn:null,queuePct:null,avgQueue:null,_hasData:false};});
+  var trend=fullDates.map(function(ds){
+    var isExcluded=BANU_EXCLUDED_DATES.indexOf(ds)>=0;
+    if(isExcluded) return{_label:ds.slice(5),avgTables:null,avgTurn:null,queuePct:null,avgQueue:null,_hasData:false,_excluded:true};
+    var o=g[ds];if(o)return{_label:ds.slice(5),avgTables:o.n?o.tables/o.n:0,avgTurn:o.n?o.turnSum/o.n:0,queuePct:o.bh?(o.qh/o.bh)*100:0,avgQueue:o.n?o.totalQueue/o.n:0,_hasData:true};
+    return{_label:ds.slice(5),avgTables:null,avgTurn:null,queuePct:null,avgQueue:null,_hasData:false};
+  });
+  var excludedInRange=BANU_EXCLUDED_DATES.filter(function(d){return d>=startD&&d<=endD;});
+  var excludeNote=excludedInRange.length>0?'<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">'+BANU_EXCLUDED_NOTE+'<br>📉 趋势图中对应日期显示为断点</div>':'';
 
-  el.innerHTML='<div class="g2">'
+  el.innerHTML=excludeNote+'<div class="g2">'
     +'<div class="card"><h3>日均单店销售桌数趋势</h3><div id="bt1"></div></div>'
     +'<div class="card"><h3>日均翻台率趋势 (ML预测)</h3><div id="bt2"></div></div></div>'
     +'<div class="g2">'
