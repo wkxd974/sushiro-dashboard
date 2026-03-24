@@ -345,6 +345,9 @@ BRANDS.forEach(function(b,i){ BRAND_COLORS[b] = COLORS[i % COLORS.length]; });
 var BANU_EXCLUDED_DATES = ['2026-03-11'];
 var BANU_EXCLUDED_NOTE = '⚠️ 以下日期因数据采集异常（小时覆盖率<80%）已排除：2026-03-11（仅凌晨0点1小时数据，覆盖率8.3%）';
 
+// === Banu excluded cities (single-store cities, sample size too small) ===
+var BANU_EXCLUDED_CITIES = ['三门峡','临沂','周口','咸阳','唐山','廊坊','开封','惠州','扬州','昆明','汕头','江门','泰州','淄博','淮安','湖州','焦作','盐城','芜湖','菏泽','连云港','镇江','长治','保定','信阳','嘉兴','漯河','濮阳','许昌','鹤壁','商丘','平顶山','洛阳','驻马店'];
+
 // === Data stores ===
 var sushiroCityData=[], sushiroStoreData=[], sushiroDailyData=[];
 var banuCityData=[], banuStoreData=[], banuDailyData=[];
@@ -899,7 +902,7 @@ function bTab(t){
 function initBanuFilters(){
   var dates=[...new Set(banuDailyData.map(function(d){return d.date;}).filter(Boolean))].sort();
   var months=[...new Set(dates.map(function(d){return d.slice(0,7);}))].sort();
-  var cities=[...new Set(banuDailyData.map(function(d){return d.city;}).filter(Boolean))].sort();
+  var cities=[...new Set(banuDailyData.map(function(d){return d.city;}).filter(Boolean))].filter(function(c){return BANU_EXCLUDED_CITIES.indexOf(c)<0;}).sort();
 
   var selM=document.getElementById('bfMonth');
   selM.innerHTML='<option>全部</option>';
@@ -942,6 +945,7 @@ function bRender(){
 
 function renderBCity(f){
   var dd=banuDailyData.filter(function(r){
+    if(BANU_EXCLUDED_CITIES.indexOf(r.city)>=0) return false;
     var mc=f.city==='全部'||r.city===f.city;
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
@@ -977,7 +981,7 @@ function renderBCity(f){
   var dataStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
 
   var cmMonth=f.month!=='全部'?f.month:(banuCityData.length?banuCityData[0].month:'');
-  var cmData=banuCityData.filter(function(r){return(cmMonth?r.month===cmMonth:true)&&(f.city==='全部'||r.city===f.city);});
+  var cmData=banuCityData.filter(function(r){return BANU_EXCLUDED_CITIES.indexOf(r.city)<0&&(cmMonth?r.month===cmMonth:true)&&(f.city==='全部'||r.city===f.city);});
   var totalStoresAuth=cmData.reduce(function(s,r){return s+(r.store_count||0);},0);
   if(!totalStoresAuth) totalStoresAuth=dataStores;
 
@@ -1012,6 +1016,7 @@ function renderBCity(f){
 
 function renderBStore(f){
   var dd=banuDailyData.filter(function(r){
+    if(BANU_EXCLUDED_CITIES.indexOf(r.city)>=0) return false;
     var mc=f.city==='全部'||r.city===f.city;
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
@@ -1056,6 +1061,7 @@ function renderBStore(f){
 
 function renderBDaily(f){
   var d=banuDailyData.filter(function(r){
+    if(BANU_EXCLUDED_CITIES.indexOf(r.city)>=0) return false;
     var mc=f.city==='全部'||r.city===f.city;
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
@@ -1081,6 +1087,7 @@ function renderBDaily(f){
 
 function renderBTrend(f){
   var d=banuDailyData.filter(function(r){
+    if(BANU_EXCLUDED_CITIES.indexOf(r.city)>=0) return false;
     var mc=f.city==='全部'||r.city===f.city;
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
@@ -1121,7 +1128,7 @@ function renderBTrend(f){
 }
 
 function renderBExpand(f){
-  var d=banuCityData.filter(function(r){return true;});
+  var d=banuCityData.filter(function(r){return BANU_EXCLUDED_CITIES.indexOf(r.city)<0;});
   var el=document.getElementById('sp-b_expand');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
 
