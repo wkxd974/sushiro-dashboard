@@ -1000,7 +1000,7 @@ function bTab(t){
   });
   // Show/hide date filters for daily/trend tabs
   var isExpand=(t==='b_expand');
-  var showDates=(t==='b_trend'||t==='b_store');
+  var showDates=(t==='b_city'||t==='b_trend'||t==='b_store');
   document.getElementById('bfgDateFrom').style.display=showDates?'':'none';
   document.getElementById('bfgDateTo').style.display=showDates?'':'none';
   document.getElementById('banuFilters').style.display=isExpand?'none':'';
