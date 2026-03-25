@@ -4,76 +4,78 @@
 <title>餐饮竞品数据看板</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;display:flex}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f5f4f1;color:#2c2c2c;min-height:100vh;display:flex}
 
 /* === Sidebar === */
-.sidebar{width:220px;min-height:100vh;background:linear-gradient(180deg,#1a1a2e 0%,#16213e 100%);color:#fff;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;overflow-y:auto}
-.sidebar .logo{padding:18px 16px 12px;font-size:17px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1);letter-spacing:1px}
-.sidebar .logo span{font-size:11px;opacity:.6;display:block;margin-top:3px;font-weight:400}
+.sidebar{width:220px;min-height:100vh;background:linear-gradient(180deg,#2A2F3A 0%,#1E2330 100%);color:#fff;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;overflow-y:auto}
+.sidebar .logo{padding:20px 16px 14px;font-size:16px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.08);letter-spacing:1.5px}
+.sidebar .logo span{font-size:11px;opacity:.45;display:block;margin-top:4px;font-weight:400;letter-spacing:.5px}
 .nav-section{padding:10px 0}
-.nav-header{padding:6px 16px;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.35);font-weight:600}
-.nav-item{padding:9px 16px 9px 20px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:8px;transition:all .15s}
-.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
-.nav-item.active{background:rgba(231,76,60,.25);color:#e74c3c;font-weight:600;border-right:3px solid #e74c3c}
-.nav-item.active-blue{background:rgba(52,152,219,.2);color:#3498db;font-weight:600;border-right:3px solid #3498db}
+.nav-header{padding:6px 16px;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(170,190,220,.4);font-weight:600}
+.nav-item{padding:9px 16px 9px 20px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:8px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.nav-item.active{background:rgba(140,170,210,.12);color:#A8C4E0;font-weight:600;border-right:2px solid #A8C4E0}
+.nav-item.active-blue{background:rgba(140,170,210,.12);color:#A8C4E0;font-weight:600;border-right:2px solid #A8C4E0}
 .nav-sub{padding-left:0}
-.nav-divider{height:1px;background:rgba(255,255,255,.08);margin:8px 16px}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0}
+.nav-item.active .nav-dot{background:#A8C4E0}
+.nav-divider{height:1px;background:rgba(255,255,255,.06);margin:8px 16px}
 
 /* === Main === */
 .main-wrap{margin-left:220px;flex:1;min-height:100vh}
-.topbar{background:#fff;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.06);position:sticky;top:0;z-index:50}
-.topbar h2{font-size:15px;font-weight:600;color:#333}
+.topbar{background:#fff;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.04);border-bottom:1px solid rgba(0,0,0,.04);position:sticky;top:0;z-index:50}
+.topbar h2{font-size:15px;font-weight:600;color:#2c2c2c}
 .topbar .actions{display:flex;gap:8px;align-items:center}
-.topbar button{padding:5px 14px;border:1px solid #d9d9d9;background:#fff;border-radius:6px;font-size:12px;cursor:pointer;color:#555}
-.topbar button:hover{border-color:#e74c3c;color:#e74c3c}
-.content{padding:16px 24px;max-width:1360px;margin:0 auto}
-.tabs{display:flex;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px}
-.tab{flex:1;text-align:center;padding:11px 8px;cursor:pointer;font-size:13px;font-weight:500;color:#888;border-bottom:2.5px solid transparent;user-select:none}
-.tab:hover{color:#e74c3c;background:#fef5f5}
-.tab.active{color:#e74c3c;border-bottom-color:#e74c3c;background:#fef5f5}
-.tab.blue:hover{color:#3498db;background:#f0f7ff}
-.tab.blue.active{color:#3498db;border-bottom-color:#3498db;background:#f0f7ff}
-.filters{background:#fff;border-radius:8px;padding:12px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.topbar button{padding:5px 14px;border:1px solid #ddd;background:#fff;border-radius:6px;font-size:12px;cursor:pointer;color:#666}
+.topbar button:hover{border-color:#999;color:#333}
+.content{padding:20px 24px;max-width:1360px;margin:0 auto}
+.tabs{display:flex;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.04);margin-bottom:14px}
+.tab{flex:1;text-align:center;padding:11px 8px;cursor:pointer;font-size:13px;font-weight:500;color:#999;border-bottom:2.5px solid transparent;user-select:none}
+.tab:hover{color:#555;background:#fafaf8}
+.tab.active{color:#2c2c2c;border-bottom-color:#2c2c2c;background:#fafaf8;font-weight:600}
+.tab.blue:hover{color:#555;background:#fafaf8}
+.tab.blue.active{color:#2c2c2c;border-bottom-color:#2c2c2c;background:#fafaf8;font-weight:600}
+.filters{background:#fff;border-radius:8px;padding:12px 16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.04);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
 .fg{display:flex;flex-direction:column;gap:3px}
-.fg label{font-size:11px;color:#888;font-weight:500}
-.fg select,.fg input[type=date]{padding:6px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px;outline:none;min-width:120px}
-.fg select:focus,.fg input:focus{border-color:#e74c3c}
+.fg label{font-size:11px;color:#8c8c8c;font-weight:500}
+.fg select,.fg input[type=date]{padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px;outline:none;min-width:120px}
+.fg select:focus,.fg input:focus{border-color:#999}
 .finfo{margin-left:auto;font-size:11px;color:#aaa}
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:12px}
-.kpi{background:#fff;border-radius:8px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid #e74c3c}
-.kpi:nth-child(2){border-left-color:#e67e22}
-.kpi:nth-child(3){border-left-color:#3498db}
-.kpi:nth-child(4){border-left-color:#2ecc71}
-.kpi:nth-child(5){border-left-color:#9b59b6}
-.kpi:nth-child(6){border-left-color:#1abc9c}
-.kpi .kl{font-size:11px;color:#999;margin-bottom:4px}
-.kpi .kv{font-size:22px;font-weight:700}
-.kpi .ks{font-size:10px;color:#aaa;margin-top:2px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px}
-.card h3{font-size:14px;font-weight:600;margin-bottom:10px;color:#333}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:14px}
+.kpi{background:#fff;border-radius:8px;padding:16px 18px;box-shadow:0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.04);border-top:2px solid #4E7A99}
+.kpi:nth-child(2){border-top-color:#7B6478}
+.kpi:nth-child(3){border-top-color:#6A967A}
+.kpi:nth-child(4){border-top-color:#A8845C}
+.kpi:nth-child(5){border-top-color:#8B6E99}
+.kpi:nth-child(6){border-top-color:#5FA3A0}
+.kpi .kl{font-size:11px;color:#8c8c8c;margin-bottom:5px;letter-spacing:.3px}
+.kpi .kv{font-size:22px;font-weight:700;color:#2c2c2c}
+.kpi .ks{font-size:10px;color:#aaa;margin-top:3px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.card{background:#fff;border-radius:8px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.04);margin-bottom:14px}
+.card h3{font-size:14px;font-weight:600;margin-bottom:10px;color:#2c2c2c}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:#fafafa;padding:8px 10px;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #f0f0f0;white-space:nowrap}
-td{padding:8px 10px;border-bottom:1px solid #f0f0f0;white-space:nowrap}
-tr:hover td{background:#fef5f5}
+th{background:#f8f7f5;padding:9px 10px;text-align:left;font-weight:600;color:#444;border-bottom:1px solid #eee;white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #f2f1ef;white-space:nowrap;color:#444}
+tr:hover td{background:#faf9f7}
 .badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:500}
 .bg-g{background:#f6ffed;color:#52c41a}.bg-o{background:#fff7e6;color:#fa8c16}.bg-r{background:#fff2f0;color:#f5222d}.bg-b{background:#e6f7ff;color:#1890ff}
 .hidden{display:none!important}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
-.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:#666}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:#777}
 .legend span{display:flex;align-items:center;gap:3px}
-.tooltip{position:absolute;background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;pointer-events:none;z-index:999;white-space:nowrap;display:none}
+.tooltip{position:absolute;background:rgba(30,30,30,.88);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;pointer-events:none;z-index:999;white-space:nowrap;display:none}
 .scroll-table{overflow-x:auto;max-height:500px;overflow-y:auto}
-.scroll-table thead th{position:sticky;top:0;z-index:2;background:#fafafa}
+.scroll-table thead th{position:sticky;top:0;z-index:2;background:#f8f7f5;color:#444}
 .loading{text-align:center;padding:60px;color:#999}
-.loading .spin{display:inline-block;width:24px;height:24px;border:3px solid #eee;border-top-color:#e74c3c;border-radius:50%;animation:sp .8s linear infinite}
+.loading .spin{display:inline-block;width:24px;height:24px;border:3px solid #eee;border-top-color:#999;border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .matrix-cell{display:inline-block;width:18px;height:18px;border-radius:3px;margin:1px;font-size:8px;text-align:center;line-height:18px;color:#fff;cursor:pointer}
 .heatmap-row{display:flex;align-items:center;gap:2px;margin-bottom:2px}
-.heatmap-label{width:60px;font-size:10px;text-align:right;margin-right:4px;color:#666;flex-shrink:0}
+.heatmap-label{width:60px;font-size:10px;text-align:right;margin-right:4px;color:#777;flex-shrink:0}
 .metric-note{display:block;font-size:10px;color:#999;font-weight:400;margin-top:2px;line-height:1.3}
-.period-tag{display:inline-block;background:#f0f7ff;color:#3498db;padding:2px 8px;border-radius:4px;font-size:10px;margin-left:8px}
+.period-tag{display:inline-block;background:#f0f0ec;color:#666;padding:2px 8px;border-radius:4px;font-size:10px;margin-left:8px}
 @media(max-width:900px){.sidebar{width:180px}.main-wrap{margin-left:180px}.g2{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
 @media(max-width:600px){.sidebar{display:none}.main-wrap{margin-left:0}}
 </style>
@@ -82,34 +84,34 @@ tr:hover td{background:#fef5f5}
 
 <!-- Sidebar -->
 <div class="sidebar">
-  <div class="logo">🍽️ 餐饮竞品看板<span>排队·拓展·经营对比</span></div>
+  <div class="logo">餐饮竞品看板<span>排队 · 拓展 · 经营对比</span></div>
 
   <div class="nav-section">
     <div class="nav-header">寿司郎</div>
-    <div class="nav-item active" onclick="navTo('sushiro')">🍣 寿司郎看板</div>
+    <div class="nav-item active" onclick="navTo('sushiro')"><span class="nav-dot"></span>寿司郎看板</div>
   </div>
 
   <div class="nav-divider"></div>
 
   <div class="nav-section">
     <div class="nav-header">巴奴火锅</div>
-    <div class="nav-item" onclick="navTo('banu')">🥘 巴奴看板</div>
+    <div class="nav-item" onclick="navTo('banu')"><span class="nav-dot"></span>巴奴看板</div>
   </div>
 
   <div class="nav-divider"></div>
 
   <div class="nav-section">
     <div class="nav-header">火锅友商</div>
-    <div class="nav-item" onclick="navTo('hp_summary')">📊 汇总看板</div>
+    <div class="nav-item" onclick="navTo('hp_summary')"><span class="nav-dot"></span>汇总看板</div>
     <div class="nav-sub">
-      <div class="nav-item" onclick="navTo('hp_三出山')">🔥 三出山</div>
-      <div class="nav-item" onclick="navTo('hp_潮发')">🔥 潮发</div>
-      <div class="nav-item" onclick="navTo('hp_左庭右院')">🔥 左庭右院</div>
-      <div class="nav-item" onclick="navTo('hp_八合里')">🔥 八合里</div>
-      <div class="nav-item" onclick="navTo('hp_朱富贵')">🔥 朱富贵</div>
-      <div class="nav-item" onclick="navTo('hp_朱光玉')">🔥 朱光玉</div>
-      <div class="nav-item" onclick="navTo('hp_芈重山')">🔥 芈重山</div>
-      <div class="nav-item" onclick="navTo('hp_熊喵来了')">🔥 熊喵来了</div>
+      <div class="nav-item" onclick="navTo('hp_三出山')"><span class="nav-dot"></span>三出山</div>
+      <div class="nav-item" onclick="navTo('hp_潮发')"><span class="nav-dot"></span>潮发</div>
+      <div class="nav-item" onclick="navTo('hp_左庭右院')"><span class="nav-dot"></span>左庭右院</div>
+      <div class="nav-item" onclick="navTo('hp_八合里')"><span class="nav-dot"></span>八合里</div>
+      <div class="nav-item" onclick="navTo('hp_朱富贵')"><span class="nav-dot"></span>朱富贵</div>
+      <div class="nav-item" onclick="navTo('hp_朱光玉')"><span class="nav-dot"></span>朱光玉</div>
+      <div class="nav-item" onclick="navTo('hp_芈重山')"><span class="nav-dot"></span>芈重山</div>
+      <div class="nav-item" onclick="navTo('hp_熊喵来了')"><span class="nav-dot"></span>熊喵来了</div>
     </div>
   </div>
 </div>
@@ -364,6 +366,10 @@ var BRANDS = ["三出山", "八合里", "左庭右院", "朱光玉", "朱富贵"
 var COLORS = ['#C75050','#4A82A8','#5A9E6E','#D0894A','#9070B0','#3E9995','#D4A040','#C46888','#5E9A6E','#7088A0','#B08860','#4A8E8E'];
 var BRAND_COLORS = {};
 BRANDS.forEach(function(b,i){ BRAND_COLORS[b] = COLORS[i % COLORS.length]; });
+// 寿司郎专属莫兰迪色 (靛蓝系)
+var S_COLORS = ['#C47A6C','#7B6478','#6A967A','#A8845C','#8B6E99'];
+// 巴奴专属莫兰迪色 (暖棕系)
+var B_COLORS = ['#A06850','#6B8A6B','#8A7260','#7A85A0'];
 
 // === Banu excluded dates (data quality < 80% hourly coverage) ===
 var BANU_EXCLUDED_DATES = ['2026-03-10'];
@@ -539,13 +545,16 @@ function stripBrandName(name,brand){
   return rest||name;
 }
 
-function drawBarH(container,items,valKey,labelKey,fmtFn,color){
+function drawBarH(container,items,valKey,labelKey,fmtFn,color,opts){
   if(!items.length){container.innerHTML='<div style="color:#999;text-align:center;padding:30px">暂无数据</div>';return;}
+  opts=opts||{};
+  var lblFs=opts.lblFs||19,valFs=opts.valFs||17,barH=opts.barH||44,gap=opts.gap||8;
   // Auto-detect max label length to set left padding
   var maxLblLen=0;items.forEach(function(d){var l=(d[labelKey]||'').length;if(l>maxLblLen)maxLblLen=l;});
   var truncLen=Math.min(Math.max(maxLblLen,8),14);
-  var padL=Math.min(Math.max(truncLen*14,120),210);
-  var W=720+(padL-120),barH=44,gap=8,pad={l:padL,r:90,t:8,b:8};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
+  var charW=Math.round(lblFs*0.75);
+  var padL=Math.min(Math.max(truncLen*charW,120),220);
+  var W=720+(padL-110),pad={l:padL,r:80,t:8,b:8};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
   var mx=Math.max.apply(null,items.map(function(d){return d[valKey]||0;}))||1;var cw=W-pad.l-pad.r;
   items.forEach(function(d,i){var y=pad.t+i*(barH+gap);var w=((d[valKey]||0)/mx)*cw;
   var c;
@@ -557,11 +566,11 @@ function drawBarH(container,items,valKey,labelKey,fmtFn,color){
     c=COLORS[i%COLORS.length];d._barOpacity=0.85;
   }
   var lbl=d[labelKey]||'';if(lbl.length>truncLen)lbl=lbl.substring(0,truncLen)+'…';
-  svg.appendChild(svgEl('text',{x:pad.l-8,y:y+barH/2+6,'text-anchor':'end','font-size':19,fill:'#333','font-weight':500},lbl));
+  svg.appendChild(svgEl('text',{x:pad.l-8,y:y+barH/2+Math.round(lblFs*0.35),'text-anchor':'end','font-size':lblFs,fill:'#444','font-weight':500},lbl));
   var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:4,fill:c,opacity:d._barOpacity||.85,style:'cursor:pointer'});
   rect.addEventListener('mouseenter',function(e){showTip(e,d[labelKey]+': '+(fmtFn?fmtFn(d[valKey]):d[valKey]));});
   rect.addEventListener('mouseleave',hideTip);svg.appendChild(rect);
-  svg.appendChild(svgEl('text',{x:pad.l+w+6,y:y+barH/2+6,'font-size':17,fill:'#555','font-weight':600},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
+  svg.appendChild(svgEl('text',{x:pad.l+w+6,y:y+barH/2+Math.round(valFs*0.35),'font-size':valFs,fill:'#666','font-weight':600},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
   container.innerHTML='';container.appendChild(svg);
 }
 
@@ -603,7 +612,7 @@ function drawGroupedBar(container, brands, vals, labelKey) {
 
 function drawLineChart(container,data,keys,colors,labels,opts){
   opts=opts||{};if(!data.length||!keys.length){container.innerHTML='<div style="color:#999;text-align:center;padding:30px">暂无数据</div>';return;}
-  var W=600,H=240,pad={t:15,r:50,b:35,l:55};var cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;var svg=mkSvg(W,H);
+  var W=opts.W||600,H=opts.H||240,pad={t:15,r:50,b:35,l:55};var cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;var svg=mkSvg(W,H);
   var allV=[];keys.forEach(function(k){data.forEach(function(d){if(d[k]!=null&&!isNaN(d[k]))allV.push(+d[k]);});});
   if(!allV.length){container.innerHTML='';return;}
   var mn=Math.min.apply(null,allV)*.9,mx=opts.yMax!=null?opts.yMax:Math.max.apply(null,allV)*1.1;if(opts.yMin!=null)mn=opts.yMin;if(mn===mx){mn-=1;mx+=1;}
@@ -804,12 +813,13 @@ function renderSCity(f){
     +'<th>月份</th><th>城市</th><th>门店数</th><th>日均单店销售桌数</th><th>日均单店不含税收入</th><th>日均翻台率下限</th><th>排号时段占比<br><span style="font-size:10px;color:#999;font-weight:400">有排号记录的小时数÷营业总小时数</span></th><th>排50号以上小时数占比<br><span style="font-size:10px;color:#999;font-weight:400">排号≥50的小时数÷营业总小时数</span></th>'
     +'</tr></thead><tbody id="sCityTbl"></tbody></table></div></div>';
 
+  var scOpts={lblFs:22,valFs:19,barH:50,gap:10};
   var topTurn=d.slice().sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);});
-  drawBarH(document.getElementById('sc0'),topTurn,'monthly_turnover_rate','city',fmtRate,'#e74c3c');
+  drawBarH(document.getElementById('sc0'),topTurn,'monthly_turnover_rate','city',fmtRate,S_COLORS[0],scOpts);
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);});
-  drawBarH(document.getElementById('sc1'),top,'daily_avg_sales_tables','city',fmtInt,'#e74c3c');
+  drawBarH(document.getElementById('sc1'),top,'daily_avg_sales_tables','city',fmtInt,S_COLORS[0],scOpts);
   var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);});
-  drawBarH(document.getElementById('sc2'),top2,'daily_avg_sales_revenue','city',fmtMoney,'#e74c3c');
+  drawBarH(document.getElementById('sc2'),top2,'daily_avg_sales_revenue','city',fmtMoney,S_COLORS[0],scOpts);
   alignBarHeights(document.getElementById('sp-s_city'));
   var tbody=document.getElementById('sCityTbl');
   d.slice().sort(function(a,b){return(b.store_count||0)-(a.store_count||0);}).forEach(function(r){
@@ -851,11 +861,11 @@ function renderSStore(f){
     +'<th>日均销售桌数</th><th>日均不含税收入</th><th>排号时段占比<br><span style="font-size:10px;color:#999;font-weight:400">排号小时÷营业小时</span></th><th>翻台率下限</th>'
     +'</tr></thead><tbody id="sStoreTbl"></tbody></table></div></div>';
   var topTurn=d.slice().sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);}).slice(0,20);
-  drawBarH(document.getElementById('ss0'),topTurn,'monthly_turnover_rate','store_name',fmtRate,'#e74c3c');
+  drawBarH(document.getElementById('ss0'),topTurn,'monthly_turnover_rate','store_name',fmtRate,S_COLORS[0]);
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,20);
-  drawBarH(document.getElementById('ss1'),top,'daily_avg_sales_tables','store_name',fmtInt,'#e74c3c');
+  drawBarH(document.getElementById('ss1'),top,'daily_avg_sales_tables','store_name',fmtInt,S_COLORS[0]);
   var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);}).slice(0,20);
-  drawBarH(document.getElementById('ss2'),top2,'daily_avg_sales_revenue','store_name',fmtMoney,'#e74c3c');
+  drawBarH(document.getElementById('ss2'),top2,'daily_avg_sales_revenue','store_name',fmtMoney,S_COLORS[0]);
   alignBarHeights(document.getElementById('sp-s_store'));
   // Search box
   var searchDiv=document.getElementById('sStoreSearch');
@@ -921,17 +931,17 @@ function renderSTrend(f){
     +'<div class="card"><h3>排号时段占比趋势</h3><div id="st3"></div></div>'
     +'<div class="card"><h3>日均翻台率下限趋势</h3><div id="st5"></div></div></div>'
     +'<div class="card"><h3>当月累计不含税收入</h3><div id="st4"></div></div>';
-  drawLineChart(document.getElementById('st1'),trend,['avgTables'],[COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
-  drawLineChart(document.getElementById('st2'),trend,['avgRev'],[COLORS[1]],['日均单店不含税收入'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
-  drawLineChart(document.getElementById('st3'),trend,['queuePct'],[COLORS[2]],['排号时段占比'],{tipFmt:function(v){return v.toFixed(1)+'%';},yFmt:function(v){return v.toFixed(0)+'%';}});
-  drawLineChart(document.getElementById('st5'),turnTrendData,['avgTurn'],[COLORS[3]],['日均翻台率下限'],{tipFmt:function(v){return v.toFixed(2);},yFmt:function(v){return v.toFixed(1);}});
+  drawLineChart(document.getElementById('st1'),trend,['avgTables'],[S_COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
+  drawLineChart(document.getElementById('st2'),trend,['avgRev'],[S_COLORS[1]],['日均单店不含税收入'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
+  drawLineChart(document.getElementById('st3'),trend,['queuePct'],[S_COLORS[2]],['排号时段占比'],{tipFmt:function(v){return v.toFixed(1)+'%';},yFmt:function(v){return v.toFixed(0)+'%';}});
+  drawLineChart(document.getElementById('st5'),turnTrendData,['avgTurn'],[S_COLORS[3]],['日均翻台率下限'],{tipFmt:function(v){return v.toFixed(2);},yFmt:function(v){return v.toFixed(1);}});
   // 计算当月累计收入
   var cumTrend=[];var cumSum=0;
   trend.forEach(function(t){
     if(t._hasData&&t.totalRev!=null){cumSum+=t.totalRev;}
     cumTrend.push({_label:t._label,cumRev:t._hasData?cumSum:null,_hasData:t._hasData});
   });
-  drawLineChart(document.getElementById('st4'),cumTrend,['cumRev'],[COLORS[4]||'#e84393'],['累计不含税收入'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
+  drawLineChart(document.getElementById('st4'),cumTrend,['cumRev'],[S_COLORS[4]],['累计不含税收入'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
 }
 
 function renderSExpand(f){
@@ -967,18 +977,18 @@ function renderSExpand(f){
   });
 
   var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+allCities.length+' 城市 × '+allMonths.length+' 月)</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
-  allMonths.forEach(function(m){matrixHtml+='<th>'+m+'</th>';});
+  allMonths.forEach(function(m){matrixHtml+='<th style="text-align:center">'+m+'</th>';});
   matrixHtml+='</tr></thead><tbody>';
   // Total row first
   matrixHtml+='<tr style="background:#fff3e0;font-weight:700"><td>总计</td>';
-  allMonths.forEach(function(m){matrixHtml+='<td style="text-align:center">'+monthTotals[m]+'</td>';});
+  allMonths.forEach(function(m,mi){var arrow='';if(mi>0){var prev=monthTotals[allMonths[mi-1]]||0;if(monthTotals[m]>prev)arrow=' <span style="font-size:10px;color:#52c41a">(↑)</span>';else if(monthTotals[m]<prev)arrow=' <span style="font-size:10px;color:#f5222d">(↓)</span>';}matrixHtml+='<td style="text-align:center">'+monthTotals[m]+arrow+'</td>';});
   matrixHtml+='</tr>';
   sortedCities.forEach(function(c){
     matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
-    allMonths.forEach(function(m){
+    allMonths.forEach(function(m,mi){
       var v=cmCounts[c+'|'+m]||0;
-      var bg=v>0?'#e6f7ff':'#f5f5f5';
-      matrixHtml+='<td style="background:'+bg+';text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';
+      var arrow='';if(mi>0){var pv=cmCounts[c+'|'+allMonths[mi-1]]||0;if(v>pv)arrow=' <span style="font-size:10px;color:#52c41a">(↑)</span>';else if(v<pv)arrow=' <span style="font-size:10px;color:#f5222d">(↓)</span>';}
+      matrixHtml+='<td style="text-align:center;font-weight:'+(v?'600':'400')+'">'+v+arrow+'</td>';
     });
     matrixHtml+='</tr>';
   });
@@ -1117,9 +1127,9 @@ function renderBCity(f){
     +'</tr></thead><tbody id="bCityTbl"></tbody></table></div></div>';
 
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);});
-  drawBarH(document.getElementById('bc1'),top,'daily_avg_sales_tables','city',fmtInt,'#e74c3c');
+  drawBarH(document.getElementById('bc1'),top,'daily_avg_sales_tables','city',fmtInt,B_COLORS[0]);
   var top2=d.slice().sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);});
-  drawBarH(document.getElementById('bc2'),top2,'monthly_turnover_rate','city',function(v){return v==null?'-':(+v).toFixed(2);},'#e67e22');
+  drawBarH(document.getElementById('bc2'),top2,'monthly_turnover_rate','city',function(v){return v==null?'-':(+v).toFixed(2);},B_COLORS[0]);
   alignBarHeights(document.getElementById('sp-b_city'));
   var tbody=document.getElementById('bCityTbl');
   d.slice().sort(function(a,b){return(b.store_count||0)-(a.store_count||0);}).forEach(function(r){
@@ -1164,10 +1174,10 @@ function renderBStore(f){
     +'</tr></thead><tbody id="bStoreTbl"></tbody></table></div></div>';
   var topItems=d.map(function(r){return{store_name:stripBrandName(r.store_name,'巴奴毛肚火锅'),daily_avg_sales_tables:r.daily_avg_sales_tables};});
   topItems.sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);});
-  drawBarH(document.getElementById('bs1'),topItems.slice(0,20),'daily_avg_sales_tables','store_name',fmtInt,'#e74c3c');
+  drawBarH(document.getElementById('bs1'),topItems.slice(0,20),'daily_avg_sales_tables','store_name',fmtInt,B_COLORS[0]);
   var topItems2=d.map(function(r){return{store_name:stripBrandName(r.store_name,'巴奴毛肚火锅'),monthly_turnover_rate:r.monthly_turnover_rate};});
   topItems2.sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);});
-  drawBarH(document.getElementById('bs2'),topItems2.slice(0,20),'monthly_turnover_rate','store_name',function(v){return v==null?'-':(+v).toFixed(2);},'#e67e22');
+  drawBarH(document.getElementById('bs2'),topItems2.slice(0,20),'monthly_turnover_rate','store_name',function(v){return v==null?'-':(+v).toFixed(2);},B_COLORS[0]);
   var searchDiv=document.getElementById('bStoreSearch');
   if(searchDiv)searchDiv.innerHTML='<input type="text" id="bStoreQ" placeholder="搜索门店名称或城市..." style="width:300px;padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px" oninput="filterBStoreTable()">';
   var tbody=document.getElementById('bStoreTbl');
@@ -1219,10 +1229,10 @@ function renderBTrend(f){
     +'<div class="g2">'
     +'<div class="card"><h3>排号时段占比趋势</h3><div id="bt3"></div></div>'
     +'<div class="card"><h3>日均单店排号数趋势</h3><div id="bt4"></div></div></div>';
-  drawLineChart(document.getElementById('bt1'),trend,['avgTables'],[COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
-  drawLineChart(document.getElementById('bt2'),trend,['avgTurn'],[COLORS[3]],['日均翻台率预估'],{tipFmt:function(v){return v.toFixed(2);},yFmt:function(v){return v.toFixed(1);}});
-  drawLineChart(document.getElementById('bt3'),trend,['queuePct'],[COLORS[2]],['排号时段占比'],{tipFmt:function(v){return v.toFixed(1)+'%';},yFmt:function(v){return v.toFixed(0)+'%';}});
-  drawLineChart(document.getElementById('bt4'),trend,['avgQueue'],[COLORS[1]],['日均单店排号'],{tipFmt:function(v){return v.toFixed(0)+'号';},yFmt:function(v){return Math.round(v);}});
+  drawLineChart(document.getElementById('bt1'),trend,['avgTables'],[B_COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
+  drawLineChart(document.getElementById('bt2'),trend,['avgTurn'],[B_COLORS[1]],['日均翻台率预估'],{tipFmt:function(v){return v.toFixed(2);},yFmt:function(v){return v.toFixed(1);}});
+  drawLineChart(document.getElementById('bt3'),trend,['queuePct'],[B_COLORS[2]],['排号时段占比'],{tipFmt:function(v){return v.toFixed(1)+'%';},yFmt:function(v){return v.toFixed(0)+'%';}});
+  drawLineChart(document.getElementById('bt4'),trend,['avgQueue'],[B_COLORS[3]],['日均单店排号'],{tipFmt:function(v){return v.toFixed(0)+'号';},yFmt:function(v){return Math.round(v);}});
 }
 
 function renderBExpand(f){
@@ -1248,7 +1258,7 @@ function renderBExpand(f){
   });
 
   var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+cities.length+' 城市 × '+months.length+' 月)</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
-  months.forEach(function(m){matrixHtml+='<th>'+m+'</th>';});
+  months.forEach(function(m){matrixHtml+='<th style="text-align:center">'+m+'</th>';});
   matrixHtml+='</tr></thead><tbody>';
   // Total row first
   matrixHtml+='<tr style="background:#fff3e0;font-weight:700"><td>总计</td>';
@@ -1258,8 +1268,8 @@ function renderBExpand(f){
     matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
     months.forEach(function(m){
       var v=cm[c+'|'+m]||0;
-      if(m!==latest){matrixHtml+='<td style="background:#f5f5f5;text-align:center;color:#bbb">/</td>';}
-      else{var bg=v>0?'#e6f7ff':'#f5f5f5';matrixHtml+='<td style="background:'+bg+';text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';}
+      if(m!==latest){matrixHtml+='<td style="text-align:center;color:#bbb">/</td>';}
+      else{matrixHtml+='<td style="text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';}
     });
     matrixHtml+='</tr>';
   });
@@ -1525,7 +1535,7 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity,fBrand){
       });
       var bNames=Object.keys(byBrand);var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
       el.innerHTML=rateNote+'<div class="card"><h3>各品牌排号门店占比趋势'+cityLabel+' ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
-      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yFmt:function(v){return Math.round(v)+'%';}});
+      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yFmt:function(v){return Math.round(v)+'%';},H:400,W:900});
     }
   } else {
     // National level: use hpBrandData
@@ -1566,7 +1576,7 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity,fBrand){
       });
       var bNames=Object.keys(byBrand);var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
       el.innerHTML=rateNote+'<div class="card"><h3>各品牌排号门店占比趋势 ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
-      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yFmt:function(v){return Math.round(v)+'%';}});
+      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yFmt:function(v){return Math.round(v)+'%';},H:400,W:900});
     }
   }
 }
@@ -1593,8 +1603,8 @@ function renderHpSumExpand(fDateFrom,fDateTo,fCity,fBrand){
   var brandNames=Object.keys(brandCities).sort();
 
   var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+latest+')</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
-  brandNames.forEach(function(b){matrixHtml+='<th style="color:'+(BRAND_COLORS[b]||'#333')+'">'+b+'</th>';});
-  matrixHtml+='<th>品牌数</th></tr></thead><tbody>';
+  brandNames.forEach(function(b){matrixHtml+='<th style="text-align:center;color:'+(BRAND_COLORS[b]||'#333')+'">'+b+'</th>';});
+  matrixHtml+='<th style="text-align:center">品牌数</th></tr></thead><tbody>';
   // Sort cities by brand count descending
   var cityCounts=allCities.map(function(c){
     var cnt=0;brandNames.forEach(function(b){if(brandCities[b]&&brandCities[b].has(c))cnt++;});
@@ -1645,7 +1655,7 @@ function renderHpSumExpand(fDateFrom,fDateTo,fCity,fBrand){
   // Monthly store count table (instead of line chart)
   var filteredBrands=fBrand&&fBrand!=='全部'?[fBrand]:BRANDS;
   var storeTblHtml='<div class="card"><h3>各品牌月底门店数</h3><div class="scroll-table"><table><thead><tr><th>品牌</th>';
-  allMonths.forEach(function(m){storeTblHtml+='<th>'+m+'</th>';});
+  allMonths.forEach(function(m){storeTblHtml+='<th style="text-align:center">'+m+'</th>';});
   storeTblHtml+='</tr></thead><tbody>';
   filteredBrands.forEach(function(b){
     storeTblHtml+='<tr><td style="font-weight:600;color:'+(BRAND_COLORS[b]||'#333')+'">'+b+'</td>';
@@ -1918,18 +1928,18 @@ function renderHpBExpand(bid,brand,fDateFrom,fDateTo,fCity){
   });
 
   var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+cities.length+' 城市 × '+months.length+' 月)</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
-  months.forEach(function(m){matrixHtml+='<th>'+m+'</th>';});
+  months.forEach(function(m){matrixHtml+='<th style="text-align:center">'+m+'</th>';});
   matrixHtml+='</tr></thead><tbody>';
   // Total row
   matrixHtml+='<tr style="background:#fff3e0;font-weight:700"><td>总计</td>';
-  months.forEach(function(m){matrixHtml+='<td style="text-align:center">'+monthTotals[m]+'</td>';});
+  months.forEach(function(m,mi){var arrow='';if(mi>0){var prev=monthTotals[months[mi-1]]||0;if(monthTotals[m]>prev)arrow=' <span style="font-size:10px;color:#52c41a">(↑)</span>';else if(monthTotals[m]<prev)arrow=' <span style="font-size:10px;color:#f5222d">(↓)</span>';}matrixHtml+='<td style="text-align:center">'+monthTotals[m]+arrow+'</td>';});
   matrixHtml+='</tr>';
   sortedCities.forEach(function(c){
     matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
-    months.forEach(function(m){
+    months.forEach(function(m,mi){
       var v=cm[c+'|'+m]||0;
-      var bg=v>0?'#e6f7ff':'#f5f5f5';
-      matrixHtml+='<td style="background:'+bg+';text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';
+      var arrow='';if(mi>0){var pv=cm[c+'|'+months[mi-1]]||0;if(v>pv)arrow=' <span style="font-size:10px;color:#52c41a">(↑)</span>';else if(v<pv)arrow=' <span style="font-size:10px;color:#f5222d">(↓)</span>';}
+      matrixHtml+='<td style="text-align:center;font-weight:'+(v?'600':'400')+'">'+v+arrow+'</td>';
     });
     matrixHtml+='</tr>';
   });
