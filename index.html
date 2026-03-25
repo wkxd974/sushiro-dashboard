@@ -380,7 +380,7 @@ function supa(table, params) {
 
 // === Paginated fetch for large tables (auto-paginates past 1000-row limit) ===
 function supaAll(table, order) {
-  var PAGE = 1000;
+  var PAGE = 10000;
   function fetchPage(offset) {
     var url = SUPA_URL + '/rest/v1/' + table + '?select=*&order=' + order + '&limit=' + PAGE + '&offset=' + offset;
     return fetch(url, {
@@ -509,8 +509,8 @@ function drawBarH(container,items,valKey,labelKey,fmtFn,color){
   // Auto-detect max label length to set left padding
   var maxLblLen=0;items.forEach(function(d){var l=(d[labelKey]||'').length;if(l>maxLblLen)maxLblLen=l;});
   var truncLen=Math.min(Math.max(maxLblLen,8),14);
-  var padL=Math.min(Math.max(truncLen*11,95),165);
-  var W=560+(padL-95),barH=34,gap=6,pad={l:padL,r:70,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
+  var padL=Math.min(Math.max(truncLen*14,120),210);
+  var W=720+(padL-120),barH=44,gap=8,pad={l:padL,r:90,t:8,b:8};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
   var mx=Math.max.apply(null,items.map(function(d){return d[valKey]||0;}))||1;var cw=W-pad.l-pad.r;
   items.forEach(function(d,i){var y=pad.t+i*(barH+gap);var w=((d[valKey]||0)/mx)*cw;
   var c;
@@ -522,11 +522,11 @@ function drawBarH(container,items,valKey,labelKey,fmtFn,color){
     c=COLORS[i%COLORS.length];d._barOpacity=0.85;
   }
   var lbl=d[labelKey]||'';if(lbl.length>truncLen)lbl=lbl.substring(0,truncLen)+'…';
-  svg.appendChild(svgEl('text',{x:pad.l-6,y:y+barH/2+5,'text-anchor':'end','font-size':15,fill:'#333','font-weight':500},lbl));
-  var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:3,fill:c,opacity:d._barOpacity||.85,style:'cursor:pointer'});
+  svg.appendChild(svgEl('text',{x:pad.l-8,y:y+barH/2+6,'text-anchor':'end','font-size':19,fill:'#333','font-weight':500},lbl));
+  var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:4,fill:c,opacity:d._barOpacity||.85,style:'cursor:pointer'});
   rect.addEventListener('mouseenter',function(e){showTip(e,d[labelKey]+': '+(fmtFn?fmtFn(d[valKey]):d[valKey]));});
   rect.addEventListener('mouseleave',hideTip);svg.appendChild(rect);
-  svg.appendChild(svgEl('text',{x:pad.l+w+5,y:y+barH/2+5,'font-size':14,fill:'#555','font-weight':600},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
+  svg.appendChild(svgEl('text',{x:pad.l+w+6,y:y+barH/2+6,'font-size':17,fill:'#555','font-weight':600},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
   container.innerHTML='';container.appendChild(svg);
 }
 
@@ -758,7 +758,7 @@ function renderSCity(f){
     +'<div class="kpi"><div class="kl">平均翻台率下限</div><div class="kv">'+avgTurn.toFixed(1)+'</div></div>'
     +'<div class="kpi"><div class="kl">平均排号时段占比<span class="metric-note">有排号记录的小时数 ÷ 营业总小时数</span></div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">排50号以上占比<span class="metric-note">排号≥50的小时数 ÷ 营业总小时数</span></div><div class="kv">'+(avgQ50*100).toFixed(1)+'%</div></div>'
-    +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+totalStoresAuth+'</div></div>'
+    +'<div class="kpi"><div class="kl">营业门店数</div><div class="kv">'+totalStoresAuth+'</div></div>'
     +'</div>'
     +'<div class="g3"><div class="card"><h3>城市日均翻台率下限排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 所选月份内日均翻台率下限</div><div id="sc0"></div></div>'
     +'<div class="card"><h3>城市日均单店销售桌数排行（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 日均单店销售桌数（总桌数÷数据天数÷门店数）</div><div id="sc1"></div></div>'
@@ -906,10 +906,25 @@ function renderSExpand(f){
   var allCities=[...new Set(sushiroDailyData.map(function(r){return r.city?normCity(r.city):'';}).filter(Boolean))].sort();
   var cmCounts={};Object.keys(cm).forEach(function(key){cmCounts[key]=Object.keys(cm[key]).length;});
 
+  var latest=allMonths[allMonths.length-1]||'';
+  // Sort cities by latest month store count descending
+  var sortedCities=allCities.slice().sort(function(a,b){
+    var va=cmCounts[a+'|'+latest]||0, vb=cmCounts[b+'|'+latest]||0;
+    return vb-va||a.localeCompare(b);
+  });
+  // Compute monthly totals
+  var monthTotals={};allMonths.forEach(function(m){
+    var t=0;allCities.forEach(function(c){t+=(cmCounts[c+'|'+m]||0);});monthTotals[m]=t;
+  });
+
   var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+allCities.length+' 城市 × '+allMonths.length+' 月)</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
   allMonths.forEach(function(m){matrixHtml+='<th>'+m+'</th>';});
   matrixHtml+='</tr></thead><tbody>';
-  allCities.forEach(function(c){
+  // Total row first
+  matrixHtml+='<tr style="background:#fff3e0;font-weight:700"><td>总计</td>';
+  allMonths.forEach(function(m){matrixHtml+='<td style="text-align:center">'+monthTotals[m]+'</td>';});
+  matrixHtml+='</tr>';
+  sortedCities.forEach(function(c){
     matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
     allMonths.forEach(function(m){
       var v=cmCounts[c+'|'+m]||0;
@@ -920,13 +935,12 @@ function renderSExpand(f){
   });
   matrixHtml+='</tbody></table></div></div>';
 
-  var latest=allMonths[allMonths.length-1]||'';
   var latestCities=allCities.filter(function(c){return cmCounts[c+'|'+latest]>0;});
   var totalS=latestCities.reduce(function(s,c){return s+(cmCounts[c+'|'+latest]||0);},0);
 
   el.innerHTML='<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+latestCities.length+'</div><div class="ks">截至 '+latest+'</div></div>'
-    +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+totalS+'</div><div class="ks">'+latest+'</div></div>'
+    +'<div class="kpi"><div class="kl">营业门店数</div><div class="kv">'+totalS+'</div><div class="ks">'+latest+'</div></div>'
     +'<div class="kpi"><div class="kl">数据月份</div><div class="kv">'+allMonths.length+'</div></div>'
     +'</div>' + matrixHtml;
 }
@@ -1199,7 +1213,7 @@ function renderBExpand(f){
   el.innerHTML='<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">'+BANU_EXCLUDED_NOTE+'</div>'
     +'<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+cities.length+'</div><div class="ks">截至 '+latest+'<br>已筛除 '+BANU_EXCLUDED_CITIES.length+' 个低线城市</div></div>'
-    +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+dataStores+'</div><div class="ks">已筛除闭店/未开业门店<br>及 '+BANU_EXCLUDED_CITIES.length+' 个门店较少的低线城市<br>基础登记: '+totalSAuth+'</div></div>'
+    +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+dataStores+'</div><div class="ks">已筛除闭店/未开业门店<br>及 '+BANU_EXCLUDED_CITIES.length+' 个门店较少的低线城市</div></div>'
     +'<div class="kpi"><div class="kl">数据月份</div><div class="kv">'+months.length+'</div></div>'
     +'</div>' + matrixHtml;
 }
