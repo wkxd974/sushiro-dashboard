@@ -128,7 +128,7 @@ tr:hover td{background:#fef5f5}
       <div class="tabs" id="sushiroTabs">
         <div class="tab active" onclick="sTab('s_city')">城市看板</div>
         <div class="tab" onclick="sTab('s_store')">门店看板</div>
-        <div class="tab" onclick="sTab('s_daily')">每日明细</div>
+
         <div class="tab" onclick="sTab('s_trend')">趋势分析</div>
         <div class="tab" onclick="sTab('s_expand')">拓展概览</div>
       </div>
@@ -141,7 +141,7 @@ tr:hover td{background:#fef5f5}
       </div>
       <div id="sp-s_city"></div>
       <div id="sp-s_store" class="hidden"></div>
-      <div id="sp-s_daily" class="hidden"></div>
+
       <div id="sp-s_trend" class="hidden"></div>
       <div id="sp-s_expand" class="hidden"></div>
     </div>
@@ -601,7 +601,7 @@ function initSushiroFilters(){
 
 // When month dropdown changes: auto-set date range to that month's available dates
 function onMonthChange(){
-  var hasDateTab=(curSTab==='s_city'||curSTab==='s_store'||curSTab==='s_daily'||curSTab==='s_trend');
+  var hasDateTab=(curSTab==='s_city'||curSTab==='s_store'||curSTab==='s_trend');
   if(hasDateTab) syncDateRangeToMonth();
   sRender();
 }
@@ -652,10 +652,10 @@ function syncDateRangeToMonth(){
 
 function sTab(t){
   curSTab=t;
-  var tabs=['s_city','s_store','s_daily','s_trend','s_expand'];
+  var tabs=['s_city','s_store','s_trend','s_expand'];
   document.querySelectorAll('#sushiroTabs .tab').forEach(function(el,i){el.classList.toggle('active',tabs[i]===t);});
   tabs.forEach(function(p){document.getElementById('sp-'+p).classList.toggle('hidden',p!==t);});
-  var showDate=(t==='s_city'||t==='s_store'||t==='s_daily'||t==='s_trend');
+  var showDate=(t==='s_city'||t==='s_store'||t==='s_trend');
   document.getElementById('sfgDateFrom').style.display=showDate?'':'none';
   document.getElementById('sfgDateTo').style.display=showDate?'':'none';
   // When switching tabs, sync date range to current month selection
@@ -670,7 +670,6 @@ function sRender(){
     dateFrom:document.getElementById('sfDateFrom').value,dateTo:document.getElementById('sfDateTo').value};
   if(curSTab==='s_city') renderSCity(f);
   else if(curSTab==='s_store') renderSStore(f);
-  else if(curSTab==='s_daily') renderSDaily(f);
   else if(curSTab==='s_trend') renderSTrend(f);
   else renderSExpand(f);
 }
@@ -721,10 +720,11 @@ function renderSCity(f){
   var avgQ50=d.reduce(function(s,r){return s+(r.queue50_hour_pct||0);},0)/n;
   var dataStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
 
-  // Get authoritative total store count from city_monthly
+  // Get authoritative total store count from city_monthly (dedupe by normalized city)
   var cmMonth=f.month!=='全部'?f.month:(sushiroCityData.length?sushiroCityData[0].month:'');
-  var cmData=sushiroCityData.filter(function(r){return(cmMonth?r.month===cmMonth:true)&&r.city!=='总计'&&(cityMatch(r.city,f.city));});
-  var totalStoresAuth=cmData.reduce(function(s,r){return s+(r.store_count||0);},0);
+  var cmData=sushiroCityData.filter(function(r){return(cmMonth?r.month===cmMonth:true)&&r.city!=='总计'&&normCity(r.city)!=='总计'&&(cityMatch(r.city,f.city));});
+  var cmDedup={};cmData.forEach(function(r){var nc=normCity(r.city);if(!cmDedup[nc])cmDedup[nc]=0;cmDedup[nc]=Math.max(cmDedup[nc],r.store_count||0);});
+  var totalStoresAuth=Object.values(cmDedup).reduce(function(s,v){return s+v;},0);
   if(!totalStoresAuth) totalStoresAuth=dataStores; // fallback
 
   el.innerHTML='<div class="kpi-row">'
@@ -739,7 +739,7 @@ function renderSCity(f){
     +'<div class="card"><h3>城市月滚动汇总明细</h3>'
     +'<div style="font-size:11px;color:#888;margin:4px 0 8px;padding:4px 8px;background:#f9f9f9;border-radius:4px;border:1px solid #eee">⚠️ 预估假设：单桌用餐时长 <b>57.5分钟</b>，桌均用餐人数 <b>2.5人</b></div>'
     +'<div class="scroll-table"><table><thead><tr>'
-    +'<th>月份</th><th>城市</th><th>门店数</th><th>日均单店销售桌数</th><th>日均单店不含税收入</th><th>翻台率下限</th><th>排队时段占比</th><th>排50号以上</th>'
+    +'<th>月份</th><th>城市</th><th>门店数</th><th>日均单店销售桌数</th><th>日均单店不含税收入</th><th>翻台率下限</th><th>排队时段占比<br><span style="font-size:10px;color:#999;font-weight:400">有排号记录的小时数÷营业总小时数</span></th><th>排50号以上<br><span style="font-size:10px;color:#999;font-weight:400">排号≥50的小时数÷营业总小时数</span></th>'
     +'</tr></thead><tbody id="sCityTbl"></tbody></table></div></div>';
 
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,15);
@@ -807,27 +807,6 @@ function filterSStoreTable(){
   rows.forEach(function(tr){var t=(tr.getAttribute('data-search')||'').toLowerCase();tr.style.display=(!q||t.indexOf(q)>=0)?'':'none';});
 }
 
-function renderSDaily(f){
-  var d=sushiroDailyData.filter(function(r){
-    var mc=cityMatch(r.city,f.city);
-    var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
-    return mc&&md;
-  });
-  document.getElementById('sDataCount').textContent='日明细: '+d.length+' 条';
-  var el=document.getElementById('sp-s_daily');
-  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-  el.innerHTML='<div class="card"><h3>门店每日明细 ('+d.length+'条，最多200条)</h3>'
-    +'<div class="scroll-table"><table><thead><tr>'
-    +'<th>日期</th><th>城市</th><th>门店</th><th>排队小时</th><th>营业小时</th>'
-    +'<th>销售桌数</th><th>翻台率下限</th><th>不含税收入</th>'
-    +'</tr></thead><tbody id="sDailyTbl"></tbody></table></div></div>';
-  var tbody=document.getElementById('sDailyTbl');
-  d.slice(0,200).forEach(function(r){
-    tbody.innerHTML+='<tr><td>'+r.date+'</td><td>'+r.city+'</td><td style="font-weight:600">'+(r.store_name||r.store_id)+'</td>'
-    +'<td>'+fmtRate(r.queue_hours)+'</td><td>'+fmtRate(r.biz_hours)+'</td>'
-    +'<td>'+fmtInt(r.daily_sales_tables)+'</td><td>'+fmtRate(r.daily_turnover_rate)+'</td><td>'+fmtMoney(r.daily_sales_revenue)+'</td></tr>';
-  });
-}
 
 function renderSTrend(f){
   var d=sushiroDailyData.filter(function(r){
