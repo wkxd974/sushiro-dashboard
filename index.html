@@ -16,7 +16,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
 .nav-item.active{background:rgba(231,76,60,.25);color:#e74c3c;font-weight:600;border-right:3px solid #e74c3c}
 .nav-item.active-blue{background:rgba(52,152,219,.2);color:#3498db;font-weight:600;border-right:3px solid #3498db}
-.nav-sub{padding-left:12px}
+.nav-sub{padding-left:0}
 .nav-divider{height:1px;background:rgba(255,255,255,.08);margin:8px 16px}
 
 /* === Main === */
@@ -174,7 +174,7 @@ tr:hover td{background:#fef5f5}
     <div id="sec-hp_summary" class="hidden">
       <div class="tabs" id="hpSumTabs">
         <div class="tab blue active" onclick="hpSumTab('hps_queue')">排号对比</div>
-        <div class="tab blue" onclick="hpSumTab('hps_rate')">排号门店率</div>
+        <div class="tab blue" onclick="hpSumTab('hps_rate')">排号趋势</div>
         <div class="tab blue" onclick="hpSumTab('hps_expand')">拓展概览</div>
       </div>
       <div class="filters" id="hpSumFilters">
@@ -1386,7 +1386,7 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity,fBrand){
   var el=document.getElementById('sp-hps_rate');
 
   var rateNote='<div style="font-size:11px;color:#888;margin:0 0 8px;padding:4px 8px;background:#f0f7ff;border-radius:4px;border:1px solid #d6e8fa">'
-    +'📋 <b>排号门店率</b> = 当日有排号记录的门店数 ÷ 该品牌当日总门店数 × 100%<br>'
+    +'📋 <b>排号门店占比</b> = 当日有排号记录的门店数 ÷ 该品牌当日总门店数 × 100%<br>'
     +'含义：反映该品牌当日有多少比例的门店产生了排号</div>';
 
   if(fCity && fCity!=='全部'){
@@ -1397,13 +1397,13 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity,fBrand){
     var isSingleDay=(fDateFrom===fDateTo)||(dates.length===1);
     if(isSingleDay){
       var items=cd.filter(function(r){return r.date===(fDateFrom||dates[0]);}).map(function(r){var pct=(r.store_count>0?(r.queue_stores||0)/r.store_count:0);return{brand:r.brand,pct:pct,total_stores:r.store_count,queue_stores:r.queue_stores||0,total_queue:r.total_queue||0};}).sort(function(a,b){return b.pct-a.pct;});
-      el.innerHTML=rateNote+'<div class="card"><h3>排号门店率对比'+cityLabel+' ('+rangeLabel+')</h3><div id="hpr1"></div></div>'
-        +'<div class="card"><h3>排号门店率明细'+cityLabel+'</h3>'
+      el.innerHTML=rateNote+'<div class="card"><h3>排号门店占比对比'+cityLabel+' ('+rangeLabel+')</h3><div id="hpr1"></div></div>'
+        +'<div class="card"><h3>排号门店占比明细'+cityLabel+'</h3>'
         +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">时间范围：'+rangeLabel+'</div>'
         +'<div class="scroll-table"><table><thead><tr>'
         +'<th>品牌</th><th>门店数</th>'
         +'<th>排号门店<br><span style="font-size:10px;color:#999;font-weight:400">当日有排号记录</span></th>'
-        +'<th>排号门店率<br><span style="font-size:10px;color:#999;font-weight:400">排号门店÷总门店</span></th>'
+        +'<th>排号门店占比<br><span style="font-size:10px;color:#999;font-weight:400">排号门店÷总门店</span></th>'
         +'<th>总排号数</th>'
         +'</tr></thead><tbody id="hprTbl"></tbody></table></div></div>';
       var pctItems=items.map(function(r){return{brand:r.brand,val:+(r.pct*100).toFixed(1)};});
@@ -1426,8 +1426,8 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity,fBrand){
         return row;
       });
       var bNames=Object.keys(byBrand);var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
-      el.innerHTML=rateNote+'<div class="card"><h3>各品牌排号门店率趋势'+cityLabel+' ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
-      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yInt:true});
+      el.innerHTML=rateNote+'<div class="card"><h3>各品牌排号门店占比趋势'+cityLabel+' ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
+      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yFmt:function(v){return Math.round(v)+'%';}});
     }
   } else {
     // National level: use hpBrandData
@@ -1439,13 +1439,13 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity,fBrand){
       var useDate=fDateFrom||dates[0];
       var dayD=d.filter(function(r){return r.date===useDate;});
       var items=dayD.map(function(r){return{brand:r.brand,pct:r.queue_store_pct||0,total_stores:r.total_stores,stores_with_queue:r.stores_with_queue,total_queue:r.total_queue,avg_queue_per_store:r.avg_queue_per_store};}).sort(function(a,b){return b.pct-a.pct;});
-      el.innerHTML=rateNote+'<div class="card"><h3>排号门店率对比 ('+rangeLabel+')</h3><div id="hpr1"></div></div>'
-        +'<div class="card"><h3>排号门店率明细</h3>'
+      el.innerHTML=rateNote+'<div class="card"><h3>排号门店占比对比 ('+rangeLabel+')</h3><div id="hpr1"></div></div>'
+        +'<div class="card"><h3>排号门店占比明细</h3>'
         +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">时间范围：'+rangeLabel+'</div>'
         +'<div class="scroll-table"><table><thead><tr>'
         +'<th>品牌</th><th>门店数</th>'
         +'<th>排号门店<br><span style="font-size:10px;color:#999;font-weight:400">当日有排号记录</span></th>'
-        +'<th>排号门店率<br><span style="font-size:10px;color:#999;font-weight:400">排号门店÷总门店</span></th>'
+        +'<th>排号门店占比<br><span style="font-size:10px;color:#999;font-weight:400">排号门店÷总门店</span></th>'
         +'<th>总排号数</th><th>店均排号<br><span style="font-size:10px;color:#999;font-weight:400">总排号÷排号门店</span></th>'
         +'</tr></thead><tbody id="hprTbl"></tbody></table></div></div>';
       var pctItems=items.map(function(r){return{brand:r.brand,val:+(r.pct*100).toFixed(1)};});
@@ -1467,8 +1467,8 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity,fBrand){
         return row;
       });
       var bNames=Object.keys(byBrand);var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
-      el.innerHTML=rateNote+'<div class="card"><h3>各品牌排号门店率趋势 ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
-      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yInt:true});
+      el.innerHTML=rateNote+'<div class="card"><h3>各品牌排号门店占比趋势 ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
+      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yFmt:function(v){return Math.round(v)+'%';}});
     }
   }
 }
@@ -1497,15 +1497,19 @@ function renderHpSumExpand(fDateFrom,fDateTo,fCity,fBrand){
   var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+latest+')</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
   brandNames.forEach(function(b){matrixHtml+='<th style="color:'+(BRAND_COLORS[b]||'#333')+'">'+b+'</th>';});
   matrixHtml+='<th>品牌数</th></tr></thead><tbody>';
-  allCities.forEach(function(c){
+  // Sort cities by brand count descending
+  var cityCounts=allCities.map(function(c){
+    var cnt=0;brandNames.forEach(function(b){if(brandCities[b]&&brandCities[b].has(c))cnt++;});
+    return{city:c,cnt:cnt};
+  }).sort(function(a,b){return b.cnt-a.cnt||a.city.localeCompare(b.city);});
+  cityCounts.forEach(function(cc){
+    var c=cc.city;
     matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
-    var cnt=0;
     brandNames.forEach(function(b){
       var has=brandCities[b]&&brandCities[b].has(c);
-      if(has)cnt++;
       matrixHtml+='<td style="text-align:center">'+(has?'<span style="color:#52c41a;font-weight:700">✓</span>':'<span style="color:#ddd">—</span>')+'</td>';
     });
-    matrixHtml+='<td style="text-align:center;font-weight:600">'+cnt+'</td></tr>';
+    matrixHtml+='<td style="text-align:center;font-weight:600">'+cc.cnt+'</td></tr>';
   });
   matrixHtml+='</tbody></table></div></div>';
 
@@ -1649,11 +1653,11 @@ function renderHpBQueue(bid,brand,fDateFrom,fDateTo,fCity){
     +'<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">总排号数<span class="metric-note">所选时段内累计</span></div><div class="kv">'+fmtInt(totalQ)+'</div></div>'
     +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+fmtInt(totalS)+'</div></div>'
-    +'<div class="kpi"><div class="kl">排号门店率<span class="metric-note">有排号门店÷总门店</span></div><div class="kv">'+fmtPct(avgPct)+'</div></div>'
+    +'<div class="kpi"><div class="kl">排号门店占比<span class="metric-note">有排号门店÷总门店</span></div><div class="kv">'+fmtPct(avgPct)+'</div></div>'
     +'<div class="kpi"><div class="kl">覆盖城市</div><div class="kv">'+cities.length+'</div></div>'
     +'</div>'
     +(brand==='八合里'?'<div style="font-size:11px;color:#e67e22;margin:0 0 8px;padding:4px 8px;background:#fff7e6;border-radius:4px;border:1px solid #ffe0b2">⚠️ 八合里目前在北京无门店</div>':'')
-    +'<div class="g2"><div class="card"><h3>城市店均排号数排行<span style="font-size:10px;color:#999;margin-left:4px">总排号÷门店数÷天数</span></h3><div id="'+bid+'q1"></div></div>'
+    +'<div class="g2"><div class="card"><h3>城市单店日均排号数排行<span style="font-size:10px;color:#999;margin-left:4px">总排号÷门店数÷天数</span></h3><div id="'+bid+'q1"></div></div>'
     +'<div class="card"><h3>城市门店数</h3><div id="'+bid+'q2"></div></div></div>'
     +'<div class="card"><h3>城市排号明细</h3>'
     +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">时间范围：'+rangeLabel+'</div>'
@@ -1666,7 +1670,8 @@ function renderHpBQueue(bid,brand,fDateFrom,fDateTo,fCity){
     +'</tr></thead><tbody id="'+bid+'qTbl"></tbody></table></div></div>';
 
   drawBarH(document.getElementById(bid+'q1'),cities.slice(0,15),'avg_per_store','city',fmtInt,BRAND_COLORS[brand]);
-  drawBarH(document.getElementById(bid+'q2'),cities.slice(0,15),'stores','city',fmtInt,BRAND_COLORS[brand]);
+  var citiesByStores=cities.slice().sort(function(a,b){return b.stores-a.stores;}).slice(0,15);
+  drawBarH(document.getElementById(bid+'q2'),citiesByStores,'stores','city',fmtInt,BRAND_COLORS[brand]);
   alignBarHeights(document.getElementById('sp-'+bid+'_queue'));
 
   var tbody=document.getElementById(bid+'qTbl');
@@ -1689,32 +1694,36 @@ function renderHpBStores(bid,brand,fDateFrom,fDateTo,fCity){
   // Aggregate by store
   var sg={};d.forEach(function(r){
     var key=r.store_id;
-    if(!sg[key])sg[key]={store_name:r.store_name,city:r.city,district:r.district||'',max_queue:0,total_slots:0,days:0};
-    sg[key].max_queue=Math.max(sg[key].max_queue,r.max_queue||0);
+    if(!sg[key])sg[key]={store_name:r.store_name,city:r.city,district:r.district||'',total_queue:0,total_slots:0,days:0};
+    sg[key].total_queue+=(r.max_queue||0);
     sg[key].total_slots+=(r.queue_slots||0);
     sg[key].days++;
   });
-  var stores=Object.values(sg).sort(function(a,b){return b.max_queue-a.max_queue;});
+  var stores=Object.values(sg);
+  stores.forEach(function(s){s.avg_queue=s.days?Math.round(s.total_queue/s.days):0;});
+  stores.sort(function(a,b){return b.avg_queue-a.avg_queue;});
 
   // Strip brand prefix for chart display (e.g. "三出山火锅(苏州中心店)" → "苏州中心店")
   stores.forEach(function(s){ s.short_name=stripBrandName(s.store_name,brand); });
 
-  el.innerHTML='<div class="card"><h3>门店最大排号排行 TOP30</h3><div id="'+bid+'s1"></div></div>'
+  el.innerHTML='<div class="card"><h3>门店日均排号数排行 TOP30</h3>'
+    +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">日均排号 = 所选时段内该门店每日排号数之和÷数据天数</div>'
+    +'<div id="'+bid+'s1"></div></div>'
     +'<div class="card"><h3>门店排号明细 ('+stores.length+'家)</h3>'
     +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">时间范围：'+rangeLabel+'</div>'
     +'<div class="scroll-table"><table><thead><tr>'
     +'<th>门店</th><th>城市</th><th>区域</th>'
-    +'<th>最大排号<br><span style="font-size:10px;color:#999;font-weight:400">所选时段内峰值</span></th>'
-    +'<th>日均排号时段数<br><span style="font-size:10px;color:#999;font-weight:400">平均每天有排号的小时数</span></th>'
+    +'<th>日均排号数<br><span style="font-size:10px;color:#999;font-weight:400">每日排号数之和÷数据天数</span></th>'
+    +'<th>日均排号小时数<br><span style="font-size:10px;color:#999;font-weight:400">平均每天有排号的小时数</span></th>'
     +'<th>数据天数</th>'
     +'</tr></thead><tbody id="'+bid+'sTbl"></tbody></table></div></div>';
 
-  drawBarH(document.getElementById(bid+'s1'),stores.slice(0,30),'max_queue','short_name',fmtInt,BRAND_COLORS[brand]);
+  drawBarH(document.getElementById(bid+'s1'),stores.slice(0,30),'avg_queue','short_name',fmtInt,BRAND_COLORS[brand]);
 
   var tbody=document.getElementById(bid+'sTbl');
   stores.slice(0,200).forEach(function(r){
     tbody.innerHTML+='<tr><td style="font-weight:600">'+r.short_name+'</td><td>'+r.city+'</td><td>'+r.district+'</td>'
-    +'<td>'+fmtInt(r.max_queue)+'</td><td>'+fmtRate(r.total_slots/r.days)+'</td><td>'+r.days+'</td></tr>';
+    +'<td>'+fmtInt(r.avg_queue)+'</td><td>'+fmtRate(r.total_slots/r.days)+'</td><td>'+r.days+'</td></tr>';
   });
 }
 
@@ -1759,19 +1768,19 @@ function renderHpBHeat(bid,brand,fDateFrom,fDateTo,fCity){
     +'<div class="card"><h3>每日店均排号数趋势</h3>'
     +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">店均排号 = 当日全城排号总数 ÷ 门店数</div>'
     +'<div id="'+bid+'h1"></div></div>'
-    +'<div class="card"><h3>每日店均排号时段数趋势</h3>'
-    +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">店均排号时段 = 当日全城排号时段总数 ÷ 门店数</div>'
+    +'<div class="card"><h3>每日店均排号小时数趋势</h3>'
+    +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">店均排号小时数 = 当日全城排号小时总数 ÷ 门店数</div>'
     +'<div id="'+bid+'h2"></div></div></div>';
 
   if(trend.length>1){
     drawLineChart(document.getElementById(bid+'h1'),trend,['avg_queue'],[BRAND_COLORS[brand]||COLORS[0]],['店均排号数'],{tipFmt:function(v){return v.toFixed(1);},yInt:true});
-    drawLineChart(document.getElementById(bid+'h2'),slotTrend,['avg_slots'],[BRAND_COLORS[brand]||COLORS[1]],['店均排号时段数'],{tipFmt:function(v){return v.toFixed(1);},yInt:true});
+    drawLineChart(document.getElementById(bid+'h2'),slotTrend,['avg_slots'],[BRAND_COLORS[brand]||COLORS[1]],['店均排号小时数'],{tipFmt:function(v){return v.toFixed(1);},yInt:true});
   } else if(trend.length===1){
     // Single day: show as simple stats
     var t=trend[0];
     document.getElementById(bid+'h1').innerHTML='<div style="text-align:center;padding:20px;font-size:16px;font-weight:600">'+t.avg_queue.toFixed(1)+'<div style="font-size:11px;color:#999;font-weight:400">'+t._label+' 店均排号数 ('+t.stores+'家门店)</div></div>';
     var s=slotTrend[0];
-    document.getElementById(bid+'h2').innerHTML='<div style="text-align:center;padding:20px;font-size:16px;font-weight:600">'+s.avg_slots.toFixed(1)+'<div style="font-size:11px;color:#999;font-weight:400">'+s._label+' 店均排号时段数</div></div>';
+    document.getElementById(bid+'h2').innerHTML='<div style="text-align:center;padding:20px;font-size:16px;font-weight:600">'+s.avg_slots.toFixed(1)+'<div style="font-size:11px;color:#999;font-weight:400">'+s._label+' 店均排号小时数</div></div>';
   }
 }
 
