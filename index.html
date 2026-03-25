@@ -994,7 +994,7 @@ function renderBCity(f){
     +'<div class="kpi"><div class="kl">平均翻台率<span class="metric-note">ML模型预测</span></div><div class="kv">'+avgTurn.toFixed(2)+'</div></div>'
     +'<div class="kpi"><div class="kl">平均排队时段占比</div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+n+'</div></div>'
-    +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+totalStoresAuth+'</div><div class="ks">有数据门店: '+dataStores+'</div></div>'
+    +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+dataStores+'</div><div class="ks">已筛除 '+BANU_EXCLUDED_CITIES.length+' 个城市、'+BANU_EXCLUDED_STORES.length+' 家门店<br>基础登记: '+totalStoresAuth+'</div></div>'
     +'</div>'
     +'<div class="g2"><div class="card"><h3>城市日均单店销售桌数排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选月份内每日销售桌数的<b>日均值</b>（翻台率×桌数）</div><div id="bc1"></div></div>'
     +'<div class="card"><h3>城市平均翻台率排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 ML模型预测翻台率</div><div id="bc2"></div></div></div>'
