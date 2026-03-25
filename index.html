@@ -108,6 +108,7 @@ tr:hover td{background:#fef5f5}
       <div class="nav-item" onclick="navTo('hp_朱光玉')">🔥 朱光玉</div>
       <div class="nav-item" onclick="navTo('hp_朱富贵')">🔥 朱富贵</div>
       <div class="nav-item" onclick="navTo('hp_潮发')">🔥 潮发</div>
+      <div class="nav-item" onclick="navTo('hp_熊喵来了')">🔥 熊喵来了</div>
       <div class="nav-item" onclick="navTo('hp_芈重山')">🔥 芈重山</div>
     </div>
   </div>
@@ -311,6 +312,26 @@ tr:hover td{background:#fef5f5}
       <div id="sp-hp_潮发_heat" class="hidden"></div>
       <div id="sp-hp_潮发_expand" class="hidden"></div>
     </div>
+    <!-- ====== 熊喵来了 SECTION ====== -->
+    <div id="sec-hp_熊喵来了" class="hidden">
+      <div class="tabs" id="hp_熊喵来了Tabs">
+        <div class="tab blue active" onclick="hpBTab('hp_熊喵来了','queue')">排号概览</div>
+        <div class="tab blue" onclick="hpBTab('hp_熊喵来了','stores')">门店排行</div>
+        <div class="tab blue" onclick="hpBTab('hp_熊喵来了','heat')">时段热力</div>
+        <div class="tab blue" onclick="hpBTab('hp_熊喵来了','expand')">拓展概览</div>
+      </div>
+      <div class="filters" id="hp_熊喵来了Filters">
+        <div class="fg"><label>月份</label><select id="hp_熊喵来了_fMonth" onchange="onHpBrandMonthChange('hp_熊喵来了')"></select></div>
+        <div class="fg"><label>开始日期</label><input type="date" id="hp_熊喵来了_fDateFrom" onchange="hpBRender('hp_熊喵来了')"></div>
+        <div class="fg"><label>结束日期</label><input type="date" id="hp_熊喵来了_fDateTo" onchange="hpBRender('hp_熊喵来了')"></div>
+        <div class="fg"><label>城市</label><select id="hp_熊喵来了_fCity" onchange="hpBRender('hp_熊喵来了')"></select></div>
+        <div class="finfo" id="hp_熊喵来了Count"></div>
+      </div>
+      <div id="sp-hp_熊喵来了_queue"></div>
+      <div id="sp-hp_熊喵来了_stores" class="hidden"></div>
+      <div id="sp-hp_熊喵来了_heat" class="hidden"></div>
+      <div id="sp-hp_熊喵来了_expand" class="hidden"></div>
+    </div>
     <!-- ====== 芈重山 SECTION ====== -->
     <div id="sec-hp_芈重山" class="hidden">
       <div class="tabs" id="hp_芈重山Tabs">
@@ -339,7 +360,7 @@ tr:hover td{background:#fef5f5}
 // === Config ===
 var SUPA_URL = 'https://wvqvrefqtvjohersxviv.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2cXZyZWZxdHZqb2hlcnN4dml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjM4MzUsImV4cCI6MjA4OTM5OTgzNX0.kt_Xf6vK_Ulhkfb_izEDM9Vd8JXSaPxCK9y8ojiQKNQ';
-var BRANDS = ["三出山", "八合里", "左庭右院", "朱光玉", "朱富贵", "潮发", "芈重山"];
+var BRANDS = ["三出山", "八合里", "左庭右院", "朱光玉", "朱富贵", "潮发", "熊喵来了", "芈重山"];
 var COLORS = ['#e74c3c','#3498db','#2ecc71','#e67e22','#9b59b6','#1abc9c','#f39c12','#e84393','#00b894','#6c5ce7','#fd79a8','#00cec9'];
 var BRAND_COLORS = {};
 BRANDS.forEach(function(b,i){ BRAND_COLORS[b] = COLORS[i % COLORS.length]; });
