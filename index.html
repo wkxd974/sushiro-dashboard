@@ -162,6 +162,7 @@ tr:hover td{background:#fef5f5}
         <div class="fg" id="bfgDateFrom" style="display:none"><label>开始日期</label><input type="date" id="bfDateFrom" onchange="onBDateManualChange()"></div>
         <div class="fg" id="bfgDateTo" style="display:none"><label>结束日期</label><input type="date" id="bfDateTo" onchange="onBDateManualChange()"></div>
         <div class="finfo" id="bDataCount"></div>
+        <div class="finfo" id="bFilterNote" style="font-size:11px;color:#888"></div>
       </div>
       <div id="sp-b_city"></div>
       <div id="sp-b_store" class="hidden"></div>
@@ -749,7 +750,7 @@ function renderSCity(f){
     +'<div class="kpi"><div class="kl">平均翻台率下限</div><div class="kv">'+avgTurn.toFixed(1)+'</div></div>'
     +'<div class="kpi"><div class="kl">平均排号时段占比<span class="metric-note">有排号记录的小时数 ÷ 营业总小时数</span></div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">排50号以上占比<span class="metric-note">排号≥50的小时数 ÷ 营业总小时数</span></div><div class="kv">'+(avgQ50*100).toFixed(1)+'%</div></div>'
-    +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+totalStoresAuth+'</div><div class="ks">已营业门店: '+dataStores+'</div></div>'
+    +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+totalStoresAuth+'</div></div>'
     +'</div>'
     +'<div class="g3"><div class="card"><h3>城市日均翻台率下限排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 所选月份内日均翻台率下限</div><div id="sc0"></div></div>'
     +'<div class="card"><h3>城市日均单店销售桌数排行（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 日均单店销售桌数（总桌数÷数据天数÷门店数）</div><div id="sc1"></div></div>'
@@ -757,14 +758,14 @@ function renderSCity(f){
     +'<div class="card"><h3>城市月滚动汇总明细</h3>'
     +'<div style="font-size:11px;color:#888;margin:4px 0 8px;padding:4px 8px;background:#f9f9f9;border-radius:4px;border:1px solid #eee">⚠️ 预估假设：单桌用餐时长 <b>57.5分钟</b>，桌均用餐人数 <b>2.5人</b></div>'
     +'<div class="scroll-table"><table><thead><tr>'
-    +'<th>月份</th><th>城市</th><th>门店数</th><th>日均单店销售桌数</th><th>日均单店不含税收入</th><th>日均翻台率下限</th><th>排号时段占比<br><span style="font-size:10px;color:#999;font-weight:400">有排号记录的小时数÷营业总小时数</span></th><th>排50号以上<br><span style="font-size:10px;color:#999;font-weight:400">排号≥50的小时数÷营业总小时数</span></th>'
+    +'<th>月份</th><th>城市</th><th>门店数</th><th>日均单店销售桌数</th><th>日均单店不含税收入</th><th>日均翻台率下限</th><th>排号时段占比<br><span style="font-size:10px;color:#999;font-weight:400">有排号记录的小时数÷营业总小时数</span></th><th>排50号以上小时数占比<br><span style="font-size:10px;color:#999;font-weight:400">排号≥50的小时数÷营业总小时数</span></th>'
     +'</tr></thead><tbody id="sCityTbl"></tbody></table></div></div>';
 
-  var topTurn=d.slice().sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);}).slice(0,15);
+  var topTurn=d.slice().sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);});
   drawBarH(document.getElementById('sc0'),topTurn,'monthly_turnover_rate','city',fmtRate,'#e74c3c');
-  var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,15);
+  var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);});
   drawBarH(document.getElementById('sc1'),top,'daily_avg_sales_tables','city',fmtInt,'#e74c3c');
-  var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);}).slice(0,15);
+  var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);});
   drawBarH(document.getElementById('sc2'),top2,'daily_avg_sales_revenue','city',fmtMoney,'#e74c3c');
   alignBarHeights(document.getElementById('sp-s_city'));
   var tbody=document.getElementById('sCityTbl');
@@ -799,16 +800,20 @@ function renderSStore(f){
   document.getElementById('sDataCount').textContent='门店: '+d.length+' 家 ('+dd.length+' 条日数据)';
   var el=document.getElementById('sp-s_store');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-  el.innerHTML='<div class="g2"><div class="card"><h3>门店日均销售桌数 TOP20（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="ss1"></div></div>'
+  el.innerHTML='<div class="g3"><div class="card"><h3>门店日均翻台率下限 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 所选日期范围内日均翻台率下限</div><div id="ss0"></div></div>'
+    +'<div class="card"><h3>门店日均销售桌数 TOP20（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="ss1"></div></div>'
     +'<div class="card"><h3>门店日均不含税收入 TOP20（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="ss2"></div></div></div>'
     +'<div class="card"><h3>门店汇总明细</h3><div id="sStoreSearch" style="margin:8px 0"></div><div class="scroll-table"><table><thead><tr>'
     +'<th>日期范围</th><th>城市</th><th>门店</th><th>数据天数</th>'
     +'<th>日均销售桌数</th><th>日均不含税收入</th><th>排号时段占比<br><span style="font-size:10px;color:#999;font-weight:400">排号小时÷营业小时</span></th><th>翻台率下限</th>'
     +'</tr></thead><tbody id="sStoreTbl"></tbody></table></div></div>';
+  var topTurn=d.slice().sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);}).slice(0,20);
+  drawBarH(document.getElementById('ss0'),topTurn,'monthly_turnover_rate','store_name',fmtRate,'#e74c3c');
   var top=d.slice().sort(function(a,b){return(b.daily_avg_sales_tables||0)-(a.daily_avg_sales_tables||0);}).slice(0,20);
   drawBarH(document.getElementById('ss1'),top,'daily_avg_sales_tables','store_name',fmtInt,'#e74c3c');
   var top2=d.slice().sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);}).slice(0,20);
   drawBarH(document.getElementById('ss2'),top2,'daily_avg_sales_revenue','store_name',fmtMoney,'#e74c3c');
+  alignBarHeights(document.getElementById('sp-s_store'));
   // Search box
   var searchDiv=document.getElementById('sStoreSearch');
   if(searchDiv)searchDiv.innerHTML='<input type="text" id="sStoreQ" placeholder="搜索门店名称或城市..." style="width:300px;padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px" oninput="filterSStoreTable()">';
@@ -1011,6 +1016,8 @@ function renderBCity(f){
     };
   });
   document.getElementById('bDataCount').textContent='城市: '+d.length+' 条 ('+dd.length+' 条日数据)';
+  var noteEl=document.getElementById('bFilterNote');
+  if(noteEl)noteEl.textContent='已筛除闭店/未开业门店及 '+BANU_EXCLUDED_CITIES.length+' 个门店较少的低线城市';
   var el=document.getElementById('sp-b_city');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var n=d.length;
@@ -1030,7 +1037,6 @@ function renderBCity(f){
     +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+n+'</div></div>'
     +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+dataStores+'</div></div>'
     +'</div>'
-    +'<div style="font-size:11px;color:#888;margin:-8px 0 12px;padding:4px 8px">已筛除闭店/未开业门店及 '+BANU_EXCLUDED_CITIES.length+' 个门店较少的低线城市</div>'
     +'<div class="g2"><div class="card"><h3>城市日均单店销售桌数排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 日均单店销售桌数（翻台率×桌子数）</div><div id="bc1"></div></div>'
     +'<div class="card"><h3>城市平均翻台率预估排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 基于小程序排号数据推算</div><div id="bc2"></div></div></div>'
     +'<div class="card"><h3>城市月滚动汇总明细</h3>'
