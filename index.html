@@ -1184,10 +1184,25 @@ function renderBExpand(f){
 
   var cm={};d.forEach(function(r){cm[r.city+'|'+r.month]=r.store_count||0;});
 
+  var latest=months[months.length-1]||'';
+  // Sort cities by latest month store count descending
+  var sortedCities=cities.slice().sort(function(a,b){
+    var va=cm[a+'|'+latest]||0, vb=cm[b+'|'+latest]||0;
+    return vb-va||a.localeCompare(b);
+  });
+  // Compute monthly totals
+  var monthTotals={};months.forEach(function(m){
+    var t=0;cities.forEach(function(c){t+=(cm[c+'|'+m]||0);});monthTotals[m]=t;
+  });
+
   var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+cities.length+' 城市 × '+months.length+' 月)</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
   months.forEach(function(m){matrixHtml+='<th>'+m+'</th>';});
   matrixHtml+='</tr></thead><tbody>';
-  cities.forEach(function(c){
+  // Total row first
+  matrixHtml+='<tr style="background:#fff3e0;font-weight:700"><td>总计</td>';
+  months.forEach(function(m){matrixHtml+='<td style="text-align:center">'+monthTotals[m]+'</td>';});
+  matrixHtml+='</tr>';
+  sortedCities.forEach(function(c){
     matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
     months.forEach(function(m){
       var v=cm[c+'|'+m]||0;
@@ -1198,7 +1213,6 @@ function renderBExpand(f){
   });
   matrixHtml+='</tbody></table></div></div>';
 
-  var latest=months[months.length-1]||'';
   var latestD=d.filter(function(r){return r.month===latest;});
   var totalSAuth=latestD.reduce(function(s,r){return s+(r.store_count||0);},0);
   // Count actual data stores from daily data for latest month (consistent with city tab)
@@ -1213,7 +1227,7 @@ function renderBExpand(f){
   el.innerHTML='<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">'+BANU_EXCLUDED_NOTE+'</div>'
     +'<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+cities.length+'</div><div class="ks">截至 '+latest+'<br>已筛除 '+BANU_EXCLUDED_CITIES.length+' 个低线城市</div></div>'
-    +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+dataStores+'</div><div class="ks">已筛除闭店/未开业门店<br>及 '+BANU_EXCLUDED_CITIES.length+' 个门店较少的低线城市</div></div>'
+    +'<div class="kpi"><div class="kl">营业门店数</div><div class="kv">'+dataStores+'</div><div class="ks">已筛除闭店/未开业门店<br>及 '+BANU_EXCLUDED_CITIES.length+' 个门店较少的低线城市</div></div>'
     +'<div class="kpi"><div class="kl">数据月份</div><div class="kv">'+months.length+'</div></div>'
     +'</div>' + matrixHtml;
 }
