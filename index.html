@@ -920,12 +920,18 @@ function renderSTrend(f){
     +'<div class="g2">'
     +'<div class="card"><h3>排号时段占比趋势</h3><div id="st3"></div></div>'
     +'<div class="card"><h3>日均翻台率下限趋势</h3><div id="st5"></div></div></div>'
-    +'<div class="card"><h3>每日总不含税收入趋势</h3><div id="st4"></div></div>';
+    +'<div class="card"><h3>当月累计不含税收入</h3><div id="st4"></div></div>';
   drawLineChart(document.getElementById('st1'),trend,['avgTables'],[COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
   drawLineChart(document.getElementById('st2'),trend,['avgRev'],[COLORS[1]],['日均单店不含税收入'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
   drawLineChart(document.getElementById('st3'),trend,['queuePct'],[COLORS[2]],['排号时段占比'],{tipFmt:function(v){return v.toFixed(1)+'%';},yFmt:function(v){return v.toFixed(0)+'%';}});
   drawLineChart(document.getElementById('st5'),turnTrendData,['avgTurn'],[COLORS[3]],['日均翻台率下限'],{tipFmt:function(v){return v.toFixed(2);},yFmt:function(v){return v.toFixed(1);}});
-  drawLineChart(document.getElementById('st4'),trend,['totalRev'],[COLORS[4]||'#e84393'],['总不含税收入'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
+  // 计算当月累计收入
+  var cumTrend=[];var cumSum=0;
+  trend.forEach(function(t){
+    if(t._hasData&&t.totalRev!=null){cumSum+=t.totalRev;}
+    cumTrend.push({_label:t._label,cumRev:t._hasData?cumSum:null,_hasData:t._hasData});
+  });
+  drawLineChart(document.getElementById('st4'),cumTrend,['cumRev'],[COLORS[4]||'#e84393'],['累计不含税收入'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
 }
 
 function renderSExpand(f){
