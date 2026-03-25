@@ -173,7 +173,7 @@ tr:hover td{background:#fef5f5}
     <div id="sec-hp_summary" class="hidden">
       <div class="tabs" id="hpSumTabs">
         <div class="tab blue active" onclick="hpSumTab('hps_queue')">排号对比</div>
-        <div class="tab blue" onclick="hpSumTab('hps_rate')">排队门店率</div>
+        <div class="tab blue" onclick="hpSumTab('hps_rate')">排号门店率</div>
         <div class="tab blue" onclick="hpSumTab('hps_expand')">拓展概览</div>
       </div>
       <div class="filters" id="hpSumFilters">
@@ -181,6 +181,7 @@ tr:hover td{background:#fef5f5}
         <div class="fg"><label>开始日期</label><input type="date" id="hpsfDateFrom" onchange="hpSumRender()"></div>
         <div class="fg"><label>结束日期</label><input type="date" id="hpsfDateTo" onchange="hpSumRender()"></div>
         <div class="fg"><label>城市</label><select id="hpsfCity" onchange="hpSumRender()"><option>全部</option></select></div>
+        <div class="fg"><label>品牌</label><select id="hpsfBrand" onchange="hpSumRender()"><option>全部</option></select></div>
         <div class="finfo" id="hpSumCount"></div>
       </div>
       <div id="sp-hps_queue"></div>
@@ -547,11 +548,11 @@ function drawLineChart(container,data,keys,colors,labels,opts){
   var W=600,H=240,pad={t:15,r:50,b:35,l:55};var cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;var svg=mkSvg(W,H);
   var allV=[];keys.forEach(function(k){data.forEach(function(d){if(d[k]!=null&&!isNaN(d[k]))allV.push(+d[k]);});});
   if(!allV.length){container.innerHTML='';return;}
-  var mn=Math.min.apply(null,allV)*.9,mx=Math.max.apply(null,allV)*1.1;if(mn===mx){mn-=1;mx+=1;}
+  var mn=Math.min.apply(null,allV)*.9,mx=opts.yMax!=null?opts.yMax:Math.max.apply(null,allV)*1.1;if(opts.yMin!=null)mn=opts.yMin;if(mn===mx){mn-=1;mx+=1;}
   var xStep=data.length>1?cw/(data.length-1):cw;
   var yS=function(v){return pad.t+ch-((v-mn)/(mx-mn))*ch;};
   for(var i=0;i<5;i++){var y=pad.t+ch*i/4;svg.appendChild(svgEl('line',{x1:pad.l,y1:y,x2:W-pad.r,y2:y,stroke:'#f0f0f0'}));
-  var v=mx-(mx-mn)*i/4;svg.appendChild(svgEl('text',{x:pad.l-6,y:y+3,'text-anchor':'end','font-size':9,fill:'#999'},opts.yFmt?opts.yFmt(v):v.toFixed(1)));}
+  var v=mx-(mx-mn)*i/4;svg.appendChild(svgEl('text',{x:pad.l-6,y:y+3,'text-anchor':'end','font-size':9,fill:'#999'},opts.yFmt?opts.yFmt(v):opts.yInt?Math.round(v)+'':v.toFixed(1)));}
   var step=Math.max(1,Math.floor(data.length/10));
   data.forEach(function(d,i){if(i%step===0||i===data.length-1){svg.appendChild(svgEl('text',{x:pad.l+i*xStep,y:H-pad.b+14,'text-anchor':'middle','font-size':9,fill:'#999',transform:'rotate(-20,'+( pad.l+i*xStep)+','+(H-pad.b+14)+')'},d._label||''));}});
   keys.forEach(function(k,ki){var pts=[];data.forEach(function(d,i){if(d[k]!=null&&!isNaN(d[k]))pts.push({x:pad.l+i*xStep,y:yS(+d[k]),v:+d[k],l:d._label||''});});
@@ -1223,6 +1224,11 @@ function initHpSumFilters(){
   var selC=document.getElementById('hpsfCity');
   selC.innerHTML='<option>全部</option>';
   cities.forEach(function(c){selC.innerHTML+='<option>'+c+'</option>';});
+
+  // Populate brand filter
+  var selB=document.getElementById('hpsfBrand');
+  selB.innerHTML='<option>全部</option>';
+  BRANDS.forEach(function(b){selB.innerHTML+='<option>'+b+'</option>';});
 }
 
 function hpSumTab(t){
@@ -1237,19 +1243,21 @@ function hpSumRender(){
   var fDateFrom=document.getElementById('hpsfDateFrom').value;
   var fDateTo=document.getElementById('hpsfDateTo').value;
   var fCity=document.getElementById('hpsfCity').value;
-  if(curHpSumTab==='hps_queue') renderHpSumQueue(fDateFrom,fDateTo,fCity);
-  else if(curHpSumTab==='hps_rate') renderHpSumRate(fDateFrom,fDateTo,fCity);
-  else renderHpSumExpand(fDateFrom,fDateTo,fCity);
+  var fBrand=document.getElementById('hpsfBrand').value;
+  if(curHpSumTab==='hps_queue') renderHpSumQueue(fDateFrom,fDateTo,fCity,fBrand);
+  else if(curHpSumTab==='hps_rate') renderHpSumRate(fDateFrom,fDateTo,fCity,fBrand);
+  else renderHpSumExpand(fDateFrom,fDateTo,fCity,fBrand);
 }
 
-function renderHpSumQueue(fDateFrom,fDateTo,fCity){
+function renderHpSumQueue(fDateFrom,fDateTo,fCity,fBrand){
   var dateFilter=function(r){return(!fDateFrom||r.date>=fDateFrom)&&(!fDateTo||r.date<=fDateTo);};
+  var brandFilter=function(r){return !fBrand||fBrand==='全部'||r.brand===fBrand;};
   // Use city-level data when a city is selected, brand-level when "全部"
   var d;
   if(fCity && fCity!=='全部'){
-    d=hpCityData.filter(function(r){return dateFilter(r)&&r.city===fCity;});
+    d=hpCityData.filter(function(r){return dateFilter(r)&&brandFilter(r)&&r.city===fCity;});
   } else {
-    d=hpBrandData.filter(function(r){return dateFilter(r);});
+    d=hpBrandData.filter(function(r){return dateFilter(r)&&brandFilter(r);});
   }
   var cityLabel=fCity&&fCity!=='全部'?' ('+fCity+')':'';
   var rangeLabel=hpDateRangeLabel(fDateFrom,fDateTo);
@@ -1268,32 +1276,34 @@ function renderHpSumQueue(fDateFrom,fDateTo,fCity){
   var brands=Object.values(bg).sort(function(a,b){return b.total_queue-a.total_queue;});
 
   var peakNote='<div style="font-size:11px;color:#888;margin:4px 0 8px;padding:4px 8px;background:#f0f7ff;border-radius:4px;border:1px solid #d6e8fa">'
-    +'📋 <b>排号数</b> = 各门店当日在小程序/大众点评上的最大排队号之和（统计时段：全天）<br>'
+    +'📋 <b>排号数</b> = 各门店当日在小程序/大众点评上的最大排号之和（统计时段：各品牌营业时间）<br>'
     +'💡 建议仅关注用餐高峰期（午市11:00-14:00，晚市17:00-21:00）的排号数据，后续版本将支持高峰期筛选</div>';
 
-  el.innerHTML=peakNote
+  var bjNote=(fCity==='北京')?'<div style="font-size:11px;color:#e67e22;margin:0 0 8px;padding:4px 8px;background:#fff7e6;border-radius:4px;border:1px solid #ffe0b2">⚠️ 八合里目前在北京无门店</div>':'';
+
+  el.innerHTML=peakNote+bjNote
     +'<div class="kpi-row">'
-    +'<div class="kpi"><div class="kl">品牌数</div><div class="kv">'+brands.length+'</div></div>'
+    +'<div class="kpi"><div class="kl">有门店的品牌数</div><div class="kv">'+brands.length+'</div></div>'
     +'<div class="kpi"><div class="kl">总排号数'+cityLabel+'<span class="metric-note">所选时段内各品牌排号累计之和</span></div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_queue;},0))+'</div></div>'
-    +'<div class="kpi"><div class="kl">门店数'+cityLabel+'<span class="metric-note">默认已开业，不确定状态视为已开业</span></div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_stores;},0)/Math.max(brands[0]?brands[0].days:1,1))+'</div><div class="ks">日均</div></div>'
+    +'<div class="kpi"><div class="kl">门店数'+cityLabel+'</div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_stores;},0)/Math.max(brands[0]?brands[0].days:1,1))+'</div></div>'
     +'</div>'
     +'<div class="g2"><div class="card"><h3>品牌排号数对比'+cityLabel+'</h3>'
     +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">排号数 = 所选时段内各门店每日最大排号的累计之和</div>'
     +'<div id="hpq1"></div></div>'
     +'<div class="card"><h3>品牌门店数对比'+cityLabel+'</h3>'
-    +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">默认已开业，不确定状态视为已开业</div>'
+    +''
     +'<div id="hpq2"></div></div></div>'
     +'<div class="card"><h3>品牌排号汇总明细'+cityLabel+'</h3>'
     +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">时间范围：'+rangeLabel+'</div>'
     +'<div class="scroll-table"><table><thead><tr>'
     +'<th>品牌</th><th>数据天数</th><th>总排号数<br><span style="font-size:10px;color:#999;font-weight:400">所选时段内累计</span></th>'
-    +'<th>日均门店数<br><span style="font-size:10px;color:#999;font-weight:400">默认已开业</span></th>'
+    +'<th>门店数</th>'
     +'<th>日均排号门店<br><span style="font-size:10px;color:#999;font-weight:400">当日有排号的门店</span></th>'
     +'<th>日均排号数<br><span style="font-size:10px;color:#999;font-weight:400">总排号÷天数</span></th>'
     +'</tr></thead><tbody id="hpqTbl"></tbody></table></div></div>';
 
   drawBarH(document.getElementById('hpq1'),brands,'total_queue','brand',fmtInt);
-  var storeView=brands.map(function(b){return{brand:b.brand,avg_stores:Math.round(b.total_stores/b.days)};});
+  var storeView=brands.map(function(b){return{brand:b.brand,avg_stores:Math.round(b.total_stores/b.days)};}).sort(function(a,b){return b.avg_stores-a.avg_stores;});
   drawBarH(document.getElementById('hpq2'),storeView,'avg_stores','brand',fmtInt);
 
   var tbody=document.getElementById('hpqTbl');
@@ -1306,31 +1316,32 @@ function renderHpSumQueue(fDateFrom,fDateTo,fCity){
   });
 }
 
-function renderHpSumRate(fDateFrom,fDateTo,fCity){
+function renderHpSumRate(fDateFrom,fDateTo,fCity,fBrand){
   var dateFilter=function(r){return(!fDateFrom||r.date>=fDateFrom)&&(!fDateTo||r.date<=fDateTo);};
+  var brandFilter=function(r){return !fBrand||fBrand==='全部'||r.brand===fBrand;};
   var cityLabel=fCity&&fCity!=='全部'?' ('+fCity+')':'';
   var rangeLabel=hpDateRangeLabel(fDateFrom,fDateTo);
   var el=document.getElementById('sp-hps_rate');
 
   var rateNote='<div style="font-size:11px;color:#888;margin:0 0 8px;padding:4px 8px;background:#f0f7ff;border-radius:4px;border:1px solid #d6e8fa">'
-    +'📋 <b>排队门店率</b> = 当日有排号记录的门店数 ÷ 该品牌当日总门店数 × 100%<br>'
-    +'含义：反映该品牌当日有多少比例的门店产生了排队</div>';
+    +'📋 <b>排号门店率</b> = 当日有排号记录的门店数 ÷ 该品牌当日总门店数 × 100%<br>'
+    +'含义：反映该品牌当日有多少比例的门店产生了排号</div>';
 
   if(fCity && fCity!=='全部'){
     // City-level: use hpCityData, compute pct manually
-    var cd=hpCityData.filter(function(r){return dateFilter(r)&&r.city===fCity;});
+    var cd=hpCityData.filter(function(r){return dateFilter(r)&&brandFilter(r)&&r.city===fCity;});
     if(!cd.length){el.innerHTML=rateNote+'<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
     var dates=[...new Set(cd.map(function(r){return r.date;}))].sort();
     var isSingleDay=(fDateFrom===fDateTo)||(dates.length===1);
     if(isSingleDay){
       var items=cd.filter(function(r){return r.date===(fDateFrom||dates[0]);}).map(function(r){var pct=(r.store_count>0?(r.queue_stores||0)/r.store_count:0);return{brand:r.brand,pct:pct,total_stores:r.store_count,queue_stores:r.queue_stores||0,total_queue:r.total_queue||0};}).sort(function(a,b){return b.pct-a.pct;});
-      el.innerHTML=rateNote+'<div class="card"><h3>排队门店率对比'+cityLabel+' ('+rangeLabel+')</h3><div id="hpr1"></div></div>'
-        +'<div class="card"><h3>排队门店率明细'+cityLabel+'</h3>'
+      el.innerHTML=rateNote+'<div class="card"><h3>排号门店率对比'+cityLabel+' ('+rangeLabel+')</h3><div id="hpr1"></div></div>'
+        +'<div class="card"><h3>排号门店率明细'+cityLabel+'</h3>'
         +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">时间范围：'+rangeLabel+'</div>'
         +'<div class="scroll-table"><table><thead><tr>'
-        +'<th>品牌</th><th>门店数<br><span style="font-size:10px;color:#999;font-weight:400">默认已开业</span></th>'
+        +'<th>品牌</th><th>门店数</th>'
         +'<th>排号门店<br><span style="font-size:10px;color:#999;font-weight:400">当日有排号记录</span></th>'
-        +'<th>排队门店率<br><span style="font-size:10px;color:#999;font-weight:400">排号门店÷总门店</span></th>'
+        +'<th>排号门店率<br><span style="font-size:10px;color:#999;font-weight:400">排号门店÷总门店</span></th>'
         +'<th>总排号数</th>'
         +'</tr></thead><tbody id="hprTbl"></tbody></table></div></div>';
       var pctItems=items.map(function(r){return{brand:r.brand,val:+(r.pct*100).toFixed(1)};});
@@ -1353,12 +1364,12 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity){
         return row;
       });
       var bNames=Object.keys(byBrand);var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
-      el.innerHTML=rateNote+'<div class="card"><h3>各品牌排队门店率趋势'+cityLabel+' ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
-      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';}});
+      el.innerHTML=rateNote+'<div class="card"><h3>各品牌排号门店率趋势'+cityLabel+' ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
+      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yInt:true});
     }
   } else {
     // National level: use hpBrandData
-    var d=hpBrandData.filter(function(r){return dateFilter(r);});
+    var d=hpBrandData.filter(function(r){return dateFilter(r)&&brandFilter(r);});
     if(!d.length){el.innerHTML=rateNote+'<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
     var dates=[...new Set(d.map(function(r){return r.date;}))].sort();
     var isSingleDay=(fDateFrom===fDateTo)||(dates.length===1);
@@ -1366,13 +1377,13 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity){
       var useDate=fDateFrom||dates[0];
       var dayD=d.filter(function(r){return r.date===useDate;});
       var items=dayD.map(function(r){return{brand:r.brand,pct:r.queue_store_pct||0,total_stores:r.total_stores,stores_with_queue:r.stores_with_queue,total_queue:r.total_queue,avg_queue_per_store:r.avg_queue_per_store};}).sort(function(a,b){return b.pct-a.pct;});
-      el.innerHTML=rateNote+'<div class="card"><h3>排队门店率对比 ('+rangeLabel+')</h3><div id="hpr1"></div></div>'
-        +'<div class="card"><h3>排队门店率明细</h3>'
+      el.innerHTML=rateNote+'<div class="card"><h3>排号门店率对比 ('+rangeLabel+')</h3><div id="hpr1"></div></div>'
+        +'<div class="card"><h3>排号门店率明细</h3>'
         +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">时间范围：'+rangeLabel+'</div>'
         +'<div class="scroll-table"><table><thead><tr>'
-        +'<th>品牌</th><th>门店数<br><span style="font-size:10px;color:#999;font-weight:400">默认已开业</span></th>'
+        +'<th>品牌</th><th>门店数</th>'
         +'<th>排号门店<br><span style="font-size:10px;color:#999;font-weight:400">当日有排号记录</span></th>'
-        +'<th>排队门店率<br><span style="font-size:10px;color:#999;font-weight:400">排号门店÷总门店</span></th>'
+        +'<th>排号门店率<br><span style="font-size:10px;color:#999;font-weight:400">排号门店÷总门店</span></th>'
         +'<th>总排号数</th><th>店均排号<br><span style="font-size:10px;color:#999;font-weight:400">总排号÷排号门店</span></th>'
         +'</tr></thead><tbody id="hprTbl"></tbody></table></div></div>';
       var pctItems=items.map(function(r){return{brand:r.brand,val:+(r.pct*100).toFixed(1)};});
@@ -1394,15 +1405,16 @@ function renderHpSumRate(fDateFrom,fDateTo,fCity){
         return row;
       });
       var bNames=Object.keys(byBrand);var bColors=bNames.map(function(b){return BRAND_COLORS[b]||'#999';});
-      el.innerHTML=rateNote+'<div class="card"><h3>各品牌排队门店率趋势 ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
-      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';}});
+      el.innerHTML=rateNote+'<div class="card"><h3>各品牌排号门店率趋势 ('+rangeLabel+')</h3><div id="hpr1"></div></div>';
+      drawLineChart(document.getElementById('hpr1'),trendData,bNames,bColors,bNames,{tipFmt:function(v){return v.toFixed(1)+'%';},yMax:100,yMin:0,yInt:true});
     }
   }
 }
 
-function renderHpSumExpand(fDateFrom,fDateTo,fCity){
+function renderHpSumExpand(fDateFrom,fDateTo,fCity,fBrand){
   var el=document.getElementById('sp-hps_expand');
-  var cd=hpCityData;
+  var brandFilter=function(r){return !fBrand||fBrand==='全部'||r.brand===fBrand;};
+  var cd=hpCityData.filter(brandFilter);
   if(fCity && fCity!=='全部') cd=cd.filter(function(r){return r.city===fCity;});
   if(!cd.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var cityLabel=fCity&&fCity!=='全部'?' ('+fCity+')':'';
@@ -1437,23 +1449,19 @@ function renderHpSumExpand(fDateFrom,fDateTo,fCity){
 
   // Brand scale summary
   var scaleHtml='<div class="card"><h3>品牌规模概览 ('+latest+')</h3><div class="scroll-table"><table><thead><tr>'
-    +'<th>品牌</th><th>覆盖城市</th><th>门店数<br><span style="font-size:10px;color:#999;font-weight:400">默认已开业</span></th>'
-    +'<th>排号门店</th><th>排队门店率<br><span style="font-size:10px;color:#999;font-weight:400">排号门店÷总门店</span></th>'
-    +'<th>总排号数</th>'
+    +'<th>品牌</th><th>覆盖城市</th><th>门店数</th>'
     +'</tr></thead><tbody>';
 
-  var bd=hpBrandData.filter(function(r){return r.date===latest;}).sort(function(a,b){return(b.total_stores||0)-(a.total_stores||0);});
+  var bd=hpBrandData.filter(function(r){return r.date===latest&&brandFilter(r);}).sort(function(a,b){return(b.total_stores||0)-(a.total_stores||0);});
   bd.forEach(function(r){
     var nCities=brandCities[r.brand]?brandCities[r.brand].size:0;
     scaleHtml+='<tr><td style="font-weight:600;color:'+(BRAND_COLORS[r.brand]||'#333')+'">'+r.brand+'</td>'
-    +'<td>'+nCities+'</td><td>'+fmtInt(r.total_stores)+'</td><td>'+fmtInt(r.stores_with_queue)+'</td>'
-    +'<td><span class="badge '+(r.queue_store_pct>.5?'bg-g':r.queue_store_pct>.3?'bg-o':'bg-r')+'">'+fmtPct(r.queue_store_pct)+'</span></td>'
-    +'<td>'+fmtInt(r.total_queue)+'</td></tr>';
+    +'<td>'+nCities+'</td><td>'+fmtInt(r.total_stores)+'</td></tr>';
   });
   scaleHtml+='</tbody></table></div></div>';
 
   // Monthly store count trend
-  var monthlyStores={};hpBrandData.forEach(function(r){
+  var monthlyStores={};hpBrandData.filter(brandFilter).forEach(function(r){
     var m=r.date.slice(0,7);
     var key=r.brand+'|'+m;
     if(!monthlyStores[key]||r.total_stores>monthlyStores[key].stores){
@@ -1478,8 +1486,9 @@ function renderHpSumExpand(fDateFrom,fDateTo,fCity){
     +'<div class="card"><h3>各品牌门店数月度趋势</h3><div id="hpe1"></div></div>';
 
   if(trendData.length>1){
-    var bColors=BRANDS.map(function(b){return BRAND_COLORS[b]||'#999';});
-    drawLineChart(document.getElementById('hpe1'),trendData,BRANDS,bColors,BRANDS,{tipFmt:function(v){return v+'家';}});
+    var filteredBrands=fBrand&&fBrand!=='全部'?[fBrand]:BRANDS;
+    var bColors=filteredBrands.map(function(b){return BRAND_COLORS[b]||'#999';});
+    drawLineChart(document.getElementById('hpe1'),trendData,filteredBrands,bColors,filteredBrands,{tipFmt:function(v){return v+'家';}});
   }
 }
 
@@ -1546,33 +1555,37 @@ function renderHpBQueue(bid,brand,fDateFrom,fDateTo,fCity){
     cg[r.city].stores=Math.max(cg[r.city].stores,r.store_count||0);
     cg[r.city].days++;
   });
-  var cities=Object.values(cg).sort(function(a,b){return b.queue-a.queue;});
+  var cities=Object.values(cg);
+  cities.forEach(function(c){c.avg_per_store=c.stores>0?Math.round(c.queue/c.stores/c.days):0;});
+  cities.sort(function(a,b){return b.avg_per_store-a.avg_per_store;});
 
   el.innerHTML='<div style="font-size:11px;color:#888;margin:0 0 8px;padding:4px 8px;background:#f0f7ff;border-radius:4px;border:1px solid #d6e8fa">'
-    +'📋 <b>排号数</b> = 各门店当日在小程序/大众点评上的最大排队号之和（统计时段：全天）</div>'
+    +'📋 <b>排号数</b> = 各门店当日在小程序/大众点评上的最大排号之和（统计时段：各品牌营业时间）</div>'
     +'<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">总排号数<span class="metric-note">所选时段内累计</span></div><div class="kv">'+fmtInt(totalQ)+'</div></div>'
-    +'<div class="kpi"><div class="kl">门店数<span class="metric-note">默认已开业，不确定状态视为已开业</span></div><div class="kv">'+fmtInt(totalS)+'</div></div>'
-    +'<div class="kpi"><div class="kl">排队门店率<span class="metric-note">有排号门店÷总门店</span></div><div class="kv">'+fmtPct(avgPct)+'</div></div>'
+    +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+fmtInt(totalS)+'</div></div>'
+    +'<div class="kpi"><div class="kl">排号门店率<span class="metric-note">有排号门店÷总门店</span></div><div class="kv">'+fmtPct(avgPct)+'</div></div>'
     +'<div class="kpi"><div class="kl">覆盖城市</div><div class="kv">'+cities.length+'</div></div>'
     +'</div>'
-    +'<div class="g2"><div class="card"><h3>城市排号数排行</h3><div id="'+bid+'q1"></div></div>'
-    +'<div class="card"><h3>城市门店数<span style="font-size:10px;color:#999;margin-left:4px">默认已开业</span></h3><div id="'+bid+'q2"></div></div></div>'
+    +(brand==='八合里'?'<div style="font-size:11px;color:#e67e22;margin:0 0 8px;padding:4px 8px;background:#fff7e6;border-radius:4px;border:1px solid #ffe0b2">⚠️ 八合里目前在北京无门店</div>':'')
+    +'<div class="g2"><div class="card"><h3>城市店均排号数排行<span style="font-size:10px;color:#999;margin-left:4px">总排号÷门店数÷天数</span></h3><div id="'+bid+'q1"></div></div>'
+    +'<div class="card"><h3>城市门店数</h3><div id="'+bid+'q2"></div></div></div>'
     +'<div class="card"><h3>城市排号明细</h3>'
     +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">时间范围：'+rangeLabel+'</div>'
     +'<div class="scroll-table"><table><thead><tr>'
-    +'<th>城市</th><th>数据天数</th><th>门店数<br><span style="font-size:10px;color:#999;font-weight:400">默认已开业</span></th>'
+    +'<th>城市</th><th>数据天数</th><th>门店数</th>'
     +'<th>总排号数<br><span style="font-size:10px;color:#999;font-weight:400">所选时段内累计</span></th>'
     +'<th>日均排号<br><span style="font-size:10px;color:#999;font-weight:400">总排号÷天数</span></th>'
+    +'<th>店均排号<br><span style="font-size:10px;color:#999;font-weight:400">总排号÷门店数÷天数</span></th>'
     +'</tr></thead><tbody id="'+bid+'qTbl"></tbody></table></div></div>';
 
-  drawBarH(document.getElementById(bid+'q1'),cities.slice(0,15),'queue','city',fmtInt,BRAND_COLORS[brand]);
+  drawBarH(document.getElementById(bid+'q1'),cities.slice(0,15),'avg_per_store','city',fmtInt,BRAND_COLORS[brand]);
   drawBarH(document.getElementById(bid+'q2'),cities.slice(0,15),'stores','city',fmtInt,BRAND_COLORS[brand]);
 
   var tbody=document.getElementById(bid+'qTbl');
   cities.forEach(function(r){
     tbody.innerHTML+='<tr><td style="font-weight:600">'+r.city+'</td><td>'+r.days+'</td><td>'+r.stores+'</td>'
-    +'<td>'+fmtInt(r.queue)+'</td><td>'+Math.round(r.queue/r.days)+'</td></tr>';
+    +'<td>'+fmtInt(r.queue)+'</td><td>'+Math.round(r.queue/r.days)+'</td><td>'+r.avg_per_store+'</td></tr>';
   });
 }
 
@@ -1650,7 +1663,8 @@ function renderHpBHeat(bid,brand,fDateFrom,fDateTo,fCity){
   var storeCount=allStoreIds.size;
 
   el.innerHTML='<div style="font-size:11px;color:#888;margin:0 0 8px;padding:4px 8px;background:#f0f7ff;border-radius:4px;border:1px solid #d6e8fa">'
-    +'📋 时间范围：'+rangeLabel+' | 涉及门店：<b>'+storeCount+'</b> 家 | 以下数据均为<b>店均</b>值</div>'
+    +'📋 <b>时段热力</b>：通过每日各时段的排号数据，观察品牌在不同时间段的排号热度变化趋势<br>'
+    +'时间范围：'+rangeLabel+' | 涉及门店：<b>'+storeCount+'</b> 家 | 以下数据均为<b>店均</b>值</div>'
     +'<div class="g2">'
     +'<div class="card"><h3>每日店均排号数趋势</h3>'
     +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">店均排号 = 当日全城排号总数 ÷ 门店数</div>'
@@ -1660,8 +1674,8 @@ function renderHpBHeat(bid,brand,fDateFrom,fDateTo,fCity){
     +'<div id="'+bid+'h2"></div></div></div>';
 
   if(trend.length>1){
-    drawLineChart(document.getElementById(bid+'h1'),trend,['avg_queue'],[BRAND_COLORS[brand]||COLORS[0]],['店均排号数'],{tipFmt:function(v){return v.toFixed(1);}});
-    drawLineChart(document.getElementById(bid+'h2'),slotTrend,['avg_slots'],[BRAND_COLORS[brand]||COLORS[1]],['店均排号时段数'],{tipFmt:function(v){return v.toFixed(1);}});
+    drawLineChart(document.getElementById(bid+'h1'),trend,['avg_queue'],[BRAND_COLORS[brand]||COLORS[0]],['店均排号数'],{tipFmt:function(v){return v.toFixed(1);},yInt:true});
+    drawLineChart(document.getElementById(bid+'h2'),slotTrend,['avg_slots'],[BRAND_COLORS[brand]||COLORS[1]],['店均排号时段数'],{tipFmt:function(v){return v.toFixed(1);},yInt:true});
   } else if(trend.length===1){
     // Single day: show as simple stats
     var t=trend[0];
@@ -1676,32 +1690,42 @@ function renderHpBExpand(bid,brand,fDateFrom,fDateTo,fCity){
   var cd=hpCityData.filter(function(r){return r.brand===brand;});
   if(!cd.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
 
-  var dates=[...new Set(cd.map(function(r){return r.date;}))].sort();
-  var latest=fDateTo||(dates[dates.length-1]||'');
-  var latestD=cd.filter(function(r){return r.date===latest;});
-  var allCities=[...new Set(latestD.map(function(r){return r.city;}))].sort();
-  var totalStores=latestD.reduce(function(s,r){return s+(r.store_count||0);},0);
+  // Build city × month matrix (like sushiro expand)
+  var allDates=[...new Set(cd.map(function(r){return r.date;}))].sort();
+  var months=[...new Set(allDates.map(function(d){return d.slice(0,7);}))].sort();
+  var cities=[...new Set(cd.map(function(r){return r.city;}))].sort();
 
-  // Monthly store counts
-  var monthlyStores={};cd.forEach(function(r){
+  // Get max store_count per city per month
+  var cm={};cd.forEach(function(r){
     var m=r.date.slice(0,7);
-    if(!monthlyStores[m])monthlyStores[m]=0;
-    monthlyStores[m]=Math.max(monthlyStores[m],r.store_count||0);
+    var key=r.city+'|'+m;
+    cm[key]=Math.max(cm[key]||0,r.store_count||0);
   });
 
-  // city-date matrix
-  var matrixHtml='<div class="card"><h3>城市覆盖矩阵</h3><div class="scroll-table"><table><thead><tr><th>城市</th>'
-    +'<th>门店数<br><span style="font-size:10px;color:#999;font-weight:400">默认已开业</span></th>'
-    +'<th>排号门店</th><th>排号数</th></tr></thead><tbody>';
-  latestD.sort(function(a,b){return(b.store_count||0)-(a.store_count||0);}).forEach(function(r){
-    matrixHtml+='<tr><td style="font-weight:600">'+r.city+'</td><td>'+fmtInt(r.store_count)+'</td>'
-    +'<td>'+fmtInt(r.queue_stores)+'</td><td>'+fmtInt(r.total_queue)+'</td></tr>';
+  var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+cities.length+' 城市 × '+months.length+' 月)</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
+  months.forEach(function(m){matrixHtml+='<th>'+m+'</th>';});
+  matrixHtml+='</tr></thead><tbody>';
+  cities.forEach(function(c){
+    matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
+    months.forEach(function(m){
+      var v=cm[c+'|'+m]||0;
+      var bg=v>0?'#e6f7ff':'#f5f5f5';
+      matrixHtml+='<td style="background:'+bg+';text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';
+    });
+    matrixHtml+='</tr>';
   });
   matrixHtml+='</tbody></table></div></div>';
 
+  var latest=months[months.length-1]||'';
+  var latestD=cd.filter(function(r){return r.date.slice(0,7)===latest;});
+  var latestCities=[...new Set(latestD.map(function(r){return r.city;}))];
+  var totalStores=0;
+  latestCities.forEach(function(c){totalStores+=cm[c+'|'+latest]||0;});
+
   el.innerHTML='<div class="kpi-row">'
-    +'<div class="kpi"><div class="kl">覆盖城市</div><div class="kv">'+allCities.length+'</div><div class="ks">'+latest+'</div></div>'
-    +'<div class="kpi"><div class="kl">门店数<span class="metric-note">默认已开业，不确定状态视为已开业</span></div><div class="kv">'+totalStores+'</div></div>'
+    +'<div class="kpi"><div class="kl">覆盖城市数</div><div class="kv">'+latestCities.length+'</div><div class="ks">截至 '+latest+'</div></div>'
+    +'<div class="kpi"><div class="kl">总门店数</div><div class="kv">'+totalStores+'</div><div class="ks">'+latest+'</div></div>'
+    +'<div class="kpi"><div class="kl">数据月份</div><div class="kv">'+months.length+'</div></div>'
     +'</div>'+matrixHtml;
 }
 
