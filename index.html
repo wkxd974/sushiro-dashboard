@@ -823,7 +823,8 @@ function renderSCity(f){
   alignBarHeights(document.getElementById('sp-s_city'));
   var tbody=document.getElementById('sCityTbl');
   d.slice().sort(function(a,b){return(b.store_count||0)-(a.store_count||0);}).forEach(function(r){
-    var tb=r.monthly_turnover_rate>=10?'bg-g':r.monthly_turnover_rate>=8?'bg-o':'bg-r';
+    var diff=(r.monthly_turnover_rate||0)-avgTurn;
+    var tb=diff>2?'bg-g':diff>=0?'bg-o':'bg-r';
     tbody.innerHTML+='<tr><td>'+r.month+'</td><td style="font-weight:600">'+r.city+'</td><td>'+fmtInt(r.store_count)+'</td>'
     +'<td>'+fmtInt(r.daily_avg_sales_tables)+'</td><td>'+fmtMoney(r.daily_avg_sales_revenue)+'</td>'
     +'<td><span class="badge '+tb+'">'+fmtRate(r.monthly_turnover_rate)+'</span></td>'
@@ -870,14 +871,18 @@ function renderSStore(f){
   // Search box
   var searchDiv=document.getElementById('sStoreSearch');
   if(searchDiv)searchDiv.innerHTML='<input type="text" id="sStoreQ" placeholder="搜索门店名称或城市..." style="width:300px;padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px" oninput="filterSStoreTable()">';
-  var sortedD=d.sort(function(a,b){return(b.daily_avg_sales_revenue||0)-(a.daily_avg_sales_revenue||0);});
+  var sortedD=d.sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);});
   window._sStoreRows=sortedD;
+  // Compute average turnover rate for badge coloring
+  var sAvgTurn=sortedD.length?sortedD.reduce(function(s,r){return s+(r.monthly_turnover_rate||0);},0)/sortedD.length:0;
   var tbody=document.getElementById('sStoreTbl');
   sortedD.slice(0,200).forEach(function(r){
+    var diff=(r.monthly_turnover_rate||0)-sAvgTurn;
+    var tb=diff>2?'bg-g':diff>=0?'bg-o':'bg-r';
     tbody.innerHTML+='<tr data-search="'+(r.store_name||'')+' '+(r.city||'')+'"><td>'+r.month+'</td><td>'+r.city+'</td><td style="font-weight:600">'+(r.store_name||r.store_id)+'</td>'
     +'<td>'+r.data_days+'</td>'
     +'<td>'+fmtInt(r.daily_avg_sales_tables)+'</td><td>'+fmtMoney(r.daily_avg_sales_revenue)+'</td>'
-    +'<td>'+fmtPct(r.queue_hour_pct)+'</td><td>'+fmtRate(r.monthly_turnover_rate)+'</td></tr>';
+    +'<td>'+fmtPct(r.queue_hour_pct)+'</td><td><span class="badge '+tb+'">'+fmtRate(r.monthly_turnover_rate)+'</span></td></tr>';
   });
 }
 function filterSStoreTable(){
@@ -1133,7 +1138,8 @@ function renderBCity(f){
   alignBarHeights(document.getElementById('sp-b_city'));
   var tbody=document.getElementById('bCityTbl');
   d.slice().sort(function(a,b){return(b.store_count||0)-(a.store_count||0);}).forEach(function(r){
-    var tb=r.monthly_turnover_rate>=5?'bg-g':r.monthly_turnover_rate>=3?'bg-o':'bg-r';
+    var diff=(r.monthly_turnover_rate||0)-avgTurn;
+    var tb=diff>2?'bg-g':diff>=0?'bg-o':'bg-r';
     tbody.innerHTML+='<tr><td>'+r.month+'</td><td style="font-weight:600">'+r.city+'</td><td>'+fmtInt(r.store_count)+'</td>'
     +'<td>'+fmtInt(r.daily_avg_sales_tables)+'</td>'
     +'<td><span class="badge '+tb+'">'+fmtRate(r.monthly_turnover_rate)+'</span></td>'
