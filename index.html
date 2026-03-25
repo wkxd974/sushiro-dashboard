@@ -1252,14 +1252,14 @@ function renderBExpand(f){
   matrixHtml+='</tr></thead><tbody>';
   // Total row first
   matrixHtml+='<tr style="background:#fff3e0;font-weight:700"><td>总计</td>';
-  months.forEach(function(m){matrixHtml+='<td style="text-align:center">'+monthTotals[m]+'</td>';});
+  months.forEach(function(m){var disp=(m===latest)?monthTotals[m]:'/';matrixHtml+='<td style="text-align:center">'+disp+'</td>';});
   matrixHtml+='</tr>';
   sortedCities.forEach(function(c){
     matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
     months.forEach(function(m){
       var v=cm[c+'|'+m]||0;
-      var bg=v>0?'#e6f7ff':'#f5f5f5';
-      matrixHtml+='<td style="background:'+bg+';text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';
+      if(m!==latest){matrixHtml+='<td style="background:#f5f5f5;text-align:center;color:#bbb">/</td>';}
+      else{var bg=v>0?'#e6f7ff':'#f5f5f5';matrixHtml+='<td style="background:'+bg+';text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';}
     });
     matrixHtml+='</tr>';
   });
