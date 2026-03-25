@@ -52,7 +52,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
 .card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px}
-.card h3{font-size:13px;font-weight:600;margin-bottom:10px;color:#333}
+.card h3{font-size:14px;font-weight:600;margin-bottom:10px;color:#333}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{background:#fafafa;padding:8px 10px;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #f0f0f0;white-space:nowrap}
 td{padding:8px 10px;border-bottom:1px solid #f0f0f0;white-space:nowrap}
@@ -162,7 +162,7 @@ tr:hover td{background:#fef5f5}
         <div class="fg" id="bfgDateFrom" style="display:none"><label>开始日期</label><input type="date" id="bfDateFrom" onchange="onBDateManualChange()"></div>
         <div class="fg" id="bfgDateTo" style="display:none"><label>结束日期</label><input type="date" id="bfDateTo" onchange="onBDateManualChange()"></div>
         <div class="finfo" id="bDataCount"></div>
-        <div class="finfo" id="bFilterNote" style="font-size:11px;color:#888"></div>
+        <div id="bFilterNote" style="font-size:12.5px;color:#555;font-weight:500"></div>
       </div>
       <div id="sp-b_city"></div>
       <div id="sp-b_store" class="hidden"></div>
@@ -354,6 +354,14 @@ var BANU_EXCLUDED_CITIES = ['三门峡','临沂','周口','咸阳','唐山','廊
 // === Banu excluded stores (未开业/新店暂无客单价/未找到店铺/闭店) ===
 var BANU_EXCLUDED_STORES = ['巴奴毛肚火锅（安阳金豪）','巴奴毛肚火锅（北京怀柔万达店）','巴奴毛肚火锅（北京蓝色港湾店）','巴奴毛肚火锅（北京银泰中心店）','巴奴毛肚火锅（常州九洲店）','巴奴毛肚火锅（常州莱蒙）','巴奴毛肚火锅（杭州东站万象汇店）','巴奴毛肚火锅（杭州嘉里城店）','巴奴毛肚火锅（杭州奥体印象城店）','巴奴毛肚火锅（邯郸丛台西路）','巴奴毛肚火锅（邯郸学院路）','巴奴毛肚火锅（鹤壁爱之城）','巴奴毛肚火锅（济南恒隆广场店）','巴奴毛肚火锅（漯河昌建）','巴奴毛肚火锅（洛阳西工王府井）','巴奴毛肚火锅（南阳金玛特）','巴奴毛肚火锅（平顶山新华路）闭','巴奴毛肚火锅（濮阳永望里）闭','巴奴毛肚火锅（青岛永旺梦乐城店）','巴奴毛肚火锅（商丘港汇万达店）','巴奴毛肚火锅（石家庄裕华万达店）','巴奴毛肚火锅（泰州万象城店）','巴奴毛肚火锅（天津中北永旺巴奴店）','巴奴毛肚火锅（无锡广益哥伦布店）','巴奴毛肚火锅（江阴万达）','巴奴毛肚火锅（无锡融创茂）','巴奴毛肚火锅（无锡红豆万花城店）','巴奴毛肚火锅（西安港务区万象汇店）','巴奴毛肚火锅（郑州文化路）闭','巴奴毛肚火锅（郑州桃源路）闭','巴奴毛肚火锅（郑州二七路）闭','巴奴毛肚火锅（郑州农科路）闭','巴奴毛肚火锅（郑州农业路）闭','巴奴毛肚火锅（驻马店文明路）','巴奴毛肚火锅（郑州正弘旗）闭','巴奴毛肚火锅（郑州六天地-闭）'];
 
+// Normalize excluded store names: strip trailing 闭/-闭 and build a Set for fast lookup
+var BANU_EXCLUDED_STORES_NORM=BANU_EXCLUDED_STORES.map(function(s){return s.replace(/[-]?闭$/,'').replace(/-闭\）$/,'）');});
+function isBanuExcludedStore(name){
+  if(!name)return false;
+  var n=name.replace(/[-]?闭$/,'').replace(/-闭\）$/,'）');
+  return BANU_EXCLUDED_STORES_NORM.indexOf(n)>=0||BANU_EXCLUDED_STORES.indexOf(name)>=0;
+}
+
 // === Data stores ===
 var sushiroCityData=[], sushiroStoreData=[], sushiroDailyData=[];
 var banuCityData=[], banuStoreData=[], banuDailyData=[];
@@ -502,7 +510,7 @@ function drawBarH(container,items,valKey,labelKey,fmtFn,color){
   var maxLblLen=0;items.forEach(function(d){var l=(d[labelKey]||'').length;if(l>maxLblLen)maxLblLen=l;});
   var truncLen=Math.min(Math.max(maxLblLen,8),14);
   var padL=Math.min(Math.max(truncLen*11,95),165);
-  var W=560+(padL-95),barH=30,gap=5,pad={l:padL,r:65,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
+  var W=560+(padL-95),barH=34,gap=6,pad={l:padL,r:70,t:5,b:5};var H=pad.t+items.length*(barH+gap)+pad.b;var svg=mkSvg(W,H);
   var mx=Math.max.apply(null,items.map(function(d){return d[valKey]||0;}))||1;var cw=W-pad.l-pad.r;
   items.forEach(function(d,i){var y=pad.t+i*(barH+gap);var w=((d[valKey]||0)/mx)*cw;
   var c;
@@ -514,11 +522,11 @@ function drawBarH(container,items,valKey,labelKey,fmtFn,color){
     c=COLORS[i%COLORS.length];d._barOpacity=0.85;
   }
   var lbl=d[labelKey]||'';if(lbl.length>truncLen)lbl=lbl.substring(0,truncLen)+'…';
-  svg.appendChild(svgEl('text',{x:pad.l-6,y:y+barH/2+5,'text-anchor':'end','font-size':13,fill:'#333','font-weight':500},lbl));
+  svg.appendChild(svgEl('text',{x:pad.l-6,y:y+barH/2+5,'text-anchor':'end','font-size':15,fill:'#333','font-weight':500},lbl));
   var rect=svgEl('rect',{x:pad.l,y:y,width:Math.max(w,2),height:barH,rx:3,fill:c,opacity:d._barOpacity||.85,style:'cursor:pointer'});
   rect.addEventListener('mouseenter',function(e){showTip(e,d[labelKey]+': '+(fmtFn?fmtFn(d[valKey]):d[valKey]));});
   rect.addEventListener('mouseleave',hideTip);svg.appendChild(rect);
-  svg.appendChild(svgEl('text',{x:pad.l+w+5,y:y+barH/2+5,'font-size':12,fill:'#555','font-weight':600},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
+  svg.appendChild(svgEl('text',{x:pad.l+w+5,y:y+barH/2+5,'font-size':14,fill:'#555','font-weight':600},fmtFn?fmtFn(d[valKey]):String(Math.round(d[valKey]||0))));});
   container.innerHTML='';container.appendChild(svg);
 }
 
@@ -945,7 +953,7 @@ function bTab(t){
 function initBanuFilters(){
   var dates=[...new Set(banuDailyData.map(function(d){return d.date;}).filter(Boolean))].sort();
   var months=[...new Set(dates.map(function(d){return d.slice(0,7);}))].sort();
-  var cities=[...new Set(banuDailyData.filter(function(d){return BANU_EXCLUDED_STORES.indexOf(d.store_name)<0;}).map(function(d){return d.city;}).filter(Boolean))].filter(function(c){return BANU_EXCLUDED_CITIES.indexOf(c)<0;}).sort();
+  var cities=[...new Set(banuDailyData.filter(function(d){return !isBanuExcludedStore(d.store_name);}).map(function(d){return d.city;}).filter(Boolean))].filter(function(c){return BANU_EXCLUDED_CITIES.indexOf(c)<0;}).sort();
 
   var selM=document.getElementById('bfMonth');
   selM.innerHTML='<option>全部</option>';
@@ -988,7 +996,7 @@ function bRender(){
 function renderBCity(f){
   var dd=banuDailyData.filter(function(r){
     if(BANU_EXCLUDED_CITIES.indexOf(r.city)>=0) return false;
-    if(BANU_EXCLUDED_STORES.indexOf(r.store_name)>=0) return false;
+    if(isBanuExcludedStore(r.store_name)) return false;
     var mc=cityMatch(r.city,f.city);
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
@@ -1017,7 +1025,7 @@ function renderBCity(f){
   });
   document.getElementById('bDataCount').textContent='城市: '+d.length+' 条 ('+dd.length+' 条日数据)';
   var noteEl=document.getElementById('bFilterNote');
-  if(noteEl)noteEl.textContent='已筛除闭店/未开业门店及 '+BANU_EXCLUDED_CITIES.length+' 个门店较少的低线城市';
+  if(noteEl)noteEl.innerHTML='<b>备注：</b>已筛除闭店/未开业门店及 '+BANU_EXCLUDED_CITIES.length+' 个门店较少的低线城市';
   var el=document.getElementById('sp-b_city');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var n=d.length;
@@ -1063,7 +1071,7 @@ function renderBCity(f){
 function renderBStore(f){
   var dd=banuDailyData.filter(function(r){
     if(BANU_EXCLUDED_CITIES.indexOf(r.city)>=0) return false;
-    if(BANU_EXCLUDED_STORES.indexOf(r.store_name)>=0) return false;
+    if(isBanuExcludedStore(r.store_name)) return false;
     var mc=cityMatch(r.city,f.city);
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
@@ -1111,7 +1119,7 @@ function renderBStore(f){
 function renderBTrend(f){
   var d=banuDailyData.filter(function(r){
     if(BANU_EXCLUDED_CITIES.indexOf(r.city)>=0) return false;
-    if(BANU_EXCLUDED_STORES.indexOf(r.store_name)>=0) return false;
+    if(isBanuExcludedStore(r.store_name)) return false;
     var mc=cityMatch(r.city,f.city);
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
@@ -1182,7 +1190,7 @@ function renderBExpand(f){
   // Count actual data stores from daily data for latest month (consistent with city tab)
   var latestDailyDD=banuDailyData.filter(function(r){
     if(BANU_EXCLUDED_CITIES.indexOf(r.city)>=0) return false;
-    if(BANU_EXCLUDED_STORES.indexOf(r.store_name)>=0) return false;
+    if(isBanuExcludedStore(r.store_name)) return false;
     return r.date&&r.date.slice(0,7)===latest;
   });
   var latestStoreSet={};latestDailyDD.forEach(function(r){var k=r.store_id||r.store_name;if(k)latestStoreSet[k]=1;});
@@ -1334,11 +1342,15 @@ function renderHpSumQueue(fDateFrom,fDateTo,fCity,fBrand){
     bg[b].queue_slot_pct=s&&s.total?s.slots/s.total:0;
     bg[b].queue_store_pct=bg[b].total_stores>0?(bg[b].stores_with_queue/bg[b].total_stores):0;
   });
-  var brands=Object.values(bg).sort(function(a,b){return b.total_queue-a.total_queue;});
+  // Compute per-store daily average queue
+  Object.keys(bg).forEach(function(b){
+    var avgStores=bg[b].days?bg[b].total_stores/bg[b].days:0;
+    bg[b].avg_queue_per_store=avgStores&&bg[b].days?Math.round(bg[b].total_queue/avgStores/bg[b].days):0;
+  });
+  var brands=Object.values(bg).sort(function(a,b){return b.avg_queue_per_store-a.avg_queue_per_store;});
 
-  var peakNote='<div style="font-size:11px;color:#888;margin:4px 0 8px;padding:4px 8px;background:#f0f7ff;border-radius:4px;border:1px solid #d6e8fa">'
-    +'📋 <b>排号数</b> = 各门店当日在小程序/大众点评上的最大排号之和（统计时段：各品牌营业时间）<br>'
-    +'💡 建议仅关注用餐高峰期（午市11:00-14:00，晚市17:00-21:00）的排号数据，后续版本将支持高峰期筛选</div>';
+  var peakNote='<div style="font-size:12px;color:#c62828;margin:0 0 12px;padding:10px 14px;background:#ffebee;border-radius:6px;border:1px solid #ef9a9a">'
+    +'⚠️ <b>关于排号数</b>：排号数来源于每小时小程序/大众点评上的取号情况，存在同一号在不同时段被重复计算的可能性，因此排号数比真实数据偏高，在此仅供参考（统计时段：各品牌营业时间）</div>';
 
   var bjNote=(fCity==='北京')?'<div style="font-size:11px;color:#e67e22;margin:0 0 8px;padding:4px 8px;background:#fff7e6;border-radius:4px;border:1px solid #ffe0b2">⚠️ 八合里目前在北京无门店</div>':'';
 
@@ -1348,8 +1360,8 @@ function renderHpSumQueue(fDateFrom,fDateTo,fCity,fBrand){
     +'<div class="kpi"><div class="kl">总排号数'+cityLabel+'<span class="metric-note">所选时段内各品牌排号累计之和</span></div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_queue;},0))+'</div></div>'
     +'<div class="kpi"><div class="kl">门店数'+cityLabel+'</div><div class="kv">'+fmtInt(brands.reduce(function(s,r){return s+r.total_stores;},0)/Math.max(brands[0]?brands[0].days:1,1))+'</div></div>'
     +'</div>'
-    +'<div class="g2"><div class="card"><h3>品牌排号数对比'+cityLabel+'</h3>'
-    +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">排号数 = 所选时段内各门店每日最大排号的累计之和</div>'
+    +'<div class="g2"><div class="card"><h3>品牌店均日均排号数对比'+cityLabel+'</h3>'
+    +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">店均日均排号数 = 所选时段内总排号数÷门店数÷天数</div>'
     +'<div id="hpq1"></div></div>'
     +'<div class="card"><h3>品牌门店数对比'+cityLabel+'</h3>'
     +''
@@ -1365,7 +1377,7 @@ function renderHpSumQueue(fDateFrom,fDateTo,fCity,fBrand){
     +'<th>排号时段占比<br><span style="font-size:10px;color:#999;font-weight:400">有排号记录的小时数÷营业总小时数</span></th>'
     +'</tr></thead><tbody id="hpqTbl"></tbody></table></div></div>';
 
-  drawBarH(document.getElementById('hpq1'),brands,'total_queue','brand',fmtInt);
+  drawBarH(document.getElementById('hpq1'),brands,'avg_queue_per_store','brand',fmtInt);
   var storeView=brands.map(function(b){return{brand:b.brand,avg_stores:Math.round(b.total_stores/b.days)};}).sort(function(a,b){return b.avg_stores-a.avg_stores;});
   drawBarH(document.getElementById('hpq2'),storeView,'avg_stores','brand',fmtInt);
   alignBarHeights(document.getElementById('sp-hps_queue'));
@@ -1654,8 +1666,8 @@ function renderHpBQueue(bid,brand,fDateFrom,fDateTo,fCity){
   });
   cities.sort(function(a,b){return b.avg_per_store-a.avg_per_store;});
 
-  el.innerHTML='<div style="font-size:11px;color:#888;margin:0 0 8px;padding:4px 8px;background:#f0f7ff;border-radius:4px;border:1px solid #d6e8fa">'
-    +'📋 <b>排号数</b> = 各门店当日在小程序/大众点评上的最大排号之和（统计时段：各品牌营业时间）</div>'
+  el.innerHTML='<div style="font-size:12px;color:#c62828;margin:0 0 12px;padding:10px 14px;background:#ffebee;border-radius:6px;border:1px solid #ef9a9a">'
+    +'⚠️ <b>关于排号数</b>：排号数来源于每小时小程序/大众点评上的取号情况，存在同一号在不同时段被重复计算的可能性，因此排号数比真实数据偏高，在此仅供参考（统计时段：各品牌营业时间）</div>'
     +'<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">总排号数<span class="metric-note">所选时段内累计</span></div><div class="kv">'+fmtInt(totalQ)+'</div></div>'
     +'<div class="kpi"><div class="kl">门店数</div><div class="kv">'+fmtInt(totalS)+'</div></div>'
