@@ -1655,6 +1655,13 @@ function renderHpSumExpand(fDateFrom,fDateTo,fCity,fBrand){
     });
     storeTblHtml+='</tr>';
   });
+  // Total row
+  storeTblHtml+='<tr style="background:#fff3e0;font-weight:700"><td>总计</td>';
+  allMonths.forEach(function(m){
+    var total=0;filteredBrands.forEach(function(b){var v=monthlyStores[b+'|'+m];if(v)total+=v.stores;});
+    storeTblHtml+='<td style="text-align:center">'+total+'</td>';
+  });
+  storeTblHtml+='</tr>';
   storeTblHtml+='</tbody></table></div></div>';
 
   el.innerHTML='<div class="kpi-row">'
@@ -1899,10 +1906,25 @@ function renderHpBExpand(bid,brand,fDateFrom,fDateTo,fCity){
     cm[key]=Math.max(cm[key]||0,r.store_count||0);
   });
 
+  var latest=months[months.length-1]||'';
+  // Sort cities by latest month store count descending
+  var sortedCities=cities.slice().sort(function(a,b){
+    var va=cm[a+'|'+latest]||0, vb=cm[b+'|'+latest]||0;
+    return vb-va||a.localeCompare(b);
+  });
+  // Compute monthly totals
+  var monthTotals={};months.forEach(function(m){
+    var t=0;cities.forEach(function(c){t+=(cm[c+'|'+m]||0);});monthTotals[m]=t;
+  });
+
   var matrixHtml='<div class="card"><h3>城市覆盖矩阵 ('+cities.length+' 城市 × '+months.length+' 月)</h3><div class="scroll-table"><table><thead><tr><th>城市</th>';
   months.forEach(function(m){matrixHtml+='<th>'+m+'</th>';});
   matrixHtml+='</tr></thead><tbody>';
-  cities.forEach(function(c){
+  // Total row
+  matrixHtml+='<tr style="background:#fff3e0;font-weight:700"><td>总计</td>';
+  months.forEach(function(m){matrixHtml+='<td style="text-align:center">'+monthTotals[m]+'</td>';});
+  matrixHtml+='</tr>';
+  sortedCities.forEach(function(c){
     matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
     months.forEach(function(m){
       var v=cm[c+'|'+m]||0;
@@ -1913,7 +1935,6 @@ function renderHpBExpand(bid,brand,fDateFrom,fDateTo,fCity){
   });
   matrixHtml+='</tbody></table></div></div>';
 
-  var latest=months[months.length-1]||'';
   var latestD=cd.filter(function(r){return r.date.slice(0,7)===latest;});
   var latestCities=[...new Set(latestD.map(function(r){return r.city;}))];
   var totalStores=0;
