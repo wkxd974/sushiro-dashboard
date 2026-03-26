@@ -421,8 +421,8 @@ tr:hover td{background:#faf9f7}
         <div class="card" style="padding:16px;margin-bottom:14px">
           <div style="display:flex;gap:24px;font-size:13px;align-items:center">
             <span><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#E04040;margin-right:4px;vertical-align:middle"></span>仅海底捞</span>
-            <span><span id="cmpLegendBrand" style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#A06850;margin-right:4px;vertical-align:middle"></span><span id="cmpLegendLabel">仅巴奴</span></span>
-            <span><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#8B6E50;margin-right:4px;vertical-align:middle"></span>重叠区域</span>
+            <span><span id="cmpLegendBrand" style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#3377CC;margin-right:4px;vertical-align:middle"></span><span id="cmpLegendLabel">仅巴奴</span></span>
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#8B45A6;margin-right:4px;vertical-align:middle"></span>重叠区域</span>
           </div>
         </div>
         <div class="card" style="padding:0">
@@ -622,7 +622,7 @@ function selectCmpBrand(brand) {
   document.querySelectorAll('.macro-cmp-btn').forEach(function(el){
     el.classList.toggle('active', el.getAttribute('data-brand') === brand);
   });
-  document.getElementById('cmpLegendBrand').style.background = MACRO_BRAND_COLORS[brand] || '#4A82A8';
+  document.getElementById('cmpLegendBrand').style.background = '#3377CC';
   document.getElementById('cmpLegendLabel').textContent = '仅' + brand;
   renderMap2();
 }
@@ -748,8 +748,8 @@ function renderMap2() {
   var maxVal = 0;
 
   var hdlColor = '#E04040';
-  var brdColor = MACRO_BRAND_COLORS[brand] || '#4A82A8';
-  var overlapColor = '#8B6E50';
+  var brdColor = '#3377CC';
+  var overlapColor = '#8B45A6';
 
   Object.keys(allProvs).forEach(function(prov) {
     var hc = hdlData[prov] ? hdlData[prov].total : 0;
@@ -794,8 +794,8 @@ function renderMap2() {
       roam: false,
       label: { show: false },
       emphasis: {
-        label: { show: true, fontSize: 12, color: '#333' },
-        itemStyle: { areaColor: '#FFD700' }
+        label: { show: false },
+        itemStyle: { areaColor: undefined }
       },
       itemStyle: {
         borderColor: '#fff',
@@ -803,19 +803,14 @@ function renderMap2() {
         areaColor: '#f0efed'
       },
       data: data.map(function(d) {
-        var baseC, maxC;
+        var color;
         if(d.type === 'both') {
-          baseC = '#D9CFC4';
-          maxC = overlapColor;
+          color = overlapColor;
         } else if(d.type === 'hdl') {
-          baseC = '#F5D0D0';
-          maxC = hdlColor;
+          color = hdlColor;
         } else {
-          baseC = lightenColor(brdColor, 0.7);
-          maxC = brdColor;
+          color = brdColor;
         }
-        var ratio = Math.min(d.value / Math.max(maxVal * 0.5, 1), 1);
-        var color = interpolateColor(baseC, maxC, ratio);
         return {
           name: d.name,
           value: d.value,
@@ -961,6 +956,7 @@ function macroTurnoverRender() {
   }).sort();
 
   if(filteredDates.length === 0) {
+    if(turnoverChart) { turnoverChart.dispose(); turnoverChart = null; }
     var container = document.getElementById('turnoverChart');
     if(container) container.innerHTML = '<div style="color:#999;text-align:center;padding:60px">暂无数据</div>';
     return;
@@ -1067,15 +1063,16 @@ function macroQueueRender() {
   var container = document.getElementById('queueMapsContainer');
   if(!container) return;
 
-  // Build HTML for 9 brand maps - 1 per row, full width
-  var html = '';
+  // Build HTML for 9 brand maps - 2 per row
+  var html = '<div style="display:flex;flex-wrap:wrap;gap:14px">';
   MACRO_BRANDS.forEach(function(brand) {
     var divId = 'queueMap_' + brand;
-    html += '<div class="card" style="padding:0;margin-bottom:14px">'
-      + '<div style="padding:14px;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:600;color:' + (MACRO_BRAND_COLORS[brand] || '#333') + '">' + brand + ' 店均排号数分布</div>'
-      + '<div id="' + divId + '" style="width:100%;height:550px"></div>'
+    html += '<div class="card" style="padding:0;flex:1 1 calc(50% - 7px);min-width:400px">'
+      + '<div style="padding:12px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:' + (MACRO_BRAND_COLORS[brand] || '#333') + '">' + brand + ' 店均排号数分布</div>'
+      + '<div id="' + divId + '" style="width:100%;height:500px"></div>'
       + '</div>';
   });
+  html += '</div>';
   container.innerHTML = html;
 
   // For each brand, aggregate queue data by province and render map
