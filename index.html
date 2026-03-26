@@ -71,6 +71,12 @@ tr:hover td{background:#faf9f7}
 .loading{text-align:center;padding:60px;color:#999}
 .loading .spin{display:inline-block;width:24px;height:24px;border:3px solid #eee;border-top-color:#999;border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+.macro-brand-btn{display:inline-block;padding:6px 14px;margin:3px;border:1px solid #ddd;border-radius:16px;font-size:12px;cursor:pointer;background:#fff;color:#666;transition:all .15s}
+.macro-brand-btn:hover{border-color:#999;color:#333}
+.macro-brand-btn.active{background:#2c2c2c;color:#fff;border-color:#2c2c2c}
+.macro-cmp-btn{display:inline-block;padding:6px 14px;margin:3px;border:1px solid #ddd;border-radius:16px;font-size:12px;cursor:pointer;background:#fff;color:#666;transition:all .15s}
+.macro-cmp-btn:hover{border-color:#999;color:#333}
+.macro-cmp-btn.active{background:#2c2c2c;color:#fff;border-color:#2c2c2c}
 .matrix-cell{display:inline-block;width:18px;height:18px;border-radius:3px;margin:1px;font-size:8px;text-align:center;line-height:18px;color:#fff;cursor:pointer}
 .heatmap-row{display:flex;align-items:center;gap:2px;margin-bottom:2px}
 .heatmap-label{width:60px;font-size:10px;text-align:right;margin-right:4px;color:#777;flex-shrink:0}
@@ -96,6 +102,13 @@ tr:hover td{background:#faf9f7}
   <div class="nav-section">
     <div class="nav-header">巴奴火锅</div>
     <div class="nav-item" onclick="navTo('banu')"><span class="nav-dot"></span>巴奴看板</div>
+  </div>
+
+  <div class="nav-divider"></div>
+
+  <div class="nav-section">
+    <div class="nav-header">宏观对比</div>
+    <div class="nav-item" onclick="navTo('macro_dist')"><span class="nav-dot"></span>门店分布</div>
   </div>
 
   <div class="nav-divider"></div>
@@ -354,9 +367,97 @@ tr:hover td{background:#faf9f7}
       <div id="sp-hp_芈重山_heat" class="hidden"></div>
       <div id="sp-hp_芈重山_expand" class="hidden"></div>
     </div>
+
+    <!-- ====== MACRO DISTRIBUTION SECTION ====== -->
+    <div id="sec-macro_dist" class="hidden">
+      <div class="tabs">
+        <div class="tab active" onclick="macroDistTab('dist')">门店分布</div>
+        <div class="tab" onclick="macroDistTab('cmp')">海底捞对比</div>
+      </div>
+      <div id="macroTab1">
+        <div class="card" style="padding:16px;margin-bottom:14px">
+          <div style="margin-bottom:8px;font-size:12px;color:#888">选择品牌</div>
+          <div id="macroBrandBtns">
+            <span class="macro-brand-btn active" data-brand="全部" onclick="selectMacroBrand('全部')">全部</span>
+            <span class="macro-brand-btn" data-brand="巴奴" onclick="selectMacroBrand('巴奴')">巴奴</span>
+            <span class="macro-brand-btn" data-brand="三出山" onclick="selectMacroBrand('三出山')">三出山</span>
+            <span class="macro-brand-btn" data-brand="八合里" onclick="selectMacroBrand('八合里')">八合里</span>
+            <span class="macro-brand-btn" data-brand="左庭右院" onclick="selectMacroBrand('左庭右院')">左庭右院</span>
+            <span class="macro-brand-btn" data-brand="朱光玉" onclick="selectMacroBrand('朱光玉')">朱光玉</span>
+            <span class="macro-brand-btn" data-brand="朱富贵" onclick="selectMacroBrand('朱富贵')">朱富贵</span>
+            <span class="macro-brand-btn" data-brand="潮发" onclick="selectMacroBrand('潮发')">潮发</span>
+            <span class="macro-brand-btn" data-brand="熊喵来了" onclick="selectMacroBrand('熊喵来了')">熊喵来了</span>
+            <span class="macro-brand-btn" data-brand="芈重山" onclick="selectMacroBrand('芈重山')">芈重山</span>
+          </div>
+        </div>
+        <div class="card" style="padding:0">
+          <div id="mapChart1" style="width:100%;height:600px"></div>
+        </div>
+      </div>
+      <div id="macroTab2" class="hidden">
+        <div class="card" style="padding:16px;margin-bottom:14px">
+          <div style="margin-bottom:8px;font-size:12px;color:#888">选择对比品牌 (与海底捞 1v1)</div>
+          <div id="macroCmpBtns">
+            <span class="macro-cmp-btn active" data-brand="巴奴" onclick="selectCmpBrand('巴奴')">巴奴</span>
+            <span class="macro-cmp-btn" data-brand="三出山" onclick="selectCmpBrand('三出山')">三出山</span>
+            <span class="macro-cmp-btn" data-brand="八合里" onclick="selectCmpBrand('八合里')">八合里</span>
+            <span class="macro-cmp-btn" data-brand="左庭右院" onclick="selectCmpBrand('左庭右院')">左庭右院</span>
+            <span class="macro-cmp-btn" data-brand="朱光玉" onclick="selectCmpBrand('朱光玉')">朱光玉</span>
+            <span class="macro-cmp-btn" data-brand="朱富贵" onclick="selectCmpBrand('朱富贵')">朱富贵</span>
+            <span class="macro-cmp-btn" data-brand="潮发" onclick="selectCmpBrand('潮发')">潮发</span>
+            <span class="macro-cmp-btn" data-brand="熊喵来了" onclick="selectCmpBrand('熊喵来了')">熊喵来了</span>
+            <span class="macro-cmp-btn" data-brand="芈重山" onclick="selectCmpBrand('芈重山')">芈重山</span>
+          </div>
+        </div>
+        <div class="card" style="padding:16px;margin-bottom:14px">
+          <div style="display:flex;gap:24px;font-size:13px;align-items:center">
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#E04040;margin-right:4px;vertical-align:middle"></span>仅海底捞</span>
+            <span><span id="cmpLegendBrand" style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#A06850;margin-right:4px;vertical-align:middle"></span><span id="cmpLegendLabel">仅巴奴</span></span>
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#8B6E50;margin-right:4px;vertical-align:middle"></span>重叠区域</span>
+          </div>
+        </div>
+        <div class="card" style="padding:0">
+          <div id="mapChart2" style="width:100%;height:600px"></div>
+        </div>
+      </div>
+    </div>
   </div><!-- /content -->
 </div><!-- /main-wrap -->
 <div class="tooltip" id="tt"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script>
+// === Macro Comparison Dashboard Variables (declared early) ===
+var chinaGeoLoaded = false;
+
+// === ECharts China Map Initialization ===
+function initChinaMap() {
+  if(typeof echarts === 'undefined') {
+    console.error('ECharts not loaded');
+    return;
+  }
+  // Fetch and register China map
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
+  xhr.onload = function() {
+    if(xhr.status === 200) {
+      try {
+        var geoJSON = JSON.parse(xhr.responseText);
+        echarts.registerMap('china', geoJSON);
+        chinaGeoLoaded = true;
+      } catch(e) {
+        console.error('Failed to parse China map JSON', e);
+      }
+    }
+  };
+  xhr.onerror = function() {
+    console.error('Failed to load China map');
+  };
+  xhr.send();
+}
+// Initialize on page load
+initChinaMap();
+</script>
 
 <script>
 // === Config ===
@@ -387,6 +488,311 @@ function isBanuExcludedStore(name){
   if(!name)return false;
   var n=name.replace(/[-]?闭$/,'').replace(/-闭\）$/,'）');
   return BANU_EXCLUDED_STORES_NORM.indexOf(n)>=0||BANU_EXCLUDED_STORES.indexOf(name)>=0;
+}
+
+// === Store Distribution Data for Macro Dashboard ===
+var STORE_DIST = {"巴奴":{"河南":{"total":70,"cities":{"三门峡":1,"信阳":2,"南阳":4,"周口":1,"商丘":3,"安阳":5,"平顶山":3,"开封":1,"新乡":4,"洛阳":3,"漯河":2,"濮阳":2,"焦作":1,"许昌":2,"郑州":31,"驻马店":3,"鹤壁":2}},"河北":{"total":12,"cities":{"保定":2,"唐山":1,"廊坊":1,"石家庄":4,"邯郸":4}},"江苏":{"total":44,"cities":{"南京":9,"南通":2,"常州":5,"扬州":1,"无锡":10,"泰州":1,"淮安":1,"盐城":1,"苏州":12,"连云港":1,"镇江":1}},"北京":{"total":22,"cities":{"北京":22}},"上海":{"total":7,"cities":{"上海":7}},"陕西":{"total":10,"cities":{"咸阳":1,"西安":9}},"广东":{"total":18,"cities":{"东莞":2,"佛山":1,"广州":2,"惠州":1,"汕头":1,"江门":1,"深圳":10}},"湖北":{"total":10,"cities":{"武汉":10}},"安徽":{"total":7,"cities":{"合肥":6,"芜湖":1}},"天津":{"total":5,"cities":{"天津":5}},"云南":{"total":1,"cities":{"昆明":1}},"山西":{"total":4,"cities":{"太原":3,"长治":1}},"山东":{"total":9,"cities":{"临沂":1,"济南":3,"淄博":1,"菏泽":1,"青岛":3}},"浙江":{"total":13,"cities":{"嘉兴":2,"杭州":10,"湖州":1}}},"三出山":{"浙江":{"total":10,"cities":{"义乌":1,"台州":1,"嘉兴":1,"宁波":1,"杭州":3,"温州":2,"金华":1}},"广东":{"total":5,"cities":{"深圳":5}},"陕西":{"total":3,"cities":{"西安":3}},"湖南":{"total":2,"cities":{"长沙":2}},"江苏":{"total":8,"cities":{"南京":4,"南通":1,"常州":1,"苏州":2}},"湖北":{"total":4,"cities":{"武汉":4}},"安徽":{"total":2,"cities":{"合肥":2}},"北京":{"total":5,"cities":{"北京":5}},"河南":{"total":1,"cities":{"郑州":1}},"上海":{"total":6,"cities":{"上海":6}},"广西":{"total":1,"cities":{"南宁":1}}},"八合里":{"广东":{"total":116,"cities":{"东莞":5,"中山":1,"佛山":1,"广州":20,"惠州":4,"惠阳":2,"深圳":80,"肇庆":1,"顺德区":2}},"陕西":{"total":7,"cities":{"西安":7}},"上海":{"total":11,"cities":{"上海":11}},"江苏":{"total":4,"cities":{"南京":2,"苏州":2}},"四川":{"total":2,"cities":{"成都":2}},"浙江":{"total":2,"cities":{"杭州":2}},"江西":{"total":3,"cities":{"南昌":2,"赣州":1}},"安徽":{"total":3,"cities":{"合肥":3}},"湖南":{"total":1,"cities":{"长沙":1}}},"左庭右院":{"江苏":{"total":41,"cities":{"南京":15,"南通":3,"吴江":1,"常州":5,"常熟":2,"无锡":2,"昆山":1,"江阴":1,"泰州":1,"海门区":1,"苏州":9}},"上海":{"total":77,"cities":{"上海":76,"崇明区":1}},"浙江":{"total":15,"cities":{"嘉兴":2,"宁波":3,"杭州":7,"柯桥区":1,"桐乡":1,"绍兴":1}},"北京":{"total":15,"cities":{"北京":15}}},"朱光玉":{"江苏":{"total":16,"cities":{"南京":2,"南通":1,"宜兴":1,"常熟":1,"张家港":1,"无锡":1,"昆山":1,"江阴":1,"沭阳县":1,"盐城":1,"苏州":1,"连云港":2,"通州区":1,"镇江":1}},"宁夏":{"total":10,"cities":{"同心县":1,"吴忠":2,"固原":1,"石嘴山":1,"贺兰县":1,"银川":4}},"广东":{"total":6,"cities":{"广州":1,"深圳":3,"珠海":2}},"福建":{"total":8,"cities":{"厦门":3,"宁德":1,"晋江":1,"泉州":1,"漳州":1,"福州":1}},"安徽":{"total":18,"cities":{"六安":2,"合肥":4,"巢湖":1,"庐江县":1,"无为":1,"淮南":1,"滁州":1,"肥西县":1,"舒城县":1,"蚌埠":1,"长丰县":1,"阜阳":1,"霍邱县":1,"黄山":1}},"重庆":{"total":6,"cities":{"云阳县":1,"奉节县":1,"巫山县":1,"涪陵区":1,"重庆":2}},"河北":{"total":1,"cities":{"邯郸":1}},"新疆":{"total":5,"cities":{"乌鲁木齐":2,"伊宁":1,"克拉玛依":1,"库尔勒":1}},"河南":{"total":4,"cities":{"南阳":1,"洛阳":1,"郑州":1,"镇平县":1}},"湖北":{"total":9,"cities":{"大冶":1,"恩施":1,"武汉":5,"荆州":1,"鄂州":1}},"四川":{"total":9,"cities":{"乐山":1,"南充":1,"巴州区":1,"成都":2,"简阳":1,"绵阳":1,"西昌":2}},"陕西":{"total":2,"cities":{"宝鸡":1,"西安":1}},"湖南":{"total":1,"cities":{"郴州":1}},"云南":{"total":4,"cities":{"昆明":3,"玉溪":1}},"浙江":{"total":3,"cities":{"桐乡":1,"湖州":1,"金华":1}},"内蒙古":{"total":2,"cities":{"乌海":1,"呼和浩特":1}},"上海":{"total":6,"cities":{"上海":6}},"北京":{"total":1,"cities":{"北京":1}},"江西":{"total":2,"cities":{"南昌":1,"景德镇":1}},"山西":{"total":2,"cities":{"临汾":1,"榆次区":1}},"山东":{"total":4,"cities":{"临沂":1,"威海":1,"淄博":1,"烟台":1}},"贵州":{"total":1,"cities":{"盘州":1}},"海南":{"total":4,"cities":{"三亚":2,"海口":2}},"甘肃":{"total":1,"cities":{"兰州":1}}},"朱富贵":{"福建":{"total":22,"cities":{"三明":1,"厦门":4,"宁德":1,"泉州":2,"漳州":1,"福州":11,"莆田":1,"龙岩":1}},"浙江":{"total":8,"cities":{"台州":1,"宁波":2,"杭州":2,"温州":3}}},"潮发":{"广东":{"total":125,"cities":{"东莞":6,"中山":2,"佛山":14,"广州":74,"深圳":29}}},"熊喵来了":{"辽宁":{"total":42,"cities":{"丹东":1,"大连":6,"庄河":1,"抚顺":2,"新民":1,"普兰店区":1,"朝阳":1,"本溪":1,"沈阳":16,"瓦房店":1,"盘锦":3,"营口":2,"辽阳":1,"锦州":2,"阜新":1,"鞍山":2}},"山西":{"total":3,"cities":{"大同":1,"晋城":1,"榆次区":1}},"河北":{"total":37,"cities":{"三河":1,"任丘":2,"保定":3,"唐山":5,"定州":1,"廊坊":1,"张家口":1,"承德":2,"昌黎县":1,"永清县":1,"涿州":1,"滦南县":1,"滦州":1,"玉田县":1,"石家庄":2,"秦皇岛":1,"衡水":3,"辛集":1,"迁安":1,"遵化":1,"邢台":1,"邯郸":2,"高碑店":1,"魏县":1,"黄骅":1}},"山东":{"total":46,"cities":{"东营":2,"临沂":2,"周村":1,"巨野县":1,"德州":1,"新泰":1,"日照":1,"沂水县":1,"泰安":1,"济南":7,"济宁":2,"淄博":3,"滕州":1,"滨州":1,"烟台":3,"胶州":1,"莱芜":1,"莱西":1,"菏泽":2,"薛城":1,"诸城":1,"青岛":8,"青州":1,"齐河县":1,"龙口":1}},"内蒙古":{"total":14,"cities":{"乌兰察布":1,"乌兰浩特":1,"乌海":1,"包头":2,"呼伦贝尔":1,"呼和浩特":2,"巴彦淖尔":1,"赤峰":2,"通辽":1,"鄂尔多斯":1,"锡林浩特":1}},"天津":{"total":15,"cities":{"天津":12,"宁河区":1,"武清区":1,"蓟州区":1}},"黑龙江":{"total":24,"cities":{"佳木斯":1,"双城区":1,"哈尔滨":12,"大庆":2,"牡丹江":1,"绥化":2,"阿城区":1,"鸡西":1,"鹤岗":1,"齐齐哈尔":2}},"吉林":{"total":31,"cities":{"公主岭":1,"吉林":2,"四平":1,"延吉":1,"松原":1,"梅河口":1,"辽源":1,"通化":1,"长春":22}},"北京":{"total":7,"cities":{"北京":5,"密云区":1,"怀柔区":1}},"陕西":{"total":1,"cities":{"榆林":1}}},"芈重山":{"北京":{"total":21,"cities":{"北京":21}},"广东":{"total":8,"cities":{"广州":6,"深圳":2}},"上海":{"total":2,"cities":{"上海":2}},"天津":{"total":1,"cities":{"天津":1}},"安徽":{"total":1,"cities":{"合肥":1}},"重庆":{"total":1,"cities":{"重庆":1}}},"海底捞":{"重庆":{"total":12,"cities":{"万州":1,"重庆":11}},"海南":{"total":11,"cities":{"三亚":4,"儋州":1,"海口":6}},"福建":{"total":52,"cities":{"三明":1,"仙游":1,"南安":1,"南平":1,"厦门":14,"宁德":1,"安溪":1,"德化":1,"惠安":1,"晋江":3,"泉州":5,"漳州":2,"漳浦":1,"石狮":2,"福州":12,"福清":1,"莆田":2,"霞浦":1,"龙岩":1}},"河南":{"total":71,"cities":{"三门峡":1,"信阳":2,"南阳":3,"周口":2,"商丘":2,"安阳":2,"巩义":1,"平顶山":1,"开封":2,"新乡":2,"新密":1,"永城":1,"汝州":1,"洛阳":6,"济源":1,"漯河":2,"濮阳":1,"焦作":2,"禹州":1,"荥阳":1,"许昌":2,"郑州":29,"长葛":1,"项城":1,"驻马店":2,"鹤壁":1}},"上海":{"total":64,"cities":{"上海":64}},"江西":{"total":26,"cities":{"上饶":2,"九江":2,"南昌":11,"吉安":2,"宜春":1,"抚州":2,"新余":1,"景德镇":1,"萍乡":1,"赣州":2,"鹰潭":1}},"江苏":{"total":155,"cities":{"东台":1,"东海":1,"丰县":1,"丹阳":2,"兴化":1,"南京":31,"南通":8,"句容":1,"启东":2,"太仓":2,"如东":1,"如皋":1,"宜兴":2,"宝应":1,"宿迁":4,"常州":7,"常熟":4,"张家港":3,"徐州":5,"扬中":1,"扬州":6,"新沂":1,"无锡":8,"昆山":3,"江阴":3,"沛县":1,"泗阳":1,"泰兴":1,"泰州":4,"海安":1,"海门":1,"涟水":1,"淮安":5,"溧阳":1,"盐城":7,"盱眙":1,"睢宁":1,"苏州":21,"连云港":4,"邳州":1,"镇江":2,"靖江":1,"高邮":1}},"广东":{"total":169,"cities":{"东莞":16,"中山":6,"云浮":1,"佛山":16,"台山":1,"吴川":1,"四会":1,"广州":37,"廉江":1,"惠州":8,"揭阳":1,"普宁":2,"梅州":3,"汕头":5,"汕尾":2,"江门":3,"河源":1,"深圳":42,"清远":2,"湛江":4,"潮州":2,"珠海":5,"肇庆":2,"茂名":3,"阳江":1,"韶关":2,"鹤山":1}},"山东":{"total":78,"cities":{"东营":1,"临沂":4,"兰陵":1,"威海":3,"寿光":1,"平度":1,"德州":3,"招远":1,"日照":2,"枣庄":1,"泰安":2,"济南":15,"济宁":4,"淄博":4,"滕州":1,"滨州":1,"潍坊":3,"烟台":5,"聊城":2,"胶州":1,"莒县":1,"菏泽":2,"诸城":1,"邹城":1,"青岛":14,"青州":1,"齐河":1,"龙口":1}},"浙江":{"total":116,"cities":{"东阳":1,"临海":1,"丽水":1,"义乌":3,"乐清":1,"仙居":1,"余姚":2,"兰溪":1,"台州":4,"嘉兴":3,"嘉善":1,"奉化":1,"宁波":12,"安吉":1,"嵊州":1,"平湖":2,"平阳":1,"德清":1,"慈溪":2,"新昌":1,"杭州":42,"桐乡":1,"永嘉":1,"永康":1,"海宁":1,"海盐":1,"温岭":1,"温州":6,"湖州":4,"玉环":1,"瑞安":1,"绍兴":5,"舟山":1,"苍南":1,"衢州":2,"诸暨":2,"象山":1,"金华":2,"长兴":1}},"山西":{"total":26,"cities":{"临汾":2,"吕梁":2,"大同":1,"太原":13,"忻州":1,"晋中":1,"晋城":1,"朔州":1,"运城":2,"长治":1,"阳泉":1}},"安徽":{"total":54,"cities":{"临泉":1,"亳州":2,"六安":2,"利辛":1,"合肥":20,"天长":1,"太和":1,"安庆":1,"宣城":1,"宿州":2,"巢湖":1,"庐江":1,"涡阳":1,"淮北":1,"淮南":1,"滁州":2,"肥东":1,"肥西":1,"舒城":1,"芜湖":4,"蒙城":1,"蚌埠":2,"铜陵":1,"阜阳":2,"霍邱":1,"马鞍山":1}},"辽宁":{"total":21,"cities":{"丹东":1,"大连":5,"抚顺":1,"沈阳":10,"营口":1,"辽阳":1,"锦州":1,"鞍山":1}},"云南":{"total":24,"cities":{"丽江":2,"保山":1,"大理":2,"文山":1,"昆明":13,"昭通":1,"普洱":1,"曲靖":1,"玉溪":1,"西双版纳":1}},"内蒙古":{"total":10,"cities":{"乌海":1,"包头":1,"呼和浩特":3,"巴彦淖尔":1,"赤峰":1,"通辽":1,"鄂尔多斯":2}},"新疆":{"total":4,"cities":{"乌鲁木齐":2,"喀什":1,"库尔勒":1}},"四川":{"total":40,"cities":{"乐山":1,"南充":1,"宜宾":1,"崇州":1,"广元":1,"德阳":1,"成都":26,"攀枝花":1,"泸州":1,"眉山":1,"简阳":1,"绵阳":2,"自贡":1,"遂宁":1}},"贵州":{"total":11,"cities":{"仁怀":1,"兴义":1,"凯里":1,"贵阳":7,"遵义":1}},"湖北":{"total":63,"cities":{"仙桃":1,"十堰":2,"咸宁":1,"大冶":1,"天门":1,"孝感":2,"宜昌":3,"恩施":1,"武汉":37,"潜江":1,"监利":1,"荆州":2,"荆门":2,"襄阳":3,"鄂州":1,"随州":1,"黄冈":1,"黄石":2}},"河北":{"total":44,"cities":{"任丘":1,"保定":4,"唐山":4,"固安":1,"定州":1,"容城":1,"廊坊":2,"张家口":1,"承德":1,"武安":1,"沧州":1,"涿州":1,"燕郊":3,"石家庄":9,"秦皇岛":2,"衡水":2,"辛集":1,"迁安":1,"遵化":1,"邢台":2,"邯郸":3,"黄骅":1}},"甘肃":{"total":16,"cities":{"兰州":7,"天水":1,"定西":1,"平凉":1,"庆阳":1,"张掖":1,"武威":1,"白银":1,"酒泉":1,"金昌":1}},"陕西":{"total":73,"cities":{"咸阳":4,"商洛":1,"安康":1,"宝鸡":3,"延安":2,"彬州":1,"杨凌":1,"榆林":2,"汉中":1,"渭南":2,"神木":1,"蒲城":1,"西安":51,"铜川":1,"韩城":1}},"北京":{"total":76,"cities":{"北京":76}},"广西":{"total":26,"cities":{"北海":2,"南宁":8,"柳州":3,"桂林":4,"梧州":1,"玉林":2,"百色":1,"贵港":1,"贺州":1,"钦州":2,"防城港":1}},"吉林":{"total":12,"cities":{"吉林":2,"四平":1,"延吉":1,"松原":1,"通化":1,"长春":6}},"湖南":{"total":39,"cities":{"吉首":1,"娄底":1,"岳阳":2,"常德":2,"张家界":1,"怀化":1,"株洲":2,"永州":1,"湘潭":2,"益阳":1,"衡阳":2,"邵阳":1,"郴州":1,"长沙":21}},"黑龙江":{"total":10,"cities":{"哈尔滨":7,"大庆":1,"牡丹江":1,"齐齐哈尔":1}},"宁夏":{"total":8,"cities":{"固原":1,"石嘴山":1,"银川":6}},"天津":{"total":31,"cities":{"天津":31}},"西藏":{"total":1,"cities":{"拉萨":1}},"青海":{"total":2,"cities":{"西宁":2}}}};
+
+// === Macro Comparison Dashboard Variables ===
+var macroDistChart1 = null;
+var macroDistChart2 = null;
+var macroCurBrand = '全部';
+var macroCmpBrand = '巴奴';
+
+var MACRO_BRANDS = ['巴奴','三出山','八合里','左庭右院','朱光玉','朱富贵','潮发','熊喵来了','芈重山'];
+
+var MACRO_BRAND_COLORS = {
+  '巴奴': '#A06850',
+  '三出山': '#C75050',
+  '八合里': '#4A82A8',
+  '左庭右院': '#5A9E6E',
+  '朱光玉': '#D0894A',
+  '朱富贵': '#9070B0',
+  '潮发': '#3E9995',
+  '熊喵来了': '#D4A040',
+  '芈重山': '#C46888',
+  '海底捞': '#E04040'
+};
+
+function macroDistTab(t) {
+  document.querySelectorAll('#sec-macro_dist .tab').forEach(function(el){ el.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.getElementById('macroTab1').classList.add('hidden');
+  document.getElementById('macroTab2').classList.add('hidden');
+  document.getElementById('macroTab' + (t === 'dist' ? '1' : '2')).classList.remove('hidden');
+  if(t === 'dist') renderMap1();
+  else renderMap2();
+}
+
+function macroDistRender() {
+  if(typeof echarts === 'undefined') {
+    console.error('ECharts not available');
+    return;
+  }
+  if(!chinaGeoLoaded) {
+    setTimeout(macroDistRender, 500);
+    return;
+  }
+  var tab2Visible = !document.getElementById('macroTab2').classList.contains('hidden');
+  if(tab2Visible) renderMap2();
+  else renderMap1();
+}
+
+function selectMacroBrand(brand) {
+  macroCurBrand = brand;
+  document.querySelectorAll('.macro-brand-btn').forEach(function(el){
+    el.classList.toggle('active', el.getAttribute('data-brand') === brand);
+  });
+  renderMap1();
+}
+
+function selectCmpBrand(brand) {
+  macroCmpBrand = brand;
+  document.querySelectorAll('.macro-cmp-btn').forEach(function(el){
+    el.classList.toggle('active', el.getAttribute('data-brand') === brand);
+  });
+  document.getElementById('cmpLegendBrand').style.background = MACRO_BRAND_COLORS[brand] || '#4A82A8';
+  document.getElementById('cmpLegendLabel').textContent = '仅' + brand;
+  renderMap2();
+}
+
+function renderMap1() {
+  if(typeof echarts === 'undefined' || !chinaGeoLoaded) return;
+  var container = document.getElementById('mapChart1');
+  if(!container) return;
+  if(!macroDistChart1) {
+    macroDistChart1 = echarts.init(container);
+  }
+
+  var brand = macroCurBrand;
+  var data = [];
+  var maxVal = 0;
+
+  if(brand === '全部') {
+    var provTotals = {};
+    var provDetails = {};
+    MACRO_BRANDS.forEach(function(b) {
+      var bd = STORE_DIST[b];
+      if(!bd) return;
+      Object.keys(bd).forEach(function(prov) {
+        provTotals[prov] = (provTotals[prov] || 0) + bd[prov].total;
+        if(!provDetails[prov]) provDetails[prov] = {};
+        provDetails[prov][b] = bd[prov].total;
+      });
+    });
+    Object.keys(provTotals).forEach(function(prov) {
+      data.push({ name: prov, value: provTotals[prov], details: provDetails[prov] });
+      if(provTotals[prov] > maxVal) maxVal = provTotals[prov];
+    });
+  } else {
+    var bd = STORE_DIST[brand];
+    if(bd) {
+      Object.keys(bd).forEach(function(prov) {
+        data.push({ name: prov, value: bd[prov].total, cities: bd[prov].cities });
+        if(bd[prov].total > maxVal) maxVal = bd[prov].total;
+      });
+    }
+  }
+
+  var baseColor = brand === '全部' ? '#4A82A8' : (MACRO_BRAND_COLORS[brand] || '#4A82A8');
+
+  var option = {
+    title: {
+      text: brand === '全部' ? '全品牌门店分布 (共' + MACRO_BRANDS.length + '个品牌)' : brand + ' 门店分布',
+      left: 'center',
+      top: 10,
+      textStyle: { fontSize: 16, color: '#2c2c2c', fontWeight: 600 }
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: function(params) {
+        if(!params.data || !params.data.value) return params.name + '：暂无门店';
+        var html = '<b>' + params.name + '</b>：' + params.data.value + ' 家<br/>';
+        if(brand === '全部' && params.data.details) {
+          var det = params.data.details;
+          var sorted = Object.keys(det).sort(function(a,b){ return det[b] - det[a]; });
+          sorted.forEach(function(b) {
+            html += '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + (MACRO_BRAND_COLORS[b]||'#999') + ';margin-right:4px"></span>' + b + '：' + det[b] + ' 家<br/>';
+          });
+        } else if(params.data.cities) {
+          var cities = params.data.cities;
+          var sorted = Object.keys(cities).sort(function(a,b){ return cities[b] - cities[a]; });
+          sorted.forEach(function(c) {
+            html += c + '：' + cities[c] + ' 家<br/>';
+          });
+        }
+        return html;
+      }
+    },
+    visualMap: {
+      min: 0,
+      max: Math.max(maxVal, 1),
+      left: 'left',
+      top: 'bottom',
+      text: ['多', '少'],
+      inRange: {
+        color: ['#f0efed', baseColor]
+      },
+      calculable: true
+    },
+    series: [{
+      type: 'map',
+      map: 'china',
+      roam: true,
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 12, color: '#333' },
+        itemStyle: { areaColor: '#FFD700' }
+      },
+      itemStyle: {
+        borderColor: '#fff',
+        borderWidth: 1,
+        areaColor: '#f0efed'
+      },
+      data: data
+    }]
+  };
+
+  macroDistChart1.setOption(option, true);
+  macroDistChart1.resize();
+}
+
+function renderMap2() {
+  if(typeof echarts === 'undefined' || !chinaGeoLoaded) return;
+  var container = document.getElementById('mapChart2');
+  if(!container) return;
+  if(!macroDistChart2) {
+    macroDistChart2 = echarts.init(container);
+  }
+
+  var brand = macroCmpBrand;
+  var hdlData = STORE_DIST['海底捞'] || {};
+  var cmpData = STORE_DIST[brand] || {};
+
+  var allProvs = {};
+  Object.keys(hdlData).forEach(function(p) { allProvs[p] = true; });
+  Object.keys(cmpData).forEach(function(p) { allProvs[p] = true; });
+
+  var data = [];
+  var maxVal = 0;
+
+  var hdlColor = '#E04040';
+  var brdColor = MACRO_BRAND_COLORS[brand] || '#4A82A8';
+  var overlapColor = '#8B6E50';
+
+  Object.keys(allProvs).forEach(function(prov) {
+    var hc = hdlData[prov] ? hdlData[prov].total : 0;
+    var bc = cmpData[prov] ? cmpData[prov].total : 0;
+    var total = hc + bc;
+    var type = (hc > 0 && bc > 0) ? 'both' : (hc > 0 ? 'hdl' : 'brand');
+    data.push({ name: prov, value: total, hdl: hc, brand: bc, type: type });
+    if(total > maxVal) maxVal = total;
+  });
+
+  var option = {
+    title: {
+      text: '海底捞 vs ' + brand + ' 门店分布对比',
+      left: 'center',
+      top: 10,
+      textStyle: { fontSize: 16, color: '#2c2c2c', fontWeight: 600 }
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: function(params) {
+        if(!params.data || !params.data.value) return params.name + '：暂无门店';
+        return '<b>' + params.name + '</b><br/>' +
+          '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + hdlColor + ';margin-right:4px"></span>海底捞：' + params.data.hdl + ' 家<br/>' +
+          '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + brdColor + ';margin-right:4px"></span>' + brand + '：' + params.data.brand + ' 家<br/>' +
+          '合计：' + params.data.value + ' 家';
+      }
+    },
+    visualMap: {
+      show: false,
+      min: 0,
+      max: Math.max(maxVal, 1)
+    },
+    legend: {
+      data: ['海底捞', brand, '重叠区域'],
+      bottom: 10,
+      left: 'center',
+      textStyle: { fontSize: 12 }
+    },
+    series: [{
+      type: 'map',
+      map: 'china',
+      roam: true,
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 12, color: '#333' },
+        itemStyle: { areaColor: '#FFD700' }
+      },
+      itemStyle: {
+        borderColor: '#fff',
+        borderWidth: 1,
+        areaColor: '#f0efed'
+      },
+      data: data.map(function(d) {
+        var baseC, maxC;
+        if(d.type === 'both') {
+          baseC = '#D9CFC4';
+          maxC = overlapColor;
+        } else if(d.type === 'hdl') {
+          baseC = '#F5D0D0';
+          maxC = hdlColor;
+        } else {
+          baseC = lightenColor(brdColor, 0.7);
+          maxC = brdColor;
+        }
+        var ratio = Math.min(d.value / Math.max(maxVal * 0.5, 1), 1);
+        var color = interpolateColor(baseC, maxC, ratio);
+        return {
+          name: d.name,
+          value: d.value,
+          hdl: d.hdl,
+          brand: d.brand,
+          type: d.type,
+          itemStyle: { areaColor: color }
+        };
+      })
+    }]
+  };
+
+  macroDistChart2.setOption(option, true);
+  macroDistChart2.resize();
+}
+
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  return {
+    r: parseInt(hex.substring(0, 2), 16),
+    g: parseInt(hex.substring(2, 4), 16),
+    b: parseInt(hex.substring(4, 6), 16)
+  };
+}
+
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(function(x) {
+    var h = Math.round(Math.max(0, Math.min(255, x))).toString(16);
+    return h.length === 1 ? '0' + h : h;
+  }).join('');
+}
+
+function interpolateColor(c1, c2, t) {
+  var a = hexToRgb(c1), b = hexToRgb(c2);
+  return rgbToHex(
+    a.r + (b.r - a.r) * t,
+    a.g + (b.g - a.g) * t,
+    a.b + (b.b - a.b) * t
+  );
+}
+
+function lightenColor(hex, amount) {
+  var rgb = hexToRgb(hex);
+  return rgbToHex(
+    rgb.r + (255 - rgb.r) * amount,
+    rgb.g + (255 - rgb.g) * amount,
+    rgb.b + (255 - rgb.b) * amount
+  );
 }
 
 // === Sushiro store opening dates (store_id → YYYY-MM-DD) ===
@@ -506,7 +912,7 @@ function navTo(sec) {
   if(secEl) secEl.classList.remove('hidden');
 
   // Update title
-  var titles = {'sushiro':'🍣 寿司郎经营数据看板','banu':'🥘 巴奴火锅经营数据看板','hp_summary':'📊 火锅友商汇总看板'};
+  var titles = {'sushiro':'🍣 寿司郎经营数据看板','banu':'🥘 巴奴火锅经营数据看板','hp_summary':'📊 火锅友商汇总看板','macro_dist':'📍 门店分布对比'};
   BRANDS.forEach(function(b){ titles['hp_'+b] = '🔥 ' + b + ' 数据看板'; });
   document.getElementById('pageTitle').textContent = titles[sec] || sec;
 
@@ -517,6 +923,7 @@ function renderCurrentSection() {
   if(curSection === 'sushiro') sRender();
   else if(curSection === 'banu') bRender();
   else if(curSection === 'hp_summary') hpSumRender();
+  else if(curSection === 'macro_dist') macroDistRender();
   else hpBRender(curSection);
 }
 
@@ -1973,6 +2380,12 @@ function initAllFilters(){
 
 // Auto refresh
 setInterval(function(){loadAllData();}, 10*60*1000);
+
+// Window resize handler for ECharts
+window.addEventListener('resize', function() {
+  if(macroDistChart1) macroDistChart1.resize();
+  if(macroDistChart2) macroDistChart2.resize();
+});
 
 // Boot
 loadAllData();
