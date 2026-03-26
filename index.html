@@ -420,9 +420,7 @@ tr:hover td{background:#faf9f7}
         </div>
         <div class="card" style="padding:16px;margin-bottom:14px">
           <div style="display:flex;gap:24px;font-size:13px;align-items:center">
-            <span><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#E04040;margin-right:4px;vertical-align:middle"></span>仅海底捞</span>
-            <span><span id="cmpLegendBrand" style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#3377CC;margin-right:4px;vertical-align:middle"></span><span id="cmpLegendLabel">仅巴奴</span></span>
-            <span><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#8B45A6;margin-right:4px;vertical-align:middle"></span>重叠区域</span>
+            <span style="color:#666">仅显示海底捞与所选品牌的重叠区域，颜色深浅代表两品牌合计门店数</span>
           </div>
         </div>
         <div class="card" style="padding:0">
@@ -702,7 +700,7 @@ function renderMap1() {
       top: 'bottom',
       text: ['多', '少'],
       inRange: {
-        color: ['#e8e0d8', lightenColor(baseColor, 0.4), baseColor]
+        color: [lightenColor(baseColor, 0.65), lightenColor(baseColor, 0.3), lightenColor(baseColor, 0.1)]
       },
       calculable: true
     },
@@ -744,25 +742,23 @@ function renderMap2() {
   Object.keys(hdlData).forEach(function(p) { allProvs[p] = true; });
   Object.keys(cmpData).forEach(function(p) { allProvs[p] = true; });
 
+  // 只保留重叠区域（海底捞和目标品牌都有门店的省份）
   var data = [];
   var maxVal = 0;
-
-  var hdlColor = '#E04040';
-  var brdColor = '#3377CC';
-  var overlapColor = '#8B45A6';
 
   Object.keys(allProvs).forEach(function(prov) {
     var hc = hdlData[prov] ? hdlData[prov].total : 0;
     var bc = cmpData[prov] ? cmpData[prov].total : 0;
-    var total = hc + bc;
-    var type = (hc > 0 && bc > 0) ? 'both' : (hc > 0 ? 'hdl' : 'brand');
-    data.push({ name: prov, value: total, hdl: hc, brand: bc, type: type });
-    if(total > maxVal) maxVal = total;
+    if(hc > 0 && bc > 0) {
+      var total = hc + bc;
+      data.push({ name: prov, value: total, hdl: hc, brand: bc });
+      if(total > maxVal) maxVal = total;
+    }
   });
 
   var option = {
     title: {
-      text: '海底捞 vs ' + brand + ' 门店分布对比',
+      text: '海底捞 vs ' + brand + ' 重叠区域分布',
       left: 'center',
       top: 10,
       textStyle: { fontSize: 16, color: '#2c2c2c', fontWeight: 600 }
@@ -772,10 +768,21 @@ function renderMap2() {
       formatter: function(params) {
         if(!params.data || !params.data.value) return params.name + '：暂无门店';
         return '<b>' + params.name + '</b><br/>' +
-          '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + hdlColor + ';margin-right:4px"></span>海底捞：' + params.data.hdl + ' 家<br/>' +
-          '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + brdColor + ';margin-right:4px"></span>' + brand + '：' + params.data.brand + ' 家<br/>' +
+          '海底捞：' + params.data.hdl + ' 家<br/>' +
+          brand + '：' + params.data.brand + ' 家<br/>' +
           '合计：' + params.data.value + ' 家';
       }
+    },
+    visualMap: {
+      min: 1,
+      max: Math.max(maxVal, 1),
+      left: 'left',
+      top: 'bottom',
+      text: ['多', '少'],
+      inRange: {
+        color: [lightenColor('#8B45A6', 0.55), lightenColor('#8B45A6', 0.2), '#8B45A6']
+      },
+      calculable: true
     },
     series: [{
       type: 'map',
@@ -783,8 +790,8 @@ function renderMap2() {
       roam: false,
       label: { show: false, emphasis: { show: false } },
       emphasis: {
-        label: { show: false },
-        itemStyle: { borderColor: '#333', borderWidth: 2 }
+        label: { show: true, fontSize: 12, color: '#333' },
+        itemStyle: { areaColor: '#FFD700' }
       },
       select: { label: { show: false }, itemStyle: {} },
       itemStyle: {
@@ -792,28 +799,7 @@ function renderMap2() {
         borderWidth: 1,
         areaColor: '#f0efed'
       },
-      data: data.map(function(d) {
-        // 根据类别选基色，根据门店数量在0.45~1.0之间做深浅
-        var baseR, baseG, baseB;
-        if(d.type === 'both') { baseR=139; baseG=69; baseB=166; }
-        else if(d.type === 'hdl') { baseR=224; baseG=64; baseB=64; }
-        else { baseR=51; baseG=119; baseB=204; }
-        var ratio = maxVal > 0 ? (d.value / maxVal) : 0.5;
-        var t = 0.45 + ratio * 0.55; // 最浅45%，最深100%
-        var r = Math.round(255 - (255 - baseR) * t);
-        var g = Math.round(255 - (255 - baseG) * t);
-        var b = Math.round(255 - (255 - baseB) * t);
-        var areaColor = 'rgb(' + r + ',' + g + ',' + b + ')';
-        return {
-          name: d.name,
-          value: d.value,
-          hdl: d.hdl,
-          brand: d.brand,
-          type: d.type,
-          itemStyle: { areaColor: areaColor },
-          emphasis: { itemStyle: { areaColor: areaColor } }
-        };
-      })
+      data: data
     }]
   };
 
@@ -869,7 +855,7 @@ function renderMapHDL() {
       top: 'bottom',
       text: ['多', '少'],
       inRange: {
-        color: ['#e8e0d8', lightenColor(baseColor, 0.4), baseColor]
+        color: [lightenColor(baseColor, 0.65), lightenColor(baseColor, 0.3), lightenColor(baseColor, 0.1)]
       },
       calculable: true
     },
