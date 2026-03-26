@@ -109,6 +109,7 @@ tr:hover td{background:#faf9f7}
   <div class="nav-section">
     <div class="nav-header">宏观对比</div>
     <div class="nav-item" onclick="navTo('macro_dist')"><span class="nav-dot"></span>门店分布</div>
+    <div class="nav-item" onclick="navTo('macro_turnover')"><span class="nav-dot"></span>翻台率对比</div>
   </div>
 
   <div class="nav-divider"></div>
@@ -390,8 +391,15 @@ tr:hover td{background:#faf9f7}
             <span class="macro-brand-btn" data-brand="芈重山" onclick="selectMacroBrand('芈重山')">芈重山</span>
           </div>
         </div>
-        <div class="card" style="padding:0">
-          <div id="mapChart1" style="width:100%;height:600px"></div>
+        <div style="display:flex;gap:14px">
+          <div class="card" style="padding:0;flex:1">
+            <div style="padding:14px;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:#2c2c2c">竞品品牌分布</div>
+            <div id="mapChart1" style="width:100%;height:550px"></div>
+          </div>
+          <div class="card" style="padding:0;flex:1">
+            <div style="padding:14px;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:#2c2c2c">海底捞分布</div>
+            <div id="mapChartHDL" style="width:100%;height:550px"></div>
+          </div>
         </div>
       </div>
       <div id="macroTab2" class="hidden">
@@ -419,6 +427,53 @@ tr:hover td{background:#faf9f7}
         <div class="card" style="padding:0">
           <div id="mapChart2" style="width:100%;height:600px"></div>
         </div>
+      </div>
+    </div>
+
+    <div id="sec-macro_turnover" class="hidden">
+      <div class="filters">
+        <div class="fg">
+          <label>城市</label>
+          <select id="turnoverCitySelect" onchange="macroTurnoverRender()">
+            <option value="">全部城市</option>
+            <option value="上海">上海</option>
+            <option value="北京">北京</option>
+            <option value="东莞">东莞</option>
+            <option value="佛山">佛山</option>
+            <option value="南京">南京</option>
+            <option value="南通">南通</option>
+            <option value="南阳">南阳</option>
+            <option value="合肥">合肥</option>
+            <option value="天津">天津</option>
+            <option value="太原">太原</option>
+            <option value="安阳">安阳</option>
+            <option value="常州">常州</option>
+            <option value="广州">广州</option>
+            <option value="新乡">新乡</option>
+            <option value="无锡">无锡</option>
+            <option value="杭州">杭州</option>
+            <option value="武汉">武汉</option>
+            <option value="济南">济南</option>
+            <option value="深圳">深圳</option>
+            <option value="石家庄">石家庄</option>
+            <option value="苏州">苏州</option>
+            <option value="西安">西安</option>
+            <option value="邯郸">邯郸</option>
+            <option value="郑州">郑州</option>
+            <option value="青岛">青岛</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>开始日期</label>
+          <input type="date" id="turnoverStartDate" onchange="macroTurnoverRender()">
+        </div>
+        <div class="fg">
+          <label>结束日期</label>
+          <input type="date" id="turnoverEndDate" onchange="macroTurnoverRender()">
+        </div>
+      </div>
+      <div class="card" style="padding:0">
+        <div id="turnoverChart" style="width:100%;height:500px"></div>
       </div>
     </div>
   </div><!-- /content -->
@@ -471,8 +526,15 @@ var STORE_DIST = {"巴奴":{"河南":{"total":70,"cities":{"三门峡":1,"信阳
 // === Macro Comparison Dashboard Variables ===
 var macroDistChart1 = null;
 var macroDistChart2 = null;
+var macroDistChartHDL = null;
+var turnoverChart = null;
 var macroCurBrand = '全部';
 var macroCmpBrand = '巴奴';
+
+// === Haidilao turnover data (national and city-level) ===
+var HDL_NATIONAL_TURNOVER = {"2026-03-25": 2.6844, "2026-03-24": 2.4498, "2026-03-23": 2.4359, "2026-03-22": 4.3901, "2026-03-21": 5.375, "2026-03-20": 4.2523, "2026-03-19": 2.5509, "2026-03-18": 2.6335, "2026-03-17": 2.5077, "2026-03-16": 2.561, "2026-03-15": 4.5011, "2026-03-14": 5.373, "2026-03-13": 4.064, "2026-03-12": 2.5348, "2026-03-11": 2.7428, "2026-03-10": 2.6125, "2026-03-09": 2.5654, "2026-03-08": 5.3777, "2026-03-07": 5.8342, "2026-03-06": 4.591, "2026-03-05": 3.2038, "2026-03-04": 3.8577, "2026-03-03": 4.896, "2026-03-02": 4.027, "2026-03-01": 5.3035, "2026-02-28": 5.3561, "2026-02-27": 4.9375, "2026-02-26": 4.5944, "2026-02-25": 4.9435, "2026-02-24": 5.0789, "2026-02-23": 5.7071, "2026-02-22": 5.7668, "2026-02-21": 5.5119, "2026-02-20": 5.5303, "2026-02-19": 5.4299, "2026-02-18": 5.089, "2026-02-17": 4.6789, "2026-02-16": 2.507, "2026-02-15": 4.4476, "2026-02-14": 6.2002, "2026-02-13": 5.7033, "2026-02-12": 5.4289, "2026-02-11": 5.3889, "2026-02-10": 5.2528, "2026-02-09": 5.4385, "2026-02-08": 5.6476, "2026-02-07": 5.502, "2026-02-06": 4.5468, "2026-02-05": 3.7255, "2026-02-04": 3.6788, "2026-02-03": 3.4623, "2026-02-02": 3.404, "2026-02-01": 4.4666};
+
+var HDL_CITY_TURNOVER = {"2026-03-25": {"上海": 2.6546, "北京": 2.9288, "天津": 2.4678, "合肥": 2.9831, "济南": 2.7461, "青岛": 2.6801, "太原": 2.6986, "东莞": 2.7037, "佛山": 2.667, "广州": 3.0365, "深圳": 2.8577, "南京": 2.7463, "南通": 2.5323, "常州": 2.7925, "无锡": 2.8915, "苏州": 2.7748, "石家庄": 3.357, "邯郸": 2.9415, "南阳": 3.2, "安阳": 3.2353, "新乡": 3.8974, "郑州": 2.6812, "杭州": 3.2778, "武汉": 2.1892, "西安": 2.6224}, "2026-03-24": {"上海": 2.2636, "北京": 2.6175, "天津": 2.3516, "合肥": 2.6131, "济南": 2.629, "青岛": 2.3633, "太原": 2.5996, "东莞": 2.5018, "佛山": 2.3876, "广州": 2.7599, "深圳": 2.5182, "南京": 2.3715, "南通": 2.252, "常州": 2.3942, "无锡": 2.7151, "苏州": 2.4467, "石家庄": 3.0269, "邯郸": 2.8976, "南阳": 3.1278, "安阳": 2.9076, "新乡": 3.7607, "郑州": 2.6047, "杭州": 2.8831, "武汉": 2.0189, "西安": 2.366}, "2026-03-23": {"上海": 2.2583, "北京": 2.4392, "天津": 2.2568, "合肥": 2.5895, "济南": 2.601, "青岛": 2.3379, "太原": 2.5293, "东莞": 2.5229, "佛山": 2.4969, "广州": 2.7997, "深圳": 2.5427, "南京": 2.3357, "南通": 2.1472, "常州": 2.5892, "无锡": 2.6562, "苏州": 2.3535, "石家庄": 3.1295, "邯郸": 2.8439, "南阳": 3.2722, "安阳": 3.0672, "新乡": 4.1795, "郑州": 2.655, "杭州": 2.8979, "武汉": 2.0161, "西安": 2.4288}, "2026-03-22": {"上海": 4.3547, "北京": 4.9028, "天津": 4.3716, "合肥": 4.8696, "济南": 4.7699, "青岛": 4.4936, "太原": 4.4824, "东莞": 5.0952, "佛山": 4.4978, "广州": 5.03, "深圳": 5.2447, "南京": 4.5111, "南通": 4.504, "常州": 5.0249, "无锡": 5.0643, "苏州": 4.9292, "石家庄": 4.9842, "邯郸": 4.2585, "南阳": 4.1833, "安阳": 4.084, "新乡": 4.8291, "郑州": 4.117, "杭州": 5.0898, "武汉": 3.6469, "西安": 4.2373}, "2026-03-21": {"上海": 5.283, "北京": 5.8278, "天津": 5.2839, "合肥": 6.0133, "济南": 5.7098, "青岛": 5.3718, "太原": 5.8573, "东莞": 5.5362, "佛山": 5.3572, "广州": 5.9598, "深圳": 5.6971, "南京": 5.6664, "南通": 5.1935, "常州": 5.6743, "无锡": 6.0772, "苏州": 5.6249, "石家庄": 6.3033, "邯郸": 5.3463, "南阳": 6.1944, "安阳": 5.7395, "新乡": 6.4017, "郑州": 5.5139, "杭州": 6.017, "武汉": 4.7657, "西安": 5.366}, "2026-03-20": {"上海": 4.145, "北京": 4.3918, "天津": 3.999, "合肥": 4.8335, "济南": 4.6259, "青岛": 3.9619, "太原": 4.6422, "东莞": 3.9841, "佛山": 3.9624, "广州": 5.0022, "深圳": 4.2724, "南京": 4.4975, "南通": 4.1008, "常州": 4.5768, "无锡": 4.8713, "苏州": 4.2916, "石家庄": 5.2622, "邯郸": 4.5073, "南阳": 5.25, "安阳": 5.1597, "新乡": 5.5214, "郑州": 4.7485, "杭州": 4.9008, "武汉": 3.8414, "西安": 4.2749}, "2026-03-19": {"上海": 2.5299, "北京": 2.7675, "天津": 2.2711, "合肥": 2.7524, "济南": 2.8187, "青岛": 2.3602, "太原": 2.5687, "东莞": 2.485, "佛山": 2.419, "广州": 2.8933, "深圳": 2.5794, "南京": 2.4226, "南通": 2.2258, "常州": 2.639, "无锡": 2.8327, "苏州": 2.6189, "石家庄": 3.2227, "邯郸": 3.2244, "南阳": 2.9056, "安阳": 3.042, "新乡": 4.0684, "郑州": 2.8311, "杭州": 3.039, "武汉": 2.2907, "西安": 2.4619}, "2026-03-18": {"上海": 2.4148, "北京": 2.9189, "天津": 2.3359, "合肥": 2.9801, "济南": 2.8259, "青岛": 2.5604, "太原": 2.6709, "东莞": 2.6631, "佛山": 2.5909, "广州": 2.8224, "深圳": 2.6653, "南京": 2.6009, "南通": 2.4456, "常州": 2.6494, "无锡": 2.7077, "苏州": 2.5518, "石家庄": 3.2923, "邯郸": 3.1463, "南阳": 3.3111, "安阳": 3.4286, "新乡": 3.906, "郑州": 2.7228, "杭州": 3.1162, "武汉": 2.2536, "西安": 2.6155}, "2026-03-17": {"上海": 2.3121, "北京": 2.6468, "天津": 2.2144, "合肥": 2.65, "济南": 2.7067, "青岛": 2.4206, "太原": 2.4909, "东莞": 2.56, "佛山": 2.4512, "广州": 2.7171, "深圳": 2.5116, "南京": 2.2077, "南通": 2.1371, "常州": 2.612, "无锡": 2.6838, "苏州": 2.4504, "石家庄": 3.3096, "邯郸": 3.1317, "南阳": 3.2278, "安阳": 3.1933, "新乡": 4.2564, "郑州": 2.7846, "杭州": 2.9293, "武汉": 2.0511, "西安": 2.5033}, "2026-03-16": {"上海": 2.2636, "北京": 2.5788, "天津": 2.2592, "合肥": 2.9388, "济南": 2.7793, "青岛": 2.3157, "太原": 2.6358, "东莞": 2.6393, "佛山": 2.5372, "广州": 2.875, "深圳": 2.6089, "南京": 2.2849, "南通": 2.2359, "常州": 2.5809, "无锡": 2.6985, "苏州": 2.557, "石家庄": 3.3333, "邯郸": 3.2976, "南阳": 3.7556, "安阳": 3.605, "新乡": 3.8974, "郑州": 2.8157, "杭州": 2.9329, "武汉": 2.1618, "西安": 2.4878}, "2026-03-15": {"上海": 4.3549, "北京": 5.0767, "天津": 4.2573, "合肥": 5.0088, "济南": 4.9347, "青岛": 4.3633, "太原": 4.3663, "东莞": 5.0996, "佛山": 4.5398, "广州": 4.7485, "深圳": 5.1956, "南京": 4.298, "南通": 4.2117, "常州": 4.8589, "无锡": 4.9246, "苏州": 4.777, "石家庄": 5.2512, "邯郸": 4.8195, "南阳": 4.6444, "安阳": 4.7815, "新乡": 5.3162, "郑州": 4.3723, "杭州": 5.2229, "武汉": 3.5608, "西安": 4.6185}, "2026-03-14": {"上海": 5.1894, "北京": 5.9081, "天津": 4.9971, "合肥": 5.8489, "济南": 5.7627, "青岛": 5.0869, "太原": 5.7657, "东莞": 5.3933, "佛山": 4.9445, "广州": 5.724, "深圳": 5.6705, "南京": 5.316, "南通": 4.9073, "常州": 5.5249, "无锡": 5.7151, "苏州": 5.3274, "石家庄": 6.2986, "邯郸": 5.5659, "南阳": 6.1778, "安阳": 6.0504, "新乡": 6.4188, "郑州": 5.38, "杭州": 6.1306, "武汉": 4.9408, "西安": 5.4759}, "2026-03-13": {"上海": 4.0333, "北京": 4.1904, "天津": 3.6694, "合肥": 4.4488, "济南": 4.4145, "青岛": 3.6345, "太原": 4.5921, "东莞": 3.8395, "佛山": 3.5891, "广州": 4.5252, "深圳": 4.117, "南京": 4.0691, "南通": 3.5202, "常州": 4.2905, "无锡": 4.4283, "苏州": 3.9717, "石家庄": 5.2749, "邯郸": 4.4488, "南阳": 5.3556, "安阳": 5.6807, "新乡": 6.4188, "郑州": 3.9943}};
 
 var MACRO_BRANDS = ['巴奴','三出山','八合里','左庭右院','朱光玉','朱富贵','潮发','熊喵来了','芈重山'];
 
@@ -511,7 +573,10 @@ function macroDistRender() {
   }
   var tab2Visible = !document.getElementById('macroTab2').classList.contains('hidden');
   if(tab2Visible) renderMap2();
-  else renderMap1();
+  else {
+    renderMap1();
+    renderMapHDL();
+  }
 }
 
 function selectMacroBrand(brand) {
@@ -601,20 +666,20 @@ function renderMap1() {
       }
     },
     visualMap: {
-      min: 0,
+      min: 1,
       max: Math.max(maxVal, 1),
       left: 'left',
       top: 'bottom',
       text: ['多', '少'],
       inRange: {
-        color: ['#f0efed', baseColor]
+        color: ['#e8e0d8', lightenColor(baseColor, 0.4), baseColor]
       },
       calculable: true
     },
     series: [{
       type: 'map',
       map: 'china',
-      roam: true,
+      roam: false,
       label: { show: false },
       emphasis: {
         label: { show: true, fontSize: 12, color: '#333' },
@@ -696,7 +761,7 @@ function renderMap2() {
     series: [{
       type: 'map',
       map: 'china',
-      roam: true,
+      roam: false,
       label: { show: false },
       emphasis: {
         label: { show: true, fontSize: 12, color: '#333' },
@@ -735,6 +800,237 @@ function renderMap2() {
 
   macroDistChart2.setOption(option, true);
   macroDistChart2.resize();
+}
+
+function renderMapHDL() {
+  if(typeof echarts === 'undefined' || !chinaGeoLoaded) return;
+  var container = document.getElementById('mapChartHDL');
+  if(!container) return;
+  if(!macroDistChartHDL) {
+    macroDistChartHDL = echarts.init(container);
+  }
+
+  var hdlData = STORE_DIST['海底捞'] || {};
+  var data = [];
+  var maxVal = 0;
+
+  Object.keys(hdlData).forEach(function(prov) {
+    data.push({ name: prov, value: hdlData[prov].total, cities: hdlData[prov].cities });
+    if(hdlData[prov].total > maxVal) maxVal = hdlData[prov].total;
+  });
+
+  var baseColor = '#E04040';
+
+  var option = {
+    title: {
+      text: '海底捞 门店分布',
+      left: 'center',
+      top: 10,
+      textStyle: { fontSize: 16, color: '#2c2c2c', fontWeight: 600 }
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: function(params) {
+        if(!params.data || !params.data.value) return params.name + '：暂无门店';
+        var html = '<b>' + params.name + '</b>：' + params.data.value + ' 家<br/>';
+        if(params.data.cities) {
+          var cities = params.data.cities;
+          var sorted = Object.keys(cities).sort(function(a,b){ return cities[b] - cities[a]; });
+          sorted.forEach(function(c) {
+            html += c + '：' + cities[c] + ' 家<br/>';
+          });
+        }
+        return html;
+      }
+    },
+    visualMap: {
+      min: 1,
+      max: Math.max(maxVal, 1),
+      left: 'left',
+      top: 'bottom',
+      text: ['多', '少'],
+      inRange: {
+        color: ['#e8e0d8', lightenColor(baseColor, 0.4), baseColor]
+      },
+      calculable: true
+    },
+    series: [{
+      type: 'map',
+      map: 'china',
+      roam: false,
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 12, color: '#333' },
+        itemStyle: { areaColor: '#FFD700' }
+      },
+      itemStyle: {
+        borderColor: '#fff',
+        borderWidth: 1,
+        areaColor: '#f0efed'
+      },
+      data: data
+    }]
+  };
+
+  macroDistChartHDL.setOption(option, true);
+  macroDistChartHDL.resize();
+}
+
+function macroTurnoverRender() {
+  if(typeof echarts === 'undefined') {
+    console.error('ECharts not available');
+    return;
+  }
+
+  var city = document.getElementById('turnoverCitySelect').value || '';
+  var startDate = document.getElementById('turnoverStartDate').value;
+  var endDate = document.getElementById('turnoverEndDate').value;
+
+  // Collect Banu turnover data
+  var banuData = {};
+  if(banuDailyData && Array.isArray(banuDailyData)) {
+    banuDailyData.forEach(function(record) {
+      if(!record.date || !record.store_name || isBanuExcludedStore(record.store_name)) return;
+      if(city && record.city !== city) return;
+      if(city === '') {
+        // All cities: exclude BANU_EXCLUDED_CITIES
+        if(BANU_EXCLUDED_CITIES.indexOf(record.city) >= 0) return;
+      }
+
+      if(!banuData[record.date]) {
+        banuData[record.date] = { total_sold: 0, total_tables: 0 };
+      }
+      banuData[record.date].total_sold += (record.total_sold_tables || 0);
+      banuData[record.date].total_tables += (record.total_tables || 0);
+    });
+  }
+
+  // Collect HDL turnover data
+  var hdlData = {};
+  if(city) {
+    // City level - use HDL_CITY_TURNOVER
+    Object.keys(HDL_CITY_TURNOVER).forEach(function(date) {
+      var dailyData = HDL_CITY_TURNOVER[date];
+      if(dailyData && dailyData[city] !== undefined) {
+        hdlData[date] = dailyData[city];
+      }
+    });
+  } else {
+    // National level - use HDL_NATIONAL_TURNOVER
+    hdlData = Object.assign({}, HDL_NATIONAL_TURNOVER);
+  }
+
+  // Filter by date range
+  var filteredDates = [];
+  Object.keys(banuData).forEach(function(date) {
+    if(hdlData[date] !== undefined) {
+      if(!startDate || date >= startDate) {
+        if(!endDate || date <= endDate) {
+          filteredDates.push(date);
+        }
+      }
+    }
+  });
+  filteredDates.sort();
+
+  if(filteredDates.length === 0) {
+    var container = document.getElementById('turnoverChart');
+    if(container) container.innerHTML = '<div style="color:#999;text-align:center;padding:60px">暂无数据</div>';
+    return;
+  }
+
+  // Prepare chart data
+  var xAxisData = filteredDates.map(function(d) {
+    return d.substring(5); // Show MM-DD
+  });
+
+  var banuSeries = filteredDates.map(function(date) {
+    if(banuData[date] && banuData[date].total_tables > 0) {
+      return (banuData[date].total_sold / banuData[date].total_tables * 100).toFixed(2);
+    }
+    return null;
+  });
+
+  var hdlSeries = filteredDates.map(function(date) {
+    return (hdlData[date] || null);
+  });
+
+  var container = document.getElementById('turnoverChart');
+  if(!container) return;
+  if(!turnoverChart) {
+    turnoverChart = echarts.init(container);
+  }
+
+  var option = {
+    title: {
+      text: (city || '全部城市') + ' 翻台率对比',
+      left: 'center',
+      top: 10,
+      textStyle: { fontSize: 14, color: '#2c2c2c', fontWeight: 600 }
+    },
+    tooltip: {
+      trigger: 'axis',
+      formatter: function(params) {
+        var html = params[0].axisValue + '<br/>';
+        params.forEach(function(p) {
+          if(p.value !== null && p.value !== undefined) {
+            html += '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + p.color + ';margin-right:4px"></span>' + p.seriesName + '：' + p.value + '%<br/>';
+          }
+        });
+        return html;
+      }
+    },
+    legend: {
+      data: ['巴奴', '海底捞'],
+      top: 40,
+      left: 'center',
+      textStyle: { fontSize: 12 }
+    },
+    grid: {
+      left: 60,
+      right: 30,
+      top: 80,
+      bottom: 40,
+      containLabel: false
+    },
+    xAxis: {
+      type: 'category',
+      data: xAxisData,
+      boundaryGap: false
+    },
+    yAxis: {
+      type: 'value',
+      name: '翻台率 (%)',
+      nameTextStyle: { fontSize: 12, color: '#999' }
+    },
+    series: [
+      {
+        name: '巴奴',
+        type: 'line',
+        data: banuSeries,
+        smooth: true,
+        color: '#A06850',
+        lineStyle: { width: 2 },
+        areaStyle: { color: 'rgba(160, 104, 80, 0.15)' },
+        symbol: 'circle',
+        symbolSize: 5
+      },
+      {
+        name: '海底捞',
+        type: 'line',
+        data: hdlSeries,
+        smooth: true,
+        color: '#E04040',
+        lineStyle: { width: 2 },
+        areaStyle: { color: 'rgba(224, 64, 64, 0.15)' },
+        symbol: 'circle',
+        symbolSize: 5
+      }
+    ]
+  };
+
+  turnoverChart.setOption(option, true);
+  turnoverChart.resize();
 }
 
 function hexToRgb(hex) {
@@ -888,7 +1184,7 @@ function navTo(sec) {
   if(secEl) secEl.classList.remove('hidden');
 
   // Update title
-  var titles = {'sushiro':'🍣 寿司郎经营数据看板','banu':'🥘 巴奴火锅经营数据看板','hp_summary':'📊 火锅友商汇总看板','macro_dist':'📍 门店分布对比'};
+  var titles = {'sushiro':'🍣 寿司郎经营数据看板','banu':'🥘 巴奴火锅经营数据看板','hp_summary':'📊 火锅友商汇总看板','macro_dist':'📍 门店分布对比','macro_turnover':'📊 翻台率对比'};
   BRANDS.forEach(function(b){ titles['hp_'+b] = '🔥 ' + b + ' 数据看板'; });
   document.getElementById('pageTitle').textContent = titles[sec] || sec;
 
@@ -900,6 +1196,7 @@ function renderCurrentSection() {
   else if(curSection === 'banu') bRender();
   else if(curSection === 'hp_summary') hpSumRender();
   else if(curSection === 'macro_dist') macroDistRender();
+  else if(curSection === 'macro_turnover') macroTurnoverRender();
   else hpBRender(curSection);
 }
 
@@ -2361,6 +2658,8 @@ setInterval(function(){loadAllData();}, 10*60*1000);
 window.addEventListener('resize', function() {
   if(macroDistChart1) macroDistChart1.resize();
   if(macroDistChart2) macroDistChart2.resize();
+  if(macroDistChartHDL) macroDistChartHDL.resize();
+  if(turnoverChart) turnoverChart.resize();
 });
 
 // Boot
