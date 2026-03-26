@@ -409,18 +409,18 @@ tr:hover td{background:#faf9f7}
           <div id="macroCmpBtns">
             <span class="macro-cmp-btn active" data-brand="巴奴" onclick="selectCmpBrand('巴奴')">巴奴</span>
             <span class="macro-cmp-btn" data-brand="三出山" onclick="selectCmpBrand('三出山')">三出山</span>
-            <span class="macro-cmp-btn" data-brand="八合里" onclick="selectCmpBrand('八合里')">八合里</span>
-            <span class="macro-cmp-btn" data-brand="左庭右院" onclick="selectCmpBrand('左庭右院')">左庭右院</span>
-            <span class="macro-cmp-btn" data-brand="朱光玉" onclick="selectCmpBrand('朱光玉')">朱光玉</span>
-            <span class="macro-cmp-btn" data-brand="朱富贵" onclick="selectCmpBrand('朱富贵')">朱富贵</span>
             <span class="macro-cmp-btn" data-brand="潮发" onclick="selectCmpBrand('潮发')">潮发</span>
-            <span class="macro-cmp-btn" data-brand="熊喵来了" onclick="selectCmpBrand('熊喵来了')">熊喵来了</span>
+            <span class="macro-cmp-btn" data-brand="左庭右院" onclick="selectCmpBrand('左庭右院')">左庭右院</span>
+            <span class="macro-cmp-btn" data-brand="八合里" onclick="selectCmpBrand('八合里')">八合里</span>
+            <span class="macro-cmp-btn" data-brand="朱富贵" onclick="selectCmpBrand('朱富贵')">朱富贵</span>
+            <span class="macro-cmp-btn" data-brand="朱光玉" onclick="selectCmpBrand('朱光玉')">朱光玉</span>
             <span class="macro-cmp-btn" data-brand="芈重山" onclick="selectCmpBrand('芈重山')">芈重山</span>
+            <span class="macro-cmp-btn" data-brand="熊喵来了" onclick="selectCmpBrand('熊喵来了')">熊喵来了</span>
           </div>
         </div>
         <div class="card" style="padding:16px;margin-bottom:14px">
           <div style="display:flex;gap:24px;font-size:13px;align-items:center">
-            <span style="color:#666">仅显示海底捞与所选品牌的重叠区域，颜色深浅代表两品牌合计门店数</span>
+            <span style="color:#666">仅显示海底捞与所选品牌的重叠区域，颜色深浅代表所选品牌的门店数</span>
           </div>
         </div>
         <div class="card" style="padding:0">
@@ -620,8 +620,6 @@ function selectCmpBrand(brand) {
   document.querySelectorAll('.macro-cmp-btn').forEach(function(el){
     el.classList.toggle('active', el.getAttribute('data-brand') === brand);
   });
-  document.getElementById('cmpLegendBrand').style.background = '#3377CC';
-  document.getElementById('cmpLegendLabel').textContent = '仅' + brand;
   renderMap2();
 }
 
@@ -750,9 +748,9 @@ function renderMap2() {
     var hc = hdlData[prov] ? hdlData[prov].total : 0;
     var bc = cmpData[prov] ? cmpData[prov].total : 0;
     if(hc > 0 && bc > 0) {
-      var total = hc + bc;
-      data.push({ name: prov, value: total, hdl: hc, brand: bc });
-      if(total > maxVal) maxVal = total;
+      // value 用品牌门店数来驱动色阶深浅
+      data.push({ name: prov, value: bc, hdl: hc, brand: bc, total: hc + bc });
+      if(bc > maxVal) maxVal = bc;
     }
   });
 
@@ -766,11 +764,11 @@ function renderMap2() {
     tooltip: {
       trigger: 'item',
       formatter: function(params) {
-        if(!params.data || !params.data.value) return params.name + '：暂无门店';
+        if(!params.data || !params.data.brand) return params.name + '：暂无门店';
         return '<b>' + params.name + '</b><br/>' +
           '海底捞：' + params.data.hdl + ' 家<br/>' +
           brand + '：' + params.data.brand + ' 家<br/>' +
-          '合计：' + params.data.value + ' 家';
+          '合计：' + params.data.total + ' 家';
       }
     },
     visualMap: {
