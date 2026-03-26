@@ -777,26 +777,16 @@ function renderMap2() {
           '合计：' + params.data.value + ' 家';
       }
     },
-    visualMap: {
-      show: false,
-      min: 0,
-      max: Math.max(maxVal, 1)
-    },
-    legend: {
-      data: ['海底捞', brand, '重叠区域'],
-      bottom: 10,
-      left: 'center',
-      textStyle: { fontSize: 12 }
-    },
     series: [{
       type: 'map',
       map: 'china',
       roam: false,
-      label: { show: false },
+      label: { show: false, emphasis: { show: false } },
       emphasis: {
         label: { show: false },
-        itemStyle: { areaColor: undefined }
+        itemStyle: { areaColor: undefined, borderColor: '#333', borderWidth: 2 }
       },
+      select: { label: { show: false }, itemStyle: {} },
       itemStyle: {
         borderColor: '#fff',
         borderWidth: 1,
@@ -817,7 +807,8 @@ function renderMap2() {
           hdl: d.hdl,
           brand: d.brand,
           type: d.type,
-          itemStyle: { areaColor: color }
+          itemStyle: { areaColor: color },
+          emphasis: { itemStyle: { areaColor: color } }
         };
       })
     }]
