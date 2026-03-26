@@ -110,6 +110,7 @@ tr:hover td{background:#faf9f7}
     <div class="nav-header">宏观对比</div>
     <div class="nav-item" onclick="navTo('macro_dist')"><span class="nav-dot"></span>门店分布</div>
     <div class="nav-item" onclick="navTo('macro_turnover')"><span class="nav-dot"></span>翻台率对比</div>
+    <div class="nav-item" onclick="navTo('macro_queue')"><span class="nav-dot"></span>排号数地图</div>
   </div>
 
   <div class="nav-divider"></div>
@@ -476,6 +477,20 @@ tr:hover td{background:#faf9f7}
         <div id="turnoverChart" style="width:100%;height:500px"></div>
       </div>
     </div>
+
+    <div id="sec-macro_queue" class="hidden">
+      <div class="filters">
+        <div class="fg">
+          <label>开始日期</label>
+          <input type="date" id="queueMapStartDate" onchange="macroQueueRender()">
+        </div>
+        <div class="fg">
+          <label>结束日期</label>
+          <input type="date" id="queueMapEndDate" onchange="macroQueueRender()">
+        </div>
+      </div>
+      <div id="queueMapsContainer"></div>
+    </div>
   </div><!-- /content -->
 </div><!-- /main-wrap -->
 <div class="tooltip" id="tt"></div>
@@ -523,11 +538,26 @@ function isBanuExcludedStore(name){
 // === Store Distribution Data for Macro Dashboard ===
 var STORE_DIST = {"巴奴":{"河南":{"total":70,"cities":{"三门峡":1,"信阳":2,"南阳":4,"周口":1,"商丘":3,"安阳":5,"平顶山":3,"开封":1,"新乡":4,"洛阳":3,"漯河":2,"濮阳":2,"焦作":1,"许昌":2,"郑州":31,"驻马店":3,"鹤壁":2}},"河北":{"total":12,"cities":{"保定":2,"唐山":1,"廊坊":1,"石家庄":4,"邯郸":4}},"江苏":{"total":44,"cities":{"南京":9,"南通":2,"常州":5,"扬州":1,"无锡":10,"泰州":1,"淮安":1,"盐城":1,"苏州":12,"连云港":1,"镇江":1}},"北京":{"total":22,"cities":{"北京":22}},"上海":{"total":7,"cities":{"上海":7}},"陕西":{"total":10,"cities":{"咸阳":1,"西安":9}},"广东":{"total":18,"cities":{"东莞":2,"佛山":1,"广州":2,"惠州":1,"汕头":1,"江门":1,"深圳":10}},"湖北":{"total":10,"cities":{"武汉":10}},"安徽":{"total":7,"cities":{"合肥":6,"芜湖":1}},"天津":{"total":5,"cities":{"天津":5}},"云南":{"total":1,"cities":{"昆明":1}},"山西":{"total":4,"cities":{"太原":3,"长治":1}},"山东":{"total":9,"cities":{"临沂":1,"济南":3,"淄博":1,"菏泽":1,"青岛":3}},"浙江":{"total":13,"cities":{"嘉兴":2,"杭州":10,"湖州":1}}},"三出山":{"浙江":{"total":10,"cities":{"义乌":1,"台州":1,"嘉兴":1,"宁波":1,"杭州":3,"温州":2,"金华":1}},"广东":{"total":5,"cities":{"深圳":5}},"陕西":{"total":3,"cities":{"西安":3}},"湖南":{"total":2,"cities":{"长沙":2}},"江苏":{"total":8,"cities":{"南京":4,"南通":1,"常州":1,"苏州":2}},"湖北":{"total":4,"cities":{"武汉":4}},"安徽":{"total":2,"cities":{"合肥":2}},"北京":{"total":5,"cities":{"北京":5}},"河南":{"total":1,"cities":{"郑州":1}},"上海":{"total":6,"cities":{"上海":6}},"广西":{"total":1,"cities":{"南宁":1}}},"八合里":{"广东":{"total":116,"cities":{"东莞":5,"中山":1,"佛山":1,"广州":20,"惠州":4,"惠阳":2,"深圳":80,"肇庆":1,"顺德区":2}},"陕西":{"total":7,"cities":{"西安":7}},"上海":{"total":11,"cities":{"上海":11}},"江苏":{"total":4,"cities":{"南京":2,"苏州":2}},"四川":{"total":2,"cities":{"成都":2}},"浙江":{"total":2,"cities":{"杭州":2}},"江西":{"total":3,"cities":{"南昌":2,"赣州":1}},"安徽":{"total":3,"cities":{"合肥":3}},"湖南":{"total":1,"cities":{"长沙":1}}},"左庭右院":{"江苏":{"total":41,"cities":{"南京":15,"南通":3,"吴江":1,"常州":5,"常熟":2,"无锡":2,"昆山":1,"江阴":1,"泰州":1,"海门区":1,"苏州":9}},"上海":{"total":77,"cities":{"上海":76,"崇明区":1}},"浙江":{"total":15,"cities":{"嘉兴":2,"宁波":3,"杭州":7,"柯桥区":1,"桐乡":1,"绍兴":1}},"北京":{"total":15,"cities":{"北京":15}}},"朱光玉":{"江苏":{"total":16,"cities":{"南京":2,"南通":1,"宜兴":1,"常熟":1,"张家港":1,"无锡":1,"昆山":1,"江阴":1,"沭阳县":1,"盐城":1,"苏州":1,"连云港":2,"通州区":1,"镇江":1}},"宁夏":{"total":10,"cities":{"同心县":1,"吴忠":2,"固原":1,"石嘴山":1,"贺兰县":1,"银川":4}},"广东":{"total":6,"cities":{"广州":1,"深圳":3,"珠海":2}},"福建":{"total":8,"cities":{"厦门":3,"宁德":1,"晋江":1,"泉州":1,"漳州":1,"福州":1}},"安徽":{"total":18,"cities":{"六安":2,"合肥":4,"巢湖":1,"庐江县":1,"无为":1,"淮南":1,"滁州":1,"肥西县":1,"舒城县":1,"蚌埠":1,"长丰县":1,"阜阳":1,"霍邱县":1,"黄山":1}},"重庆":{"total":6,"cities":{"云阳县":1,"奉节县":1,"巫山县":1,"涪陵区":1,"重庆":2}},"河北":{"total":1,"cities":{"邯郸":1}},"新疆":{"total":5,"cities":{"乌鲁木齐":2,"伊宁":1,"克拉玛依":1,"库尔勒":1}},"河南":{"total":4,"cities":{"南阳":1,"洛阳":1,"郑州":1,"镇平县":1}},"湖北":{"total":9,"cities":{"大冶":1,"恩施":1,"武汉":5,"荆州":1,"鄂州":1}},"四川":{"total":9,"cities":{"乐山":1,"南充":1,"巴州区":1,"成都":2,"简阳":1,"绵阳":1,"西昌":2}},"陕西":{"total":2,"cities":{"宝鸡":1,"西安":1}},"湖南":{"total":1,"cities":{"郴州":1}},"云南":{"total":4,"cities":{"昆明":3,"玉溪":1}},"浙江":{"total":3,"cities":{"桐乡":1,"湖州":1,"金华":1}},"内蒙古":{"total":2,"cities":{"乌海":1,"呼和浩特":1}},"上海":{"total":6,"cities":{"上海":6}},"北京":{"total":1,"cities":{"北京":1}},"江西":{"total":2,"cities":{"南昌":1,"景德镇":1}},"山西":{"total":2,"cities":{"临汾":1,"榆次区":1}},"山东":{"total":4,"cities":{"临沂":1,"威海":1,"淄博":1,"烟台":1}},"贵州":{"total":1,"cities":{"盘州":1}},"海南":{"total":4,"cities":{"三亚":2,"海口":2}},"甘肃":{"total":1,"cities":{"兰州":1}}},"朱富贵":{"福建":{"total":22,"cities":{"三明":1,"厦门":4,"宁德":1,"泉州":2,"漳州":1,"福州":11,"莆田":1,"龙岩":1}},"浙江":{"total":8,"cities":{"台州":1,"宁波":2,"杭州":2,"温州":3}}},"潮发":{"广东":{"total":125,"cities":{"东莞":6,"中山":2,"佛山":14,"广州":74,"深圳":29}}},"熊喵来了":{"辽宁":{"total":42,"cities":{"丹东":1,"大连":6,"庄河":1,"抚顺":2,"新民":1,"普兰店区":1,"朝阳":1,"本溪":1,"沈阳":16,"瓦房店":1,"盘锦":3,"营口":2,"辽阳":1,"锦州":2,"阜新":1,"鞍山":2}},"山西":{"total":3,"cities":{"大同":1,"晋城":1,"榆次区":1}},"河北":{"total":37,"cities":{"三河":1,"任丘":2,"保定":3,"唐山":5,"定州":1,"廊坊":1,"张家口":1,"承德":2,"昌黎县":1,"永清县":1,"涿州":1,"滦南县":1,"滦州":1,"玉田县":1,"石家庄":2,"秦皇岛":1,"衡水":3,"辛集":1,"迁安":1,"遵化":1,"邢台":1,"邯郸":2,"高碑店":1,"魏县":1,"黄骅":1}},"山东":{"total":46,"cities":{"东营":2,"临沂":2,"周村":1,"巨野县":1,"德州":1,"新泰":1,"日照":1,"沂水县":1,"泰安":1,"济南":7,"济宁":2,"淄博":3,"滕州":1,"滨州":1,"烟台":3,"胶州":1,"莱芜":1,"莱西":1,"菏泽":2,"薛城":1,"诸城":1,"青岛":8,"青州":1,"齐河县":1,"龙口":1}},"内蒙古":{"total":14,"cities":{"乌兰察布":1,"乌兰浩特":1,"乌海":1,"包头":2,"呼伦贝尔":1,"呼和浩特":2,"巴彦淖尔":1,"赤峰":2,"通辽":1,"鄂尔多斯":1,"锡林浩特":1}},"天津":{"total":15,"cities":{"天津":12,"宁河区":1,"武清区":1,"蓟州区":1}},"黑龙江":{"total":24,"cities":{"佳木斯":1,"双城区":1,"哈尔滨":12,"大庆":2,"牡丹江":1,"绥化":2,"阿城区":1,"鸡西":1,"鹤岗":1,"齐齐哈尔":2}},"吉林":{"total":31,"cities":{"公主岭":1,"吉林":2,"四平":1,"延吉":1,"松原":1,"梅河口":1,"辽源":1,"通化":1,"长春":22}},"北京":{"total":7,"cities":{"北京":5,"密云区":1,"怀柔区":1}},"陕西":{"total":1,"cities":{"榆林":1}}},"芈重山":{"北京":{"total":21,"cities":{"北京":21}},"广东":{"total":8,"cities":{"广州":6,"深圳":2}},"上海":{"total":2,"cities":{"上海":2}},"天津":{"total":1,"cities":{"天津":1}},"安徽":{"total":1,"cities":{"合肥":1}},"重庆":{"total":1,"cities":{"重庆":1}}},"海底捞":{"重庆":{"total":12,"cities":{"万州":1,"重庆":11}},"海南":{"total":11,"cities":{"三亚":4,"儋州":1,"海口":6}},"福建":{"total":52,"cities":{"三明":1,"仙游":1,"南安":1,"南平":1,"厦门":14,"宁德":1,"安溪":1,"德化":1,"惠安":1,"晋江":3,"泉州":5,"漳州":2,"漳浦":1,"石狮":2,"福州":12,"福清":1,"莆田":2,"霞浦":1,"龙岩":1}},"河南":{"total":71,"cities":{"三门峡":1,"信阳":2,"南阳":3,"周口":2,"商丘":2,"安阳":2,"巩义":1,"平顶山":1,"开封":2,"新乡":2,"新密":1,"永城":1,"汝州":1,"洛阳":6,"济源":1,"漯河":2,"濮阳":1,"焦作":2,"禹州":1,"荥阳":1,"许昌":2,"郑州":29,"长葛":1,"项城":1,"驻马店":2,"鹤壁":1}},"上海":{"total":64,"cities":{"上海":64}},"江西":{"total":26,"cities":{"上饶":2,"九江":2,"南昌":11,"吉安":2,"宜春":1,"抚州":2,"新余":1,"景德镇":1,"萍乡":1,"赣州":2,"鹰潭":1}},"江苏":{"total":155,"cities":{"东台":1,"东海":1,"丰县":1,"丹阳":2,"兴化":1,"南京":31,"南通":8,"句容":1,"启东":2,"太仓":2,"如东":1,"如皋":1,"宜兴":2,"宝应":1,"宿迁":4,"常州":7,"常熟":4,"张家港":3,"徐州":5,"扬中":1,"扬州":6,"新沂":1,"无锡":8,"昆山":3,"江阴":3,"沛县":1,"泗阳":1,"泰兴":1,"泰州":4,"海安":1,"海门":1,"涟水":1,"淮安":5,"溧阳":1,"盐城":7,"盱眙":1,"睢宁":1,"苏州":21,"连云港":4,"邳州":1,"镇江":2,"靖江":1,"高邮":1}},"广东":{"total":169,"cities":{"东莞":16,"中山":6,"云浮":1,"佛山":16,"台山":1,"吴川":1,"四会":1,"广州":37,"廉江":1,"惠州":8,"揭阳":1,"普宁":2,"梅州":3,"汕头":5,"汕尾":2,"江门":3,"河源":1,"深圳":42,"清远":2,"湛江":4,"潮州":2,"珠海":5,"肇庆":2,"茂名":3,"阳江":1,"韶关":2,"鹤山":1}},"山东":{"total":78,"cities":{"东营":1,"临沂":4,"兰陵":1,"威海":3,"寿光":1,"平度":1,"德州":3,"招远":1,"日照":2,"枣庄":1,"泰安":2,"济南":15,"济宁":4,"淄博":4,"滕州":1,"滨州":1,"潍坊":3,"烟台":5,"聊城":2,"胶州":1,"莒县":1,"菏泽":2,"诸城":1,"邹城":1,"青岛":14,"青州":1,"齐河":1,"龙口":1}},"浙江":{"total":116,"cities":{"东阳":1,"临海":1,"丽水":1,"义乌":3,"乐清":1,"仙居":1,"余姚":2,"兰溪":1,"台州":4,"嘉兴":3,"嘉善":1,"奉化":1,"宁波":12,"安吉":1,"嵊州":1,"平湖":2,"平阳":1,"德清":1,"慈溪":2,"新昌":1,"杭州":42,"桐乡":1,"永嘉":1,"永康":1,"海宁":1,"海盐":1,"温岭":1,"温州":6,"湖州":4,"玉环":1,"瑞安":1,"绍兴":5,"舟山":1,"苍南":1,"衢州":2,"诸暨":2,"象山":1,"金华":2,"长兴":1}},"山西":{"total":26,"cities":{"临汾":2,"吕梁":2,"大同":1,"太原":13,"忻州":1,"晋中":1,"晋城":1,"朔州":1,"运城":2,"长治":1,"阳泉":1}},"安徽":{"total":54,"cities":{"临泉":1,"亳州":2,"六安":2,"利辛":1,"合肥":20,"天长":1,"太和":1,"安庆":1,"宣城":1,"宿州":2,"巢湖":1,"庐江":1,"涡阳":1,"淮北":1,"淮南":1,"滁州":2,"肥东":1,"肥西":1,"舒城":1,"芜湖":4,"蒙城":1,"蚌埠":2,"铜陵":1,"阜阳":2,"霍邱":1,"马鞍山":1}},"辽宁":{"total":21,"cities":{"丹东":1,"大连":5,"抚顺":1,"沈阳":10,"营口":1,"辽阳":1,"锦州":1,"鞍山":1}},"云南":{"total":24,"cities":{"丽江":2,"保山":1,"大理":2,"文山":1,"昆明":13,"昭通":1,"普洱":1,"曲靖":1,"玉溪":1,"西双版纳":1}},"内蒙古":{"total":10,"cities":{"乌海":1,"包头":1,"呼和浩特":3,"巴彦淖尔":1,"赤峰":1,"通辽":1,"鄂尔多斯":2}},"新疆":{"total":4,"cities":{"乌鲁木齐":2,"喀什":1,"库尔勒":1}},"四川":{"total":40,"cities":{"乐山":1,"南充":1,"宜宾":1,"崇州":1,"广元":1,"德阳":1,"成都":26,"攀枝花":1,"泸州":1,"眉山":1,"简阳":1,"绵阳":2,"自贡":1,"遂宁":1}},"贵州":{"total":11,"cities":{"仁怀":1,"兴义":1,"凯里":1,"贵阳":7,"遵义":1}},"湖北":{"total":63,"cities":{"仙桃":1,"十堰":2,"咸宁":1,"大冶":1,"天门":1,"孝感":2,"宜昌":3,"恩施":1,"武汉":37,"潜江":1,"监利":1,"荆州":2,"荆门":2,"襄阳":3,"鄂州":1,"随州":1,"黄冈":1,"黄石":2}},"河北":{"total":44,"cities":{"任丘":1,"保定":4,"唐山":4,"固安":1,"定州":1,"容城":1,"廊坊":2,"张家口":1,"承德":1,"武安":1,"沧州":1,"涿州":1,"燕郊":3,"石家庄":9,"秦皇岛":2,"衡水":2,"辛集":1,"迁安":1,"遵化":1,"邢台":2,"邯郸":3,"黄骅":1}},"甘肃":{"total":16,"cities":{"兰州":7,"天水":1,"定西":1,"平凉":1,"庆阳":1,"张掖":1,"武威":1,"白银":1,"酒泉":1,"金昌":1}},"陕西":{"total":73,"cities":{"咸阳":4,"商洛":1,"安康":1,"宝鸡":3,"延安":2,"彬州":1,"杨凌":1,"榆林":2,"汉中":1,"渭南":2,"神木":1,"蒲城":1,"西安":51,"铜川":1,"韩城":1}},"北京":{"total":76,"cities":{"北京":76}},"广西":{"total":26,"cities":{"北海":2,"南宁":8,"柳州":3,"桂林":4,"梧州":1,"玉林":2,"百色":1,"贵港":1,"贺州":1,"钦州":2,"防城港":1}},"吉林":{"total":12,"cities":{"吉林":2,"四平":1,"延吉":1,"松原":1,"通化":1,"长春":6}},"湖南":{"total":39,"cities":{"吉首":1,"娄底":1,"岳阳":2,"常德":2,"张家界":1,"怀化":1,"株洲":2,"永州":1,"湘潭":2,"益阳":1,"衡阳":2,"邵阳":1,"郴州":1,"长沙":21}},"黑龙江":{"total":10,"cities":{"哈尔滨":7,"大庆":1,"牡丹江":1,"齐齐哈尔":1}},"宁夏":{"total":8,"cities":{"固原":1,"石嘴山":1,"银川":6}},"天津":{"total":31,"cities":{"天津":31}},"西藏":{"total":1,"cities":{"拉萨":1}},"青海":{"total":2,"cities":{"西宁":2}}}};
 
+// Build CITY_PROV_MAP from STORE_DIST
+var CITY_PROV_MAP = (function(){
+  var m = {};
+  Object.keys(STORE_DIST).forEach(function(brand){
+    Object.keys(STORE_DIST[brand]).forEach(function(prov){
+      Object.keys(STORE_DIST[brand][prov].cities || {}).forEach(function(city){
+        m[city] = prov;
+        m[city.replace(/市$/, '')] = prov;
+      });
+    });
+  });
+  return m;
+})();
+
 // === Macro Comparison Dashboard Variables ===
 var macroDistChart1 = null;
 var macroDistChart2 = null;
 var macroDistChartHDL = null;
 var turnoverChart = null;
+var queueMapCharts = {};
 var macroCurBrand = '全部';
 var macroCmpBrand = '巴奴';
 
@@ -886,22 +916,22 @@ function macroTurnoverRender() {
   var startDate = document.getElementById('turnoverStartDate').value;
   var endDate = document.getElementById('turnoverEndDate').value;
 
-  // Collect Banu turnover data
+  // Collect Banu turnover data (average daily_turnover_rate across stores)
   var banuData = {};
   if(banuDailyData && Array.isArray(banuDailyData)) {
     banuDailyData.forEach(function(record) {
       if(!record.date || !record.store_name || isBanuExcludedStore(record.store_name)) return;
       if(city && record.city !== city) return;
-      if(city === '') {
-        // All cities: exclude BANU_EXCLUDED_CITIES
+      if(!city) {
         if(BANU_EXCLUDED_CITIES.indexOf(record.city) >= 0) return;
       }
-
+      var rate = record.daily_turnover_rate;
+      if(rate === undefined || rate === null || rate <= 0) return;
       if(!banuData[record.date]) {
-        banuData[record.date] = { total_sold: 0, total_tables: 0 };
+        banuData[record.date] = { sum: 0, count: 0 };
       }
-      banuData[record.date].total_sold += (record.total_sold_tables || 0);
-      banuData[record.date].total_tables += (record.total_tables || 0);
+      banuData[record.date].sum += rate;
+      banuData[record.date].count++;
     });
   }
 
@@ -920,18 +950,15 @@ function macroTurnoverRender() {
     hdlData = Object.assign({}, HDL_NATIONAL_TURNOVER);
   }
 
-  // Filter by date range
-  var filteredDates = [];
-  Object.keys(banuData).forEach(function(date) {
-    if(hdlData[date] !== undefined) {
-      if(!startDate || date >= startDate) {
-        if(!endDate || date <= endDate) {
-          filteredDates.push(date);
-        }
-      }
-    }
-  });
-  filteredDates.sort();
+  // Collect all dates from both datasets, filter by date range
+  var allDatesSet = {};
+  Object.keys(banuData).forEach(function(d){ allDatesSet[d] = true; });
+  Object.keys(hdlData).forEach(function(d){ allDatesSet[d] = true; });
+  var filteredDates = Object.keys(allDatesSet).filter(function(date) {
+    if(startDate && date < startDate) return false;
+    if(endDate && date > endDate) return false;
+    return true;
+  }).sort();
 
   if(filteredDates.length === 0) {
     var container = document.getElementById('turnoverChart');
@@ -945,14 +972,14 @@ function macroTurnoverRender() {
   });
 
   var banuSeries = filteredDates.map(function(date) {
-    if(banuData[date] && banuData[date].total_tables > 0) {
-      return (banuData[date].total_sold / banuData[date].total_tables * 100).toFixed(2);
+    if(banuData[date] && banuData[date].count > 0) {
+      return +(banuData[date].sum / banuData[date].count).toFixed(2);
     }
     return null;
   });
 
   var hdlSeries = filteredDates.map(function(date) {
-    return (hdlData[date] || null);
+    return hdlData[date] !== undefined ? +hdlData[date].toFixed(2) : null;
   });
 
   var container = document.getElementById('turnoverChart');
@@ -974,7 +1001,7 @@ function macroTurnoverRender() {
         var html = params[0].axisValue + '<br/>';
         params.forEach(function(p) {
           if(p.value !== null && p.value !== undefined) {
-            html += '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + p.color + ';margin-right:4px"></span>' + p.seriesName + '：' + p.value + '%<br/>';
+            html += '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + p.color + ';margin-right:4px"></span>' + p.seriesName + '：' + p.value + '<br/>';
           }
         });
         return html;
@@ -1000,7 +1027,7 @@ function macroTurnoverRender() {
     },
     yAxis: {
       type: 'value',
-      name: '翻台率 (%)',
+      name: '翻台率',
       nameTextStyle: { fontSize: 12, color: '#999' }
     },
     series: [
@@ -1008,29 +1035,228 @@ function macroTurnoverRender() {
         name: '巴奴',
         type: 'line',
         data: banuSeries,
-        smooth: true,
         color: '#A06850',
         lineStyle: { width: 2 },
-        areaStyle: { color: 'rgba(160, 104, 80, 0.15)' },
         symbol: 'circle',
-        symbolSize: 5
+        symbolSize: 4,
+        connectNulls: true
       },
       {
         name: '海底捞',
         type: 'line',
         data: hdlSeries,
-        smooth: true,
         color: '#E04040',
         lineStyle: { width: 2 },
-        areaStyle: { color: 'rgba(224, 64, 64, 0.15)' },
         symbol: 'circle',
-        symbolSize: 5
+        symbolSize: 4,
+        connectNulls: true
       }
     ]
   };
 
   turnoverChart.setOption(option, true);
   turnoverChart.resize();
+}
+
+function macroQueueRender() {
+  if(typeof echarts === 'undefined' || !chinaGeoLoaded) return;
+
+  var startDate = document.getElementById('queueMapStartDate').value;
+  var endDate = document.getElementById('queueMapEndDate').value;
+
+  var container = document.getElementById('queueMapsContainer');
+  if(!container) return;
+
+  // Build HTML for 9 brand maps - 1 per row, full width
+  var html = '';
+  MACRO_BRANDS.forEach(function(brand) {
+    var divId = 'queueMap_' + brand;
+    html += '<div class="card" style="padding:0;margin-bottom:14px">'
+      + '<div style="padding:14px;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:600;color:' + (MACRO_BRAND_COLORS[brand] || '#333') + '">' + brand + ' 店均排号数分布</div>'
+      + '<div id="' + divId + '" style="width:100%;height:550px"></div>'
+      + '</div>';
+  });
+  container.innerHTML = html;
+
+  // For each brand, aggregate queue data by province and render map
+  MACRO_BRANDS.forEach(function(brand) {
+    renderQueueMap(brand, startDate, endDate);
+  });
+}
+
+function renderQueueMap(brand, startDate, endDate) {
+  var divId = 'queueMap_' + brand;
+  var container = document.getElementById(divId);
+  if(!container) return;
+
+  // Determine data source: Banu uses banuDailyData, others use hpStoreData
+  var isBanu = (brand === '巴奴');
+  var records = [];
+
+  if(isBanu) {
+    records = (banuDailyData || []).filter(function(r) {
+      if(!r.date || !r.city || isBanuExcludedStore(r.store_name)) return false;
+      if(startDate && r.date < startDate) return false;
+      if(endDate && r.date > endDate) return false;
+      return true;
+    });
+  } else {
+    records = (hpStoreData || []).filter(function(r) {
+      if(r.brand !== brand || !r.date || !r.city) return false;
+      if(startDate && r.date < startDate) return false;
+      if(endDate && r.date > endDate) return false;
+      return true;
+    });
+  }
+
+  // Aggregate by province → city → store
+  // For each store on each date: max_queue (hotpot) or we need queue equivalent for banu
+  // Store-level: first group by store+date to get per-store-day values
+  // Then aggregate to province level
+
+  var storeDay = {}; // key: storeId_date
+  var storeMeta = {}; // key: storeId → {city, province}
+
+  records.forEach(function(r) {
+    var storeId = r.store_id || r.store_name;
+    var date = r.date;
+    var city = r.city;
+    var key = storeId + '|' + date;
+
+    // Determine province from city
+    var prov = CITY_PROV_MAP[city] || CITY_PROV_MAP[city.replace(/市$/, '')] || '';
+    if(!prov) return;
+
+    if(!storeMeta[storeId]) {
+      storeMeta[storeId] = { city: city, prov: prov };
+    }
+
+    if(isBanu) {
+      // For Banu: use queue_hours as proxy (there's no max_queue in banu data)
+      // Actually, Banu doesn't have max_queue, it has queue_hours and biz_hours
+      // Use a simple metric: assume queue activity represents queue level
+      // Actually the user said "排号数" - for banu we have queue_hours (排号时段)
+      // Let's compute: daily queuing intensity = queue_hours (number of hours with queuing)
+      // This is actually available per store per day
+      if(!storeDay[key]) storeDay[key] = { store: storeId, date: date, queue: 0 };
+      storeDay[key].queue += (r.queue_hours || 0);
+    } else {
+      // For hotpot brands: use max_queue
+      if(!storeDay[key]) storeDay[key] = { store: storeId, date: date, queue: 0 };
+      storeDay[key].queue += (r.max_queue || 0);
+    }
+  });
+
+  // Aggregate to province level
+  // provData = { province: { totalQueue, storeDays, cities: { city: { totalQueue, storeDays } } } }
+  var provData = {};
+  Object.keys(storeDay).forEach(function(key) {
+    var sd = storeDay[key];
+    var meta = storeMeta[sd.store];
+    if(!meta || !meta.prov) return;
+    var prov = meta.prov;
+    var city = meta.city;
+
+    if(!provData[prov]) provData[prov] = { totalQueue: 0, storeDays: 0, stores: {}, cities: {} };
+    provData[prov].totalQueue += sd.queue;
+    provData[prov].storeDays++;
+    provData[prov].stores[sd.store] = 1;
+
+    if(!provData[prov].cities[city]) provData[prov].cities[city] = { totalQueue: 0, storeDays: 0, stores: {} };
+    provData[prov].cities[city].totalQueue += sd.queue;
+    provData[prov].cities[city].storeDays++;
+    provData[prov].cities[city].stores[sd.store] = 1;
+  });
+
+  // Calculate store-average: totalQueue / unique stores / num unique dates
+  var allDates = {};
+  Object.keys(storeDay).forEach(function(k) { allDates[storeDay[k].date] = 1; });
+  var numDays = Object.keys(allDates).length || 1;
+
+  var data = [];
+  var maxVal = 0;
+  Object.keys(provData).forEach(function(prov) {
+    var pd = provData[prov];
+    var nStores = Object.keys(pd.stores).length;
+    var avgQueue = nStores > 0 ? Math.round(pd.totalQueue / nStores / numDays) : 0;
+
+    // City details
+    var cityDetails = {};
+    Object.keys(pd.cities).forEach(function(city) {
+      var cd = pd.cities[city];
+      var cStores = Object.keys(cd.stores).length;
+      cityDetails[city] = {
+        avg: cStores > 0 ? Math.round(cd.totalQueue / cStores / numDays) : 0,
+        stores: cStores
+      };
+    });
+
+    data.push({
+      name: prov,
+      value: avgQueue,
+      stores: nStores,
+      cityDetails: cityDetails
+    });
+    if(avgQueue > maxVal) maxVal = avgQueue;
+  });
+
+  var brandColor = MACRO_BRAND_COLORS[brand] || '#4A82A8';
+
+  // Initialize or get chart
+  if(queueMapCharts[brand]) {
+    queueMapCharts[brand].dispose();
+  }
+  queueMapCharts[brand] = echarts.init(container);
+
+  var option = {
+    tooltip: {
+      trigger: 'item',
+      formatter: function(params) {
+        if(!params.data || !params.data.value) return params.name + '：暂无数据';
+        var html = '<b>' + params.name + '</b>　店均' + (isBanu ? '排号时段' : '排号数') + '：' + params.data.value + '<br/>'
+          + '门店数：' + params.data.stores + '<br/><br/>';
+        if(params.data.cityDetails) {
+          var cities = Object.keys(params.data.cityDetails).sort(function(a,b) {
+            return params.data.cityDetails[b].avg - params.data.cityDetails[a].avg;
+          });
+          cities.forEach(function(c) {
+            var cd = params.data.cityDetails[c];
+            html += c + '：店均 ' + cd.avg + '（' + cd.stores + '家店）<br/>';
+          });
+        }
+        return html;
+      }
+    },
+    visualMap: {
+      min: 1,
+      max: Math.max(maxVal, 1),
+      left: 'left',
+      top: 'bottom',
+      text: ['多', '少'],
+      inRange: {
+        color: ['#e8e0d8', lightenColor(brandColor, 0.4), brandColor]
+      },
+      calculable: true
+    },
+    series: [{
+      type: 'map',
+      map: 'china',
+      roam: false,
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 12, color: '#333' },
+        itemStyle: { areaColor: '#FFD700' }
+      },
+      itemStyle: {
+        borderColor: '#fff',
+        borderWidth: 1,
+        areaColor: '#f0efed'
+      },
+      data: data
+    }]
+  };
+
+  queueMapCharts[brand].setOption(option, true);
 }
 
 function hexToRgb(hex) {
@@ -1184,7 +1410,7 @@ function navTo(sec) {
   if(secEl) secEl.classList.remove('hidden');
 
   // Update title
-  var titles = {'sushiro':'🍣 寿司郎经营数据看板','banu':'🥘 巴奴火锅经营数据看板','hp_summary':'📊 火锅友商汇总看板','macro_dist':'📍 门店分布对比','macro_turnover':'📊 翻台率对比'};
+  var titles = {'sushiro':'🍣 寿司郎经营数据看板','banu':'🥘 巴奴火锅经营数据看板','hp_summary':'📊 火锅友商汇总看板','macro_dist':'📍 门店分布对比','macro_turnover':'📊 翻台率对比','macro_queue':'🗺️ 排号数地图'};
   BRANDS.forEach(function(b){ titles['hp_'+b] = '🔥 ' + b + ' 数据看板'; });
   document.getElementById('pageTitle').textContent = titles[sec] || sec;
 
@@ -1197,6 +1423,7 @@ function renderCurrentSection() {
   else if(curSection === 'hp_summary') hpSumRender();
   else if(curSection === 'macro_dist') macroDistRender();
   else if(curSection === 'macro_turnover') macroTurnoverRender();
+  else if(curSection === 'macro_queue') macroQueueRender();
   else hpBRender(curSection);
 }
 
@@ -2660,6 +2887,7 @@ window.addEventListener('resize', function() {
   if(macroDistChart2) macroDistChart2.resize();
   if(macroDistChartHDL) macroDistChartHDL.resize();
   if(turnoverChart) turnoverChart.resize();
+  Object.values(queueMapCharts).forEach(function(c){ if(c) c.resize(); });
 });
 
 // Boot
