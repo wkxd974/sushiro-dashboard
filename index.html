@@ -466,7 +466,7 @@ tr:hover td{background:#faf9f7}
         </div>
         <div class="fg">
           <label>开始日期</label>
-          <input type="date" id="turnoverStartDate" onchange="macroTurnoverRender()">
+          <input type="date" id="turnoverStartDate" value="2026-02-01" onchange="macroTurnoverRender()">
         </div>
         <div class="fg">
           <label>结束日期</label>
@@ -1063,12 +1063,15 @@ function macroQueueRender() {
   var container = document.getElementById('queueMapsContainer');
   if(!container) return;
 
+  // Queue warning note
+  var html = '<div style="font-size:12px;color:#c62828;margin:0 0 14px;padding:10px 14px;background:#ffebee;border-radius:6px;border:1px solid #ef9a9a">'
+    + '⚠️ <b>关于排号数</b>：排号数来源于每小时小程序/大众点评上的取号情况，存在同一号在不同时段被重复计算的可能性，因此排号数比真实数据偏高，在此仅供参考（统计时段：各品牌营业时间）</div>';
   // Build HTML for 9 brand maps - 2 per row
-  var html = '<div style="display:flex;flex-wrap:wrap;gap:14px">';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:14px">';
   MACRO_BRANDS.forEach(function(brand) {
     var divId = 'queueMap_' + brand;
     html += '<div class="card" style="padding:0;flex:1 1 calc(50% - 7px);min-width:400px">'
-      + '<div style="padding:12px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:' + (MACRO_BRAND_COLORS[brand] || '#333') + '">' + brand + ' 店均排号数分布</div>'
+      + '<div style="padding:12px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:' + (MACRO_BRAND_COLORS[brand] || '#333') + '">' + brand + ' 单店日均排号数分布</div>'
       + '<div id="' + divId + '" style="width:100%;height:500px"></div>'
       + '</div>';
   });
@@ -1128,20 +1131,8 @@ function renderQueueMap(brand, startDate, endDate) {
       storeMeta[storeId] = { city: city, prov: prov };
     }
 
-    if(isBanu) {
-      // For Banu: use queue_hours as proxy (there's no max_queue in banu data)
-      // Actually, Banu doesn't have max_queue, it has queue_hours and biz_hours
-      // Use a simple metric: assume queue activity represents queue level
-      // Actually the user said "排号数" - for banu we have queue_hours (排号时段)
-      // Let's compute: daily queuing intensity = queue_hours (number of hours with queuing)
-      // This is actually available per store per day
-      if(!storeDay[key]) storeDay[key] = { store: storeId, date: date, queue: 0 };
-      storeDay[key].queue += (r.queue_hours || 0);
-    } else {
-      // For hotpot brands: use max_queue
-      if(!storeDay[key]) storeDay[key] = { store: storeId, date: date, queue: 0 };
-      storeDay[key].queue += (r.max_queue || 0);
-    }
+    if(!storeDay[key]) storeDay[key] = { store: storeId, date: date, queue: 0 };
+    storeDay[key].queue += (r.max_queue || 0);
   });
 
   // Aggregate to province level
@@ -1210,7 +1201,7 @@ function renderQueueMap(brand, startDate, endDate) {
       trigger: 'item',
       formatter: function(params) {
         if(!params.data || !params.data.value) return params.name + '：暂无数据';
-        var html = '<b>' + params.name + '</b>　店均' + (isBanu ? '排号时段' : '排号数') + '：' + params.data.value + '<br/>'
+        var html = '<b>' + params.name + '</b>　单店日均排号数：' + params.data.value + '<br/>'
           + '门店数：' + params.data.stores + '<br/><br/>';
         if(params.data.cityDetails) {
           var cities = Object.keys(params.data.cityDetails).sort(function(a,b) {
@@ -1218,7 +1209,7 @@ function renderQueueMap(brand, startDate, endDate) {
           });
           cities.forEach(function(c) {
             var cd = params.data.cityDetails[c];
-            html += c + '：店均 ' + cd.avg + '（' + cd.stores + '家店）<br/>';
+            html += c + '：单店日均 ' + cd.avg + '（' + cd.stores + '家店）<br/>';
           });
         }
         return html;
