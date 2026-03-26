@@ -784,7 +784,7 @@ function renderMap2() {
       label: { show: false, emphasis: { show: false } },
       emphasis: {
         label: { show: false },
-        itemStyle: { areaColor: undefined, borderColor: '#333', borderWidth: 2 }
+        itemStyle: { borderColor: '#333', borderWidth: 2 }
       },
       select: { label: { show: false }, itemStyle: {} },
       itemStyle: {
@@ -793,22 +793,25 @@ function renderMap2() {
         areaColor: '#f0efed'
       },
       data: data.map(function(d) {
-        var color;
-        if(d.type === 'both') {
-          color = overlapColor;
-        } else if(d.type === 'hdl') {
-          color = hdlColor;
-        } else {
-          color = brdColor;
-        }
+        // 根据类别选基色，根据门店数量在0.45~1.0之间做深浅
+        var baseR, baseG, baseB;
+        if(d.type === 'both') { baseR=139; baseG=69; baseB=166; }
+        else if(d.type === 'hdl') { baseR=224; baseG=64; baseB=64; }
+        else { baseR=51; baseG=119; baseB=204; }
+        var ratio = maxVal > 0 ? (d.value / maxVal) : 0.5;
+        var t = 0.45 + ratio * 0.55; // 最浅45%，最深100%
+        var r = Math.round(255 - (255 - baseR) * t);
+        var g = Math.round(255 - (255 - baseG) * t);
+        var b = Math.round(255 - (255 - baseB) * t);
+        var areaColor = 'rgb(' + r + ',' + g + ',' + b + ')';
         return {
           name: d.name,
           value: d.value,
           hdl: d.hdl,
           brand: d.brand,
           type: d.type,
-          itemStyle: { areaColor: color },
-          emphasis: { itemStyle: { areaColor: color } }
+          itemStyle: { areaColor: areaColor },
+          emphasis: { itemStyle: { areaColor: areaColor } }
         };
       })
     }]
