@@ -502,11 +502,13 @@ tr:hover td{background:#faf9f7}
 
     <!-- ====== DISH RANKING SECTION ====== -->
     <div id="sec-dish_rank" class="hidden">
+      <div class="filters" style="align-items:center">
+        <div class="fg"><label>城市</label><select id="dishCitySelect" onchange="dishSelectCity(this.value)" style="min-width:140px"><option value="全部">全部城市</option></select></div>
+        <div style="flex:1"></div>
+        <div style="font-size:11px;color:#aaa">数据来源: 久谦中台53城火锅口味榜</div>
+      </div>
       <div style="margin-bottom:14px">
-        <div style="margin-bottom:8px;font-size:12px;color:#8c8c8c;font-weight:500">菜品品类</div>
-        <div id="dishCatBtns" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
-        <div style="margin-bottom:8px;font-size:12px;color:#8c8c8c;font-weight:500">城市筛选</div>
-        <div id="dishCityBtns" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <div id="dishCatBtns" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
       <div class="card" style="padding:0;overflow:hidden;border:1px solid rgba(0,0,0,.04);border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.04)">
         <div id="dishRankTable" style="width:100%"></div>
@@ -2901,62 +2903,51 @@ function dishSelectCat(code) {
 }
 function dishSelectCity(city) {
   dishCurCity = city;
-  document.querySelectorAll('#dishCityBtns .dbtn').forEach(function(el){
-    el.classList.toggle('active', el.getAttribute('data-v') === city);
-  });
   dishRankRender();
 }
 
-var dishBtnsInited = false;
-function dishInitBtns() {
-  if(dishBtnsInited) return;
-  dishBtnsInited = true;
-  var catDiv = document.getElementById('dishCatBtns');
-  var cityDiv = document.getElementById('dishCityBtns');
-  var btnStyle = 'dbtn';
+var dishInited = false;
+function dishInit() {
+  if(dishInited) return;
+  dishInited = true;
   // Category buttons
+  var catDiv = document.getElementById('dishCatBtns');
   DISH_CATS.forEach(function(c){
     var b = document.createElement('div');
-    b.className = btnStyle + (c.code === '全部' ? ' active' : '');
+    b.className = 'dbtn' + (c.code === '全部' ? ' active' : '');
     b.setAttribute('data-v', c.code);
     b.textContent = c.label;
     b.onclick = function(){ dishSelectCat(c.code); };
     catDiv.appendChild(b);
   });
-  // City buttons
-  var allBtn = document.createElement('div');
-  allBtn.className = btnStyle + ' active';
-  allBtn.setAttribute('data-v', '全部');
-  allBtn.textContent = '全部城市';
-  allBtn.onclick = function(){ dishSelectCity('全部'); };
-  cityDiv.appendChild(allBtn);
+  // City dropdown
+  var sel = document.getElementById('dishCitySelect');
   DISH_RAW.cities.forEach(function(city){
-    var b = document.createElement('div');
-    b.className = btnStyle;
-    b.setAttribute('data-v', city);
-    b.textContent = city;
-    b.onclick = function(){ dishSelectCity(city); };
-    cityDiv.appendChild(b);
+    var opt = document.createElement('option');
+    opt.value = city;
+    opt.textContent = city;
+    sel.appendChild(opt);
   });
 }
 
 function dishRankRender() {
-  dishInitBtns();
+  dishInit();
   var raw = DISH_RAW;
+  var isAllCity = dishCurCity === '全部';
   // Filter data
   var filtered = raw.data.filter(function(r){
-    // r = [city_idx, brand_idx, cat_code, dish, total]
-    if(dishCurCity !== '全部' && raw.cities[r[0]] !== dishCurCity) return false;
+    if(!isAllCity && raw.cities[r[0]] !== dishCurCity) return false;
     if(dishCurCat !== '全部' && r[2] !== dishCurCat) return false;
     return true;
   });
 
-  // Aggregate by brand: sum totals, keep the top dish (highest single entry)
-  var brandAgg = {}; // brand_idx -> {total, dish, cat, maxSingle}
+  // Aggregate by brand: sum totals, count cities, keep the top dish
+  var brandAgg = {};
   filtered.forEach(function(r){
     var bi = r[1];
-    if(!brandAgg[bi]) brandAgg[bi] = {total:0, dish:'', cat:'', maxSingle:0};
+    if(!brandAgg[bi]) brandAgg[bi] = {total:0, dish:'', cat:'', maxSingle:0, cities:{}};
     brandAgg[bi].total += r[4];
+    brandAgg[bi].cities[r[0]] = 1;
     if(r[4] > brandAgg[bi].maxSingle) {
       brandAgg[bi].maxSingle = r[4];
       brandAgg[bi].dish = r[3];
@@ -2964,56 +2955,64 @@ function dishRankRender() {
     }
   });
 
-  // Sort by total desc, take top 50
+  // Sort by total desc, take top 100
   var ranked = Object.keys(brandAgg).map(function(bi){
-    return {brand: raw.brands[bi], total: brandAgg[bi].total, dish: brandAgg[bi].dish, cat: brandAgg[bi].cat};
+    var a = brandAgg[bi];
+    return {brand: raw.brands[bi], total: a.total, dish: a.dish, cat: a.cat, cityCount: Object.keys(a.cities).length};
   });
   ranked.sort(function(a,b){ return b.total - a.total; });
-  ranked = ranked.slice(0, 50);
+  ranked = ranked.slice(0, 100);
 
   // Render table
   var maxVal = ranked.length ? ranked[0].total : 1;
+  var thStyle = 'padding:12px 14px;color:#8c8c8c;font-weight:600;font-size:12px;white-space:nowrap';
   var html = '<table style="width:100%;border-collapse:collapse;font-size:13px">';
   html += '<thead><tr style="background:#fafaf8;border-bottom:2px solid #eee">';
-  html += '<th style="padding:12px 14px;text-align:center;color:#8c8c8c;font-weight:600;width:50px">排名</th>';
-  html += '<th style="padding:12px 14px;text-align:left;color:#8c8c8c;font-weight:600">品牌</th>';
-  html += '<th style="padding:12px 14px;text-align:left;color:#8c8c8c;font-weight:600">最热菜品</th>';
+  html += '<th style="'+thStyle+';text-align:center;width:44px">#</th>';
+  html += '<th style="'+thStyle+';text-align:left">品牌</th>';
+  html += '<th style="'+thStyle+';text-align:left">推荐数最高的菜品</th>';
   if(dishCurCat === '全部') {
-    html += '<th style="padding:12px 14px;text-align:center;color:#8c8c8c;font-weight:600;width:100px">所属品类</th>';
+    html += '<th style="'+thStyle+';text-align:center;width:90px">品类</th>';
   }
-  html += '<th style="padding:12px 14px;text-align:right;color:#8c8c8c;font-weight:600;width:90px">推荐指数</th>';
-  html += '<th style="padding:12px 14px;color:#8c8c8c;font-weight:600;width:200px">热度</th>';
+  if(isAllCity) {
+    html += '<th style="'+thStyle+';text-align:center;width:80px">上榜城市</th>';
+  }
+  html += '<th style="'+thStyle+';text-align:right;width:100px">网友推荐数</th>';
+  html += '<th style="'+thStyle+';width:180px"></th>';
   html += '</tr></thead><tbody>';
 
   var medalColors = ['#FFD700','#C0C0C0','#CD7F32'];
   ranked.forEach(function(r, i){
     var bgColor = i % 2 === 0 ? '#fff' : '#fafaf8';
-    var rankDisplay = i < 3 ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:'+medalColors[i]+';color:#fff;font-weight:700;font-size:12px">'+(i+1)+'</span>' : '<span style="color:#999">'+(i+1)+'</span>';
+    var rankDisplay = i < 3
+      ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:'+medalColors[i]+';color:#fff;font-weight:700;font-size:11px">'+(i+1)+'</span>'
+      : '<span style="color:#aaa;font-size:12px">'+(i+1)+'</span>';
     var barPct = Math.max((r.total / maxVal) * 100, 2);
     var barColor = i < 3 ? '#C75050' : i < 10 ? '#D0894A' : '#4A82A8';
     html += '<tr style="background:'+bgColor+';border-bottom:1px solid #f0f0f0;transition:background .15s" onmouseenter="this.style.background=\'#f5f0eb\'" onmouseleave="this.style.background=\''+bgColor+'\'">';
-    html += '<td style="padding:10px 14px;text-align:center">'+rankDisplay+'</td>';
-    html += '<td style="padding:10px 14px;font-weight:600;color:#2c2c2c">'+r.brand+'</td>';
-    html += '<td style="padding:10px 14px;color:#666">'+r.dish+'</td>';
+    html += '<td style="padding:9px 14px;text-align:center">'+rankDisplay+'</td>';
+    html += '<td style="padding:9px 14px;font-weight:600;color:#2c2c2c">'+r.brand+'</td>';
+    html += '<td style="padding:9px 14px;color:#555">'+r.dish+'</td>';
     if(dishCurCat === '全部') {
-      var catLabel = DISH_CAT_NAMES[r.cat] || r.cat;
-      html += '<td style="padding:10px 14px;text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(74,130,168,.1);color:#4A82A8">'+catLabel+'</span></td>';
+      html += '<td style="padding:9px 14px;text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(74,130,168,.08);color:#4A82A8">'+( DISH_CAT_NAMES[r.cat] || r.cat)+'</span></td>';
     }
-    html += '<td style="padding:10px 14px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c">'+r.total.toLocaleString()+'</td>';
-    html += '<td style="padding:10px 14px"><div style="background:#f0eeeb;border-radius:4px;height:18px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:4px;transition:width .3s"></div></div></td>';
+    if(isAllCity) {
+      html += '<td style="padding:9px 14px;text-align:center;color:#888;font-size:12px">'+r.cityCount+'城</td>';
+    }
+    html += '<td style="padding:9px 14px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c">'+r.total.toLocaleString()+'</td>';
+    html += '<td style="padding:9px 14px"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
     html += '</tr>';
   });
 
   if(ranked.length === 0) {
-    html += '<tr><td colspan="6" style="padding:40px;text-align:center;color:#ccc;font-size:14px">暂无数据</td></tr>';
+    html += '<tr><td colspan="7" style="padding:40px;text-align:center;color:#ccc;font-size:14px">该筛选条件下暂无数据</td></tr>';
   }
   html += '</tbody></table>';
   document.getElementById('dishRankTable').innerHTML = html;
 
   // Note
-  var cityLabel = dishCurCity === '全部' ? '全部城市' : dishCurCity;
   var catLabel = dishCurCat === '全部' ? '全部品类' : (DISH_CAT_NAMES[dishCurCat] || dishCurCat);
-  document.getElementById('dishNote').textContent = '数据来源: 久谦中台53城火锅口味榜 · 当前筛选: '+cityLabel+' × '+catLabel+' · 展示Top50 · 推荐指数=各门店网友推荐数加总';
+  document.getElementById('dishNote').textContent = '展示Top100 · 网友推荐数 = 该品牌所有上榜门店在该菜品上获得的推荐数加总 · 菜品品类由关键词自动匹配';
 }
 
 // Auto refresh
