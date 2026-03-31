@@ -3121,7 +3121,7 @@ function dishRenderBrand() {
     return {
       brand: bk,
       total: a.total,
-      avgPerStore: uniqueStores > 0 ? Math.round(a.total / uniqueStores) : a.total,
+      avgPerStore: a.stores > 0 ? Math.round(a.total / a.stores) : a.total,
       top5: top5,
       topCat: top5.length ? top5[0].cat : '',
       cityCount: Object.keys(a.cities).length,
