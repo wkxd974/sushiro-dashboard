@@ -2928,6 +2928,21 @@ function reclassifyDish(r) {
   }
   // vagueNames removed — these are now category ZL in Supabase, no longer filtered
 
+  // === STEP 0.5: Fix ZL items that are actually food (饼/面/凉皮 etc) ===
+  if(r.category === 'ZL') {
+    var zlFoodKw = ['饼','面','凉皮','粿条','饭','串','包子','馒头','卷','糕','面筋'];
+    for(var z=0;z<zlFoodKw.length;z++){
+      if(n.indexOf(zlFoodKw[z])>=0){ r.category='XC'; return; }
+    }
+  }
+
+  // === STEP 0.6: Fix QR items that should be SC or JS ===
+  if(r.category === 'QR') {
+    var qrToSC = ['枸杞叶','枸杞苗','枸杞芽','红薯叶','番薯叶','地瓜叶','豆苗尖','豌豆尖'];
+    for(var z=0;z<qrToSC.length;z++){ if(n===qrToSC[z]){r.category='SC';return;} }
+    if(n.indexOf('酱茶')>=0 || n.indexOf('酱酱茶')>=0){ r.category='JS'; return; }
+  }
+
   // === STEP 1: Specific name -> category overrides ===
   var jsToQR = ['茶花鸡','景迈山茶花鸡','茶地生态鸡','青桔柠檬手撕鸡','酒香风沙肝',
     '茶干炒肉','鹧鸪茶炸排骨','柠檬鬼鸡','咖啡骨','咖啡排骨','香茅柠檬鸡',
