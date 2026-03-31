@@ -3165,7 +3165,8 @@ function dishRenderBrand() {
     // Top5 dishes as numbered list
     var top5Html = r.top5.map(function(d,j){
       var opacity = 1 - j * 0.15;
-      return '<span style="opacity:'+opacity+'">'+(j+1)+'. '+d.name+'<span style="color:#bbb;font-size:10px;margin-left:3px">('+d.total.toLocaleString()+')</span></span>';
+      var prefix = r.top5.length === 1 ? '' : (j+1)+'. ';
+      return '<span style="opacity:'+opacity+'">'+prefix+d.name+'<span style="color:#bbb;font-size:10px;margin-left:3px">('+d.total.toLocaleString()+')</span></span>';
     }).join('<br>');
     html += '<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0;transition:background .15s" onmouseenter="this.style.background=\'#f5f0eb\'" onmouseleave="this.style.background=\''+bg+'\'">';
     html += '<td style="padding:9px 10px;text-align:center;vertical-align:middle">'+rank+'</td>';
@@ -3189,7 +3190,7 @@ function dishRenderBrand() {
   }
   html += '</tbody></table>';
   document.getElementById('dishRankTable').innerHTML = html;
-  document.getElementById('dishNote').textContent = '\u5c55\u793aTop100 \u00b7 \u5e97\u5747\u63a8\u8350\u6570 = \u8be5\u54c1\u724c\u63a8\u8350\u603b\u6570 \u00f7 \u4e0a\u699c\u57ce\u5e02\u6570 \u00b7 Top5\u62ec\u53f7\u5185\u4e3a\u5404\u83dc\u54c1\u63a8\u8350\u6570';
+  document.getElementById('dishNote').textContent = '\u5c55\u793aTop100 \u00b7 \u5e97\u5747\u63a8\u8350\u6570 = \u8be5\u54c1\u724c\u63a8\u8350\u603b\u6570 \u00f7 \u4e0a\u699c\u57ce\u5e02\u6570 \u00b7 Top5\u62ec\u53f7\u5185\u4e3a\u5404\u83dc\u54c1\u63a8\u8350\u6570 \u00b7 \u4e0d\u8db35\u4e2a\u8868\u793a\u8be5\u54c1\u724c\u5728\u6b64\u54c1\u7c7b\u4e0b\u7684\u63a8\u8350\u83dc\u4e0d\u8db35\u9053';
 }
 
 // === TAB 2: SKU/Dish view ===
