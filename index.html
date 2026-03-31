@@ -2926,13 +2926,7 @@ function reclassifyDish(r) {
   for(var f=0;f<filterOut.length;f++){
     if(n === filterOut[f]) { r._filtered = true; return; }
   }
-  var vagueNames = ['小料','蘸料','火锅蘸料','自助小料','秘制自助小料','秘制蘸料',
-    '特色蘸料','招牌小料','秘制小料','自选蘸料','DIY蘸料','特色小料',
-    '百搭蘸料','万能蘸料','重八特色秘制小料','蘸料自助','调料台','小料台',
-    '经典小料','自选水果小料'];
-  for(var v=0;v<vagueNames.length;v++){
-    if(n === vagueNames[v]) { r._filtered = true; return; }
-  }
+  // vagueNames removed — these are now category ZL in Supabase, no longer filtered
 
   // === STEP 1: Specific name -> category overrides ===
   var jsToQR = ['茶花鸡','景迈山茶花鸡','茶地生态鸡','青桔柠檬手撕鸡','酒香风沙肝',
