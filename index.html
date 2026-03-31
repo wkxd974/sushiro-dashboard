@@ -3174,19 +3174,19 @@ function dishRenderBrand() {
       return '<span style="opacity:'+opacity+'">'+(j+1)+'. '+d.name+'<span style="color:#bbb;font-size:10px;margin-left:3px">('+d.total.toLocaleString()+')</span></span>';
     }).join('<br>');
     html += '<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0;transition:background .15s" onmouseenter="this.style.background=\'#f5f0eb\'" onmouseleave="this.style.background=\''+bg+'\'">';
-    html += '<td style="padding:9px 10px;text-align:center;vertical-align:top">'+rank+'</td>';
-    html += '<td style="padding:9px 10px;text-align:center;font-weight:600;color:#2c2c2c;vertical-align:top">'+r.brand+'</td>';
-    html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:top">'+priceStr+'</td>';
-    html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:top">'+storeStr+'</td>';
-    html += '<td style="padding:9px 10px;text-align:center;color:#555;font-size:12px;line-height:1.7">'+top5Html+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;vertical-align:middle">'+rank+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;font-weight:600;color:#2c2c2c;vertical-align:middle">'+r.brand+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:middle">'+priceStr+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:middle">'+storeStr+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;color:#555;font-size:12px;line-height:1.7;vertical-align:middle">'+top5Html+'</td>';
     if(dishCurCat === '\u5168\u90e8') {
-      html += '<td style="padding:9px 10px;text-align:center;vertical-align:top"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(74,130,168,.08);color:#4A82A8">'+(DISH_CAT_NAMES[r.topCat]||r.topCat)+'</span></td>';
+      html += '<td style="padding:9px 10px;text-align:center;vertical-align:middle"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(74,130,168,.08);color:#4A82A8">'+(DISH_CAT_NAMES[r.topCat]||r.topCat)+'</span></td>';
     }
     if(isAllCity) {
-      html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:top">'+(r.cityCount < 5 ? r.cityNames.join('\u3001') : r.cityCount+'\u57ce')+'</td>';
+      html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:middle">'+(r.cityCount < 5 ? r.cityNames.join('\u3001') : r.cityCount+'\u57ce')+'</td>';
     }
-    html += '<td style="padding:9px 10px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c;vertical-align:top">'+r.avgPerStore.toLocaleString()+'</td>';
-    html += '<td style="padding:9px 10px;vertical-align:top"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
+    html += '<td style="padding:9px 10px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c;vertical-align:middle">'+r.avgPerStore.toLocaleString()+'</td>';
+    html += '<td style="padding:9px 10px;vertical-align:middle"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
     html += '</tr>';
   });
 
