@@ -2914,17 +2914,103 @@ var DISH_CATS = [
 var DISH_CAT_NAMES = {};
 DISH_CATS.forEach(function(c){ DISH_CAT_NAMES[c.code] = c.label; });
 
-// Client-side reclassification rules
+// Client-side reclassification + merge rules
 function reclassifyDish(r) {
   var n = r.dish_name || '';
-  var nl = n.toLowerCase();
-  // Sauce/dip keywords
-  var sauceKw = ['\u6c99\u8336\u9171','\u829d\u9ebb\u9171','\u9ebb\u9171','\u8638\u6599','\u5c0f\u6599','\u6cb9\u789f','\u8638\u789f','\u8c03\u6599','\u7518\u9171','\u8fa3\u9171','\u8c46\u74e3\u9171','\u8150\u4e73','\u9171\u6599','\u82b1\u751f\u9171','\u6d77\u9c9c\u9171','\u97ed\u83dc\u82b1\u9171','\u8fa3\u6912\u9171','\u679c\u6728\u70df\u718f\u9171','\u69b4\u83b2\u9171','\u9171\u6c41','\u81ea\u5236\u9171','\u8c46\u8c49\u9171','\u6885\u5b50\u9171','\u82a5\u672b\u9171','\u853b\u84c9\u9171','\u829d\u58eb\u9171','\u714e\u997c\u9171','\u516b\u5b9d\u9171','\u79d8\u5236\u9171','\u907f\u98ce\u5858','\u86c7\u53e3\u679c\u8638\u6599','\u9999\u8c46\u7c89\u8638\u6599'];
-  for(var i=0;i<sauceKw.length;i++){
-    if(n.indexOf(sauceKw[i]) >= 0) { r.category = 'ZL'; return; }
+
+  // === STEP 0: Filter out vague/non-dish items ===
+  var filterOut = ['销量王下酒菜','含下酒小菜无限畅吃','主食水果饮料冷饮零食无限自助',
+    '自助水果饮品零食','自助饮料水果小食','饮料甜品无限畅吃','茶点无限畅吃',
+    '下酒小菜无限畅吃','自助饮品小食','自助酒水','自助饮料','下酒菜',
+    '凉菜水果酱料冷饮零食自助'];
+  for(var f=0;f<filterOut.length;f++){
+    if(n === filterOut[f]) { r._filtered = true; return; }
   }
-  // Specific fixes: porridge base -> pot base
-  if(n.indexOf('\u7ca5\u5e95') >= 0 || n.indexOf('\u767d\u7ca5') >= 0 && r.category !== 'GD') { r.category = 'GD'; return; }
+  var vagueNames = ['小料','蘸料','火锅蘸料','自助小料','秘制自助小料','秘制蘸料',
+    '特色蘸料','招牌小料','秘制小料','自选蘸料','DIY蘸料','特色小料',
+    '百搭蘸料','万能蘸料','重八特色秘制小料','蘸料自助','调料台','小料台',
+    '经典小料','自选水果小料'];
+  for(var v=0;v<vagueNames.length;v++){
+    if(n === vagueNames[v]) { r._filtered = true; return; }
+  }
+
+  // === STEP 1: Specific name -> category overrides ===
+  var jsToQR = ['茶花鸡','景迈山茶花鸡','茶地生态鸡','青桔柠檬手撕鸡','酒香风沙肝',
+    '茶干炒肉','鹧鸪茶炸排骨','柠檬鬼鸡','咖啡骨','咖啡排骨','香茅柠檬鸡',
+    '柠檬鸡爪','柠檬凤爪','清酒豆花鸡','啤酒烧鸡','啤酒鸭'];
+  var jsToNR = ['茶缸涮牛肚','茶树菇炒牛肚','茶树菇牛肚'];
+  var jsToYR = ['塞上飘雪盐池滩羊'];
+  var jsToSC = ['茶树菇','茶豆角','香酥茶树菇','茶树菇丸','鲜香茶树菇'];
+  var jsToTP = ['酒酿丸子','酒酿冰豆花','桂花酒酿冰粉','日式抹茶冰雪山','奶茶奶冻',
+    '椰汁龟苓膏','获祭清酒冰淇淋','酒酿豆花','酒酿小汤圆','酒酿圆子',
+    '酒酿水果冰粉','冰豆花酒酿','桂花酒酿','酒酿西米露','桂花酒酿小圆子',
+    '奶茶冰淇淋','桂花酒酿豆花','桂香酒酿冰豆花','酒酿冰粉'];
+  var jsToGD = ['矿泉水锅','百岁山矿泉水锅','农夫山泉清水锅','山茶红油锅',
+    '闽南沙茶味锅','啤酒鸡汤锅','茶花鸡锅底','冰煮茶','咖啡锅底'];
+  var jsToXC = ['奶皮子炒米卷','潮汕沙茶粿条','椰汁芒果饭','沙茶面','沙茶粿条','酒酿饼'];
+
+  var xcToZL = ['味蜀吾罐装香油','潮汕避风塘小蘸料','芝麻酱小料','芝麻酱','秘制拉克申蘸料',
+    '秘制麻酱','麻酱调料','秘制拉克申小料','招牌蘸料·龙继招牌','拉克神蘸料','麻酱',
+    '招牌蘸料','东来顺秘制蘸料','芝麻花生酱','川味小料','花生麻酱小料','干碟',
+    '香油','香油碟','麻酱蘸料','罐装香油','牛油碟','香油蒜泥','油辣子蘸料',
+    '招牌芝麻酱','招牌麻酱','秘制麻酱料','秘制京味芝麻酱','国家非遗拉克申蘸料',
+    '蒜泥芝麻酱','芝麻酱汁','拉克申蘸料','重庆油碟','锅蘸料','调料味碟'];
+  var xcToGD = ['白粥粥底','粥底火锅','白粥底','白粥锅底'];
+  var scToGD = ['野菌鸡汤锅'];
+  var scToJS = ['马蹄茅根甘蔗汁','花生冰沙','冬瓜山茶'];
+
+  if(r.category === 'JS') {
+    for(var i=0;i<jsToQR.length;i++) if(n===jsToQR[i]){r.category='QR';return;}
+    for(var i=0;i<jsToNR.length;i++) if(n===jsToNR[i]){r.category='NR';return;}
+    for(var i=0;i<jsToYR.length;i++) if(n===jsToYR[i]){r.category='YR';return;}
+    for(var i=0;i<jsToSC.length;i++) if(n===jsToSC[i]){r.category='SC';return;}
+    for(var i=0;i<jsToTP.length;i++) if(n===jsToTP[i]){r.category='TP';return;}
+    for(var i=0;i<jsToGD.length;i++) if(n===jsToGD[i]){r.category='GD';return;}
+    for(var i=0;i<jsToXC.length;i++) if(n===jsToXC[i]){r.category='XC';return;}
+  }
+  if(r.category === 'XC') {
+    for(var i=0;i<xcToZL.length;i++) if(n===xcToZL[i]){r.category='ZL';return;}
+    for(var i=0;i<xcToGD.length;i++) if(n===xcToGD[i]){r.category='GD';return;}
+  }
+  if(r.category === 'SC') {
+    for(var i=0;i<scToGD.length;i++) if(n===scToGD[i]){r.category='GD';return;}
+    for(var i=0;i<scToJS.length;i++) if(n===scToJS[i]){r.category='JS';return;}
+  }
+
+  // === STEP 2: Keyword-based sauce reclassification (ZL) ===
+  var sauceKw = ['沙茶酱','芝麻酱','麻酱','油碟','蘸碟','甘酱','辣酱','豆瓣酱','腐乳',
+    '花生酱','海鲜酱','韭菜花酱','辣椒酱','果木烟熏酱','榴莲酱','酱汁','豆豉酱',
+    '梅子酱','芥末酱','蘸蓉酱','芝士酱','八宝酱','秘制酱','避风塘','蛇口果蘸料',
+    '香豆粉蘸料','酱料','调料'];
+  var sauceExclude = ['烧饼','饼','面','饭','粿条','酥肉','丸子','串','包子','饺','馒头','卷','糕'];
+  var isFoodItem = false;
+  for(var e=0;e<sauceExclude.length;e++){
+    if(n.indexOf(sauceExclude[e])>=0){isFoodItem=true;break;}
+  }
+  if(!isFoodItem) {
+    for(var i=0;i<sauceKw.length;i++){
+      if(n.indexOf(sauceKw[i])>=0){r.category='ZL';return;}
+    }
+    if(n.indexOf('香油')>=0 && n.indexOf('油条')<0){r.category='ZL';return;}
+  }
+
+  // === STEP 3: Pot base fixes ===
+  if(n.indexOf('粥底')>=0 || (n.indexOf('白粥')>=0 && r.category!=='GD')){r.category='GD';return;}
+
+  // === STEP 4: Dish name merging (cooking method prefixes) ===
+  var mergeMap = {
+    '现炸酥肉':'小酥肉','现炸小酥肉':'小酥肉','炸小酥肉':'小酥肉','炸酥肉':'小酥肉',
+    '黄金酥肉':'小酥肉','手工酥肉':'小酥肉','鲜炸酥肉':'小酥肉','鲜炸小酥肉':'小酥肉','酥肉':'小酥肉',
+    '手打鲜牛肉丸':'手打牛肉丸','手工牛肉丸':'手打牛肉丸','鲜牛肉丸':'手打牛肉丸','现打牛肉丸':'手打牛肉丸',
+    '现炸油条':'油条','手工油条':'油条','鲜炸油条':'油条',
+    '手工冰粉':'冰粉','自制冰粉':'冰粉','鲜制冰粉':'冰粉',
+    '手工红糖糍粑':'红糖糍粑','现炸糍粑':'红糖糍粑','鲜炸糍粑':'红糖糍粑',
+    '鲜切牛舌':'牛舌','薄切牛舌':'牛舌',
+    '现炸腐竹':'炸腐竹','鲜炸腐竹':'炸腐竹','香炸腐竹':'炸腐竹',
+    '鲜切羊肉卷':'羊肉卷','精切羊肉卷':'羊肉卷','手切羊肉卷':'羊肉卷',
+    '新鲜鹅肠':'鹅肠','鲜鹅肠':'鹅肠'
+  };
+  if(mergeMap[n]) { r.dish_name = mergeMap[n]; }
 }
 
 function loadDishData() {
@@ -2934,7 +3020,7 @@ function loadDishData() {
   if(tbl) tbl.innerHTML = '<div style="text-align:center;padding:60px;color:#aaa"><div style="display:inline-block;width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#4A82A8;border-radius:50%;animation:sp 1s linear infinite"></div><p style="margin-top:12px;font-size:14px">\u6b63\u5728\u52a0\u8f7d\u83dc\u54c1\u6570\u636e...</p></div>';
   dishLoading = supaAll('dish_ranking', 'id.asc').then(function(rows) {
     rows.forEach(function(r){ reclassifyDish(r); });
-    dishData = rows;
+    dishData = rows.filter(function(r){ return !r._filtered; });
     dishLoading = false;
     return rows;
   });
@@ -3045,6 +3131,7 @@ function dishRenderBrand() {
       top5: top5,
       topCat: top5.length ? top5[0].cat : '',
       cityCount: Object.keys(a.cities).length,
+      cityNames: Object.keys(a.cities),
       price: a.price,
       nationalStores: a.stores
     };
@@ -3059,13 +3146,13 @@ function dishRenderBrand() {
   html += '<th style="'+th+';text-align:center;width:36px">#</th>';
   html += '<th style="'+th+';text-align:left">品牌</th>';
   html += '<th style="'+th+';text-align:center;width:60px">客单价</th>';
-  html += '<th style="'+th+';text-align:center;width:70px">全国门店</th>';
+  html += '<th style="'+th+';text-align:center;width:70px">全国门店数</th>';
   html += '<th style="'+th+';text-align:left;min-width:220px">推荐数最高的菜品 (Top5)</th>';
   if(dishCurCat === '\u5168\u90e8') {
     html += '<th style="'+th+';text-align:center;width:75px">品类</th>';
   }
   if(isAllCity) {
-    html += '<th style="'+th+';text-align:center;width:60px">上榜城市</th>';
+    html += '<th style="'+th+';text-align:center;width:60px">上榜城市数</th>';
   }
   html += '<th style="'+th+';text-align:right;width:90px">店均推荐数</th>';
   html += '<th style="'+th+';width:130px"></th>';
@@ -3096,7 +3183,7 @@ function dishRenderBrand() {
       html += '<td style="padding:9px 10px;text-align:center;vertical-align:top"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(74,130,168,.08);color:#4A82A8">'+(DISH_CAT_NAMES[r.topCat]||r.topCat)+'</span></td>';
     }
     if(isAllCity) {
-      html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:top">'+r.cityCount+'\u57ce</td>';
+      html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:top">'+(r.cityCount < 5 ? r.cityNames.join('\u3001') : r.cityCount+'\u57ce')+'</td>';
     }
     html += '<td style="padding:9px 10px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c;vertical-align:top">'+r.avgPerStore.toLocaleString()+'</td>';
     html += '<td style="padding:9px 10px;vertical-align:top"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
@@ -3137,7 +3224,8 @@ function dishRenderSku() {
       cat: a.cat,
       total: a.total,
       brandCount: Object.keys(a.brands).length,
-      cityCount: Object.keys(a.cities).length
+      cityCount: Object.keys(a.cities).length,
+      cityNames: Object.keys(a.cities)
     };
   });
   ranked.sort(function(a,b){ return b.total - a.total; });
@@ -3152,7 +3240,7 @@ function dishRenderSku() {
   if(dishCurCat === '\u5168\u90e8') {
     html += '<th style="'+th+';text-align:center;width:85px">\u54c1\u7c7b</th>';
   }
-  html += '<th style="'+th+';text-align:center;width:80px">\u62e5\u6709\u54c1\u724c\u6570</th>';
+  html += '<th style="'+th+';text-align:center;width:80px">\u8986\u76d6\u54c1\u724c\u6570</th>';
   if(isAllCity) {
     html += '<th style="'+th+';text-align:center;width:80px">\u4e0a\u699c\u57ce\u5e02\u6570</th>';
   }
@@ -3174,9 +3262,9 @@ function dishRenderSku() {
     if(dishCurCat === '\u5168\u90e8') {
       html += '<td style="padding:9px 14px;text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(74,130,168,.08);color:#4A82A8">'+(DISH_CAT_NAMES[r.cat]||r.cat)+'</span></td>';
     }
-    html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600">'+r.brandCount+' <span style="color:#bbb;font-size:11px">\u4e2a\u54c1\u724c</span></td>';
+    html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600">'+r.brandCount+' <span style="color:#bbb;font-size:11px">\u54c1\u724c</span></td>';
     if(isAllCity) {
-      html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600">'+r.cityCount+' <span style="color:#bbb;font-size:11px">\u57ce</span></td>';
+      html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600">'+(r.cityCount < 5 ? r.cityNames.join('\u3001') : r.cityCount+' <span style="color:#bbb;font-size:11px">\u57ce</span>')+'</td>';
     }
     html += '<td style="padding:9px 14px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c">'+r.total.toLocaleString()+'</td>';
     html += '<td style="padding:9px 14px"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
