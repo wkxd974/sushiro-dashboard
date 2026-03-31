@@ -2994,7 +2994,7 @@ function dishRankRender() {
     var barColor = i < 3 ? '#C75050' : i < 10 ? '#D0894A' : '#4A82A8';
     var priceStr = r.price > 0 ? '¥'+r.price : '-';
     var storeStr = r.nationalStores > 0 ? r.nationalStores.toLocaleString() : '-';
-    html += '<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0;transition:background .15s" onmouseenter="this.style.background='#f5f0eb'" onmouseleave="this.style.background=''+bg+''">';
+    html += '<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0;transition:background .15s" onmouseenter="this.style.background=\'#f5f0eb\'" onmouseleave="this.style.background=\''+bg+'\'">';
     html += '<td style="padding:9px 14px;text-align:center">'+rank+'</td>';
     html += '<td style="padding:9px 14px;font-weight:600;color:#2c2c2c">'+r.brand+'</td>';
     html += '<td style="padding:9px 14px;text-align:center;color:#888;font-size:12px">'+priceStr+'</td>';
