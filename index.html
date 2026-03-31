@@ -502,8 +502,12 @@ tr:hover td{background:#faf9f7}
 
     <!-- ====== DISH RANKING SECTION ====== -->
     <div id="sec-dish_rank" class="hidden">
-      <div class="filters" style="align-items:center">
-        <div class="fg"><label>城市</label><select id="dishCitySelect" onchange="dishSelectCity(this.value)" style="min-width:140px"><option value="全部">全部城市</option></select></div>
+      <div style="display:flex;align-items:center;margin-bottom:14px;gap:18px">
+        <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1.5px solid #3d5a80">
+          <div id="dishTabBrand" class="dish-tab active" onclick="dishSwitchTab('brand')" style="padding:7px 22px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:#3d5a80;color:#fff">品牌维度</div>
+          <div id="dishTabSku" class="dish-tab" onclick="dishSwitchTab('sku')" style="padding:7px 22px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:#fff;color:#3d5a80">菜品维度</div>
+        </div>
+        <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">城市</label><select id="dishCitySelect" onchange="dishSelectCity(this.value)" style="min-width:140px"><option value="全部">全部城市</option></select></div>
         <div style="flex:1"></div>
         <div style="font-size:11px;color:#aaa">数据来源: 久谦中台53城火锅口味榜</div>
       </div>
@@ -2876,34 +2880,75 @@ function initAllFilters(){
 // === DISH RANKING DATA & LOGIC ===
 var dishData = null;
 var dishLoading = false;
+var dishCurTab = 'brand';
+var dishCurCat = '\u5168\u90e8';
+var dishCurCity = '\u5168\u90e8';
+
+// City tier ordering
+var CITY_TIERS = [
+  {label:'\u4e00\u7ebf\u57ce\u5e02', cities:['\u5317\u4eac','\u4e0a\u6d77','\u5e7f\u5dde','\u6df1\u5733']},
+  {label:'\u65b0\u4e00\u7ebf', cities:['\u6210\u90fd','\u91cd\u5e86','\u676d\u5dde','\u6b66\u6c49','\u82cf\u5dde','\u897f\u5b89','\u5357\u4eac','\u957f\u6c99','\u5929\u6d25','\u90d1\u5dde','\u4e1c\u839e','\u9752\u5c9b','\u6606\u660e','\u6c88\u9633','\u5408\u80a5','\u4f5b\u5c71']},
+  {label:'\u4e8c\u7ebf', cities:['\u65e0\u9521','\u5b81\u6ce2','\u53a6\u95e8','\u798f\u5dde','\u6d4e\u5357','\u5927\u8fde','\u6e29\u5dde','\u54c8\u5c14\u6ee8','\u77f3\u5bb6\u5e84','\u5357\u5b81','\u957f\u6625','\u6cc9\u5dde','\u5357\u660c','\u8d35\u9633','\u592a\u539f','\u70df\u53f0','\u5609\u5174','\u5357\u901a','\u73e0\u6d77','\u60e0\u5dde','\u5f90\u5dde','\u5e38\u5dde','\u626c\u5dde','\u7ecd\u5174']},
+  {label:'\u4e09\u7ebf\u53ca\u4ee5\u4e0b', cities:['\u6d1b\u9633','\u6d77\u53e3','\u94f6\u5ddd','\u5170\u5dde','\u6dee\u5b89','\u76d0\u57ce','\u54b8\u9633','\u6c55\u5934','\u4e2d\u5c71']}
+];
+var CITY_ORDER = {};
+(function(){
+  var idx = 0;
+  CITY_TIERS.forEach(function(t){ t.cities.forEach(function(c){ CITY_ORDER[c] = idx++; }); });
+})();
+
+// Category definitions with new sauce/dip category
+var DISH_CATS = [
+  {code:'\u5168\u90e8',label:'\u5168\u90e8\u54c1\u7c7b'},
+  {code:'GD',label:'\u9505\u5e95'},
+  {code:'NR',label:'\u8364\u83dc\u00b7\u725b\u8089'},
+  {code:'YR',label:'\u8364\u83dc\u00b7\u7f8a\u8089'},
+  {code:'HX',label:'\u8364\u83dc\u00b7\u6cb3\u6d77\u9c9c'},
+  {code:'QR',label:'\u8364\u83dc\u00b7\u5176\u4ed6'},
+  {code:'SC',label:'\u7d20\u83dc'},
+  {code:'ZL',label:'\u9171\u6599\u8638\u6599'},
+  {code:'JS',label:'\u9152\u6c34\u996e\u6599'},
+  {code:'XC',label:'\u5c0f\u5403\u00b7\u4e3b\u98df'},
+  {code:'TP',label:'\u751c\u54c1'}
+];
+var DISH_CAT_NAMES = {};
+DISH_CATS.forEach(function(c){ DISH_CAT_NAMES[c.code] = c.label; });
+
+// Client-side reclassification rules
+function reclassifyDish(r) {
+  var n = r.dish_name || '';
+  var nl = n.toLowerCase();
+  // Sauce/dip keywords
+  var sauceKw = ['\u6c99\u8336\u9171','\u829d\u9ebb\u9171','\u9ebb\u9171','\u8638\u6599','\u5c0f\u6599','\u6cb9\u789f','\u8638\u789f','\u8c03\u6599','\u7518\u9171','\u8fa3\u9171','\u8c46\u74e3\u9171','\u8150\u4e73','\u9171\u6599','\u82b1\u751f\u9171','\u6d77\u9c9c\u9171','\u97ed\u83dc\u82b1\u9171','\u8fa3\u6912\u9171','\u679c\u6728\u70df\u718f\u9171','\u69b4\u83b2\u9171','\u9171\u6c41','\u81ea\u5236\u9171','\u8c46\u8c49\u9171','\u6885\u5b50\u9171','\u82a5\u672b\u9171','\u853b\u84c9\u9171','\u829d\u58eb\u9171','\u714e\u997c\u9171','\u516b\u5b9d\u9171','\u79d8\u5236\u9171','\u907f\u98ce\u5858','\u86c7\u53e3\u679c\u8638\u6599','\u9999\u8c46\u7c89\u8638\u6599'];
+  for(var i=0;i<sauceKw.length;i++){
+    if(n.indexOf(sauceKw[i]) >= 0) { r.category = 'ZL'; return; }
+  }
+  // Specific fixes: porridge base -> pot base
+  if(n.indexOf('\u7ca5\u5e95') >= 0 || n.indexOf('\u767d\u7ca5') >= 0 && r.category !== 'GD') { r.category = 'GD'; return; }
+}
+
 function loadDishData() {
   if(dishData) return Promise.resolve(dishData);
   if(dishLoading) return dishLoading;
   var tbl = document.getElementById('dishRankTable');
-  if(tbl) tbl.innerHTML = '<div style="text-align:center;padding:60px;color:#aaa"><div style="display:inline-block;width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#4A82A8;border-radius:50%;animation:sp 1s linear infinite"></div><p style="margin-top:12px;font-size:14px">正在加载菜品数据...</p></div>';
+  if(tbl) tbl.innerHTML = '<div style="text-align:center;padding:60px;color:#aaa"><div style="display:inline-block;width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#4A82A8;border-radius:50%;animation:sp 1s linear infinite"></div><p style="margin-top:12px;font-size:14px">\u6b63\u5728\u52a0\u8f7d\u83dc\u54c1\u6570\u636e...</p></div>';
   dishLoading = supaAll('dish_ranking', 'id.asc').then(function(rows) {
+    rows.forEach(function(r){ reclassifyDish(r); });
     dishData = rows;
     dishLoading = false;
     return rows;
   });
   return dishLoading;
 }
-var dishCurCat = '全部';
-var dishCurCity = '全部';
-var DISH_CATS = [
-  {code:'全部',label:'全部品类'},
-  {code:'GD',label:'锅底'},
-  {code:'NR',label:'荤菜·牛肉'},
-  {code:'YR',label:'荤菜·羊肉'},
-  {code:'HX',label:'荤菜·河海鲜'},
-  {code:'QR',label:'荤菜·其他'},
-  {code:'SC',label:'素菜'},
-  {code:'JS',label:'酒水饮料'},
-  {code:'XC',label:'小吃·主食'},
-  {code:'TP',label:'甜品'}
-];
-var DISH_CAT_NAMES = {};
-DISH_CATS.forEach(function(c){ DISH_CAT_NAMES[c.code] = c.label; });
+
+function dishSwitchTab(tab) {
+  dishCurTab = tab;
+  document.getElementById('dishTabBrand').style.background = tab === 'brand' ? '#3d5a80' : '#fff';
+  document.getElementById('dishTabBrand').style.color = tab === 'brand' ? '#fff' : '#3d5a80';
+  document.getElementById('dishTabSku').style.background = tab === 'sku' ? '#3d5a80' : '#fff';
+  document.getElementById('dishTabSku').style.color = tab === 'sku' ? '#fff' : '#3d5a80';
+  dishRankRender();
+}
 
 function dishSelectCat(code) {
   dishCurCat = code;
@@ -2924,17 +2969,34 @@ function dishInit() {
   var catDiv = document.getElementById('dishCatBtns');
   DISH_CATS.forEach(function(c){
     var b = document.createElement('div');
-    b.className = 'dbtn' + (c.code === '全部' ? ' active' : '');
+    b.className = 'dbtn' + (c.code === '\u5168\u90e8' ? ' active' : '');
     b.setAttribute('data-v', c.code);
     b.textContent = c.label;
     b.onclick = function(){ dishSelectCat(c.code); };
     catDiv.appendChild(b);
   });
+  // Build city dropdown ordered by tier
   var citySet = {};
   dishData.forEach(function(r){ citySet[r.city] = 1; });
-  var cities = Object.keys(citySet).sort();
+  var cities = Object.keys(citySet);
+  cities.sort(function(a,b){
+    var oa = CITY_ORDER[a] !== undefined ? CITY_ORDER[a] : 999;
+    var ob = CITY_ORDER[b] !== undefined ? CITY_ORDER[b] : 999;
+    return oa - ob;
+  });
   var sel = document.getElementById('dishCitySelect');
+  var lastTier = '';
   cities.forEach(function(city){
+    // Add optgroup headers
+    for(var t=0;t<CITY_TIERS.length;t++){
+      if(CITY_TIERS[t].cities.indexOf(city) >= 0 && CITY_TIERS[t].label !== lastTier) {
+        lastTier = CITY_TIERS[t].label;
+        var og = document.createElement('optgroup');
+        og.label = '\u2500\u2500 ' + lastTier + ' \u2500\u2500';
+        sel.appendChild(og);
+        break;
+      }
+    }
     var opt = document.createElement('option');
     opt.value = city;
     opt.textContent = city;
@@ -2942,44 +3004,140 @@ function dishInit() {
   });
 }
 
-function dishRankRender() {
-  if(!dishData) {
-    loadDishData().then(function(){ dishRankRender(); });
-    return;
-  }
-  dishInit();
-  var isAllCity = dishCurCity === '全部';
+// === TAB 1: Brand view ===
+function dishRenderBrand() {
+  var isAllCity = dishCurCity === '\u5168\u90e8';
   var filtered = dishData.filter(function(r){
     if(!isAllCity && r.city !== dishCurCity) return false;
-    if(dishCurCat !== '全部' && r.category !== dishCurCat) return false;
+    if(dishCurCat !== '\u5168\u90e8' && r.category !== dishCurCat) return false;
     return true;
   });
 
+  // Aggregate by brand - collect all dishes with recommends
   var brandAgg = {};
   filtered.forEach(function(r){
     var bk = r.brand;
-    if(!brandAgg[bk]) brandAgg[bk] = {total:0, dish:'', cat:'', maxSingle:0, cities:{}, price:0, stores:0};
+    if(!brandAgg[bk]) brandAgg[bk] = {total:0, dishes:{}, cities:{}, price:0, stores:0, storeCount:0};
     brandAgg[bk].total += r.recommends;
     brandAgg[bk].cities[r.city] = 1;
     if(r.price > brandAgg[bk].price) brandAgg[bk].price = r.price;
     if(r.national_stores > brandAgg[bk].stores) brandAgg[bk].stores = r.national_stores;
-    if(r.recommends > brandAgg[bk].maxSingle) {
-      brandAgg[bk].maxSingle = r.recommends;
-      brandAgg[bk].dish = r.dish_name;
-      brandAgg[bk].cat = r.category;
-    }
+    // Track unique store entries for per-store average
+    brandAgg[bk].storeCount++;
+    // Collect dish recommends for top5
+    var dk = r.dish_name + '||' + r.category;
+    if(!brandAgg[bk].dishes[dk]) brandAgg[bk].dishes[dk] = {name:r.dish_name, cat:r.category, total:0};
+    brandAgg[bk].dishes[dk].total += r.recommends;
   });
 
   var ranked = Object.keys(brandAgg).map(function(bk){
     var a = brandAgg[bk];
+    // Get top 5 dishes
+    var dishArr = Object.values(a.dishes);
+    dishArr.sort(function(x,y){ return y.total - x.total; });
+    var top5 = dishArr.slice(0,5);
+    // Count unique stores from data (unique city entries for this brand)
+    var uniqueStores = Object.keys(a.cities).length;
     return {
       brand: bk,
       total: a.total,
-      dish: a.dish,
-      cat: a.cat,
+      avgPerStore: uniqueStores > 0 ? Math.round(a.total / uniqueStores) : a.total,
+      top5: top5,
+      topCat: top5.length ? top5[0].cat : '',
       cityCount: Object.keys(a.cities).length,
       price: a.price,
       nationalStores: a.stores
+    };
+  });
+  ranked.sort(function(a,b){ return b.avgPerStore - a.avgPerStore; });
+  ranked = ranked.slice(0, 100);
+
+  var maxVal = ranked.length ? ranked[0].avgPerStore : 1;
+  var th = 'padding:11px 14px;color:#8c8c8c;font-weight:600;font-size:12px;white-space:nowrap';
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:13px">';
+  html += '<thead><tr style="background:#fafaf8;border-bottom:2px solid #eee">';
+  html += '<th style="'+th+';text-align:center;width:36px">#</th>';
+  html += '<th style="'+th+';text-align:left">品牌</th>';
+  html += '<th style="'+th+';text-align:center;width:60px">客单价</th>';
+  html += '<th style="'+th+';text-align:center;width:70px">全国门店</th>';
+  html += '<th style="'+th+';text-align:left;min-width:220px">推荐数最高的菜品 (Top5)</th>';
+  if(dishCurCat === '\u5168\u90e8') {
+    html += '<th style="'+th+';text-align:center;width:75px">品类</th>';
+  }
+  if(isAllCity) {
+    html += '<th style="'+th+';text-align:center;width:60px">上榜城市</th>';
+  }
+  html += '<th style="'+th+';text-align:right;width:90px">店均推荐数</th>';
+  html += '<th style="'+th+';width:130px"></th>';
+  html += '</tr></thead><tbody>';
+
+  var medalColors = ['#FFD700','#C0C0C0','#CD7F32'];
+  ranked.forEach(function(r, i){
+    var bg = i % 2 === 0 ? '#fff' : '#fafaf8';
+    var rank = i < 3
+      ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:'+medalColors[i]+';color:#fff;font-weight:700;font-size:11px">'+(i+1)+'</span>'
+      : '<span style="color:#aaa;font-size:12px">'+(i+1)+'</span>';
+    var barPct = Math.max((r.avgPerStore / maxVal) * 100, 2);
+    var barColor = i < 3 ? '#C75050' : i < 10 ? '#D0894A' : '#4A82A8';
+    var priceStr = r.price > 0 ? '\u00a5'+r.price : '-';
+    var storeStr = r.nationalStores > 0 ? r.nationalStores.toLocaleString() : '-';
+    // Top5 dishes as numbered list
+    var top5Html = r.top5.map(function(d,j){
+      var opacity = 1 - j * 0.15;
+      return '<span style="opacity:'+opacity+'">'+(j+1)+'. '+d.name+'<span style="color:#bbb;font-size:10px;margin-left:3px">('+d.total.toLocaleString()+')</span></span>';
+    }).join('<br>');
+    html += '<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0;transition:background .15s" onmouseenter="this.style.background=\'#f5f0eb\'" onmouseleave="this.style.background=\''+bg+'\'">';
+    html += '<td style="padding:9px 10px;text-align:center;vertical-align:top">'+rank+'</td>';
+    html += '<td style="padding:9px 10px;font-weight:600;color:#2c2c2c;vertical-align:top">'+r.brand+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:top">'+priceStr+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:top">'+storeStr+'</td>';
+    html += '<td style="padding:9px 10px;color:#555;font-size:12px;line-height:1.7">'+top5Html+'</td>';
+    if(dishCurCat === '\u5168\u90e8') {
+      html += '<td style="padding:9px 10px;text-align:center;vertical-align:top"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(74,130,168,.08);color:#4A82A8">'+(DISH_CAT_NAMES[r.topCat]||r.topCat)+'</span></td>';
+    }
+    if(isAllCity) {
+      html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:top">'+r.cityCount+'\u57ce</td>';
+    }
+    html += '<td style="padding:9px 10px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c;vertical-align:top">'+r.avgPerStore.toLocaleString()+'</td>';
+    html += '<td style="padding:9px 10px;vertical-align:top"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
+    html += '</tr>';
+  });
+
+  if(ranked.length === 0) {
+    html += '<tr><td colspan="9" style="padding:40px;text-align:center;color:#ccc;font-size:14px">\u8be5\u7b5b\u9009\u6761\u4ef6\u4e0b\u6682\u65e0\u6570\u636e</td></tr>';
+  }
+  html += '</tbody></table>';
+  document.getElementById('dishRankTable').innerHTML = html;
+  document.getElementById('dishNote').textContent = '\u5c55\u793aTop100 \u00b7 \u5e97\u5747\u63a8\u8350\u6570 = \u8be5\u54c1\u724c\u63a8\u8350\u603b\u6570 \u00f7 \u4e0a\u699c\u57ce\u5e02\u6570 \u00b7 Top5\u62ec\u53f7\u5185\u4e3a\u5404\u83dc\u54c1\u63a8\u8350\u6570';
+}
+
+// === TAB 2: SKU/Dish view ===
+function dishRenderSku() {
+  var isAllCity = dishCurCity === '\u5168\u90e8';
+  var filtered = dishData.filter(function(r){
+    if(!isAllCity && r.city !== dishCurCity) return false;
+    if(dishCurCat !== '\u5168\u90e8' && r.category !== dishCurCat) return false;
+    return true;
+  });
+
+  // Aggregate by dish_name
+  var dishAgg = {};
+  filtered.forEach(function(r){
+    var dk = r.dish_name;
+    if(!dishAgg[dk]) dishAgg[dk] = {name:dk, cat:r.category, total:0, brands:{}, cities:{}, stores:0};
+    dishAgg[dk].total += r.recommends;
+    dishAgg[dk].brands[r.brand] = 1;
+    dishAgg[dk].cities[r.city] = 1;
+    if(r.national_stores > dishAgg[dk].stores) dishAgg[dk].stores = r.national_stores;
+  });
+
+  var ranked = Object.values(dishAgg).map(function(a){
+    return {
+      name: a.name,
+      cat: a.cat,
+      total: a.total,
+      brandCount: Object.keys(a.brands).length,
+      cityCount: Object.keys(a.cities).length
     };
   });
   ranked.sort(function(a,b){ return b.total - a.total; });
@@ -2989,19 +3147,17 @@ function dishRankRender() {
   var th = 'padding:11px 14px;color:#8c8c8c;font-weight:600;font-size:12px;white-space:nowrap';
   var html = '<table style="width:100%;border-collapse:collapse;font-size:13px">';
   html += '<thead><tr style="background:#fafaf8;border-bottom:2px solid #eee">';
-  html += '<th style="'+th+';text-align:center;width:40px">#</th>';
-  html += '<th style="'+th+';text-align:left">品牌</th>';
-  html += '<th style="'+th+';text-align:center;width:70px">客单价</th>';
-  html += '<th style="'+th+';text-align:center;width:80px">全国门店</th>';
-  html += '<th style="'+th+';text-align:left">推荐数最高的菜品</th>';
-  if(dishCurCat === '全部') {
-    html += '<th style="'+th+';text-align:center;width:85px">品类</th>';
+  html += '<th style="'+th+';text-align:center;width:36px">#</th>';
+  html += '<th style="'+th+';text-align:left">\u83dc\u54c1\u540d\u79f0</th>';
+  if(dishCurCat === '\u5168\u90e8') {
+    html += '<th style="'+th+';text-align:center;width:85px">\u54c1\u7c7b</th>';
   }
+  html += '<th style="'+th+';text-align:center;width:80px">\u62e5\u6709\u54c1\u724c\u6570</th>';
   if(isAllCity) {
-    html += '<th style="'+th+';text-align:center;width:70px">上榜城市</th>';
+    html += '<th style="'+th+';text-align:center;width:80px">\u4e0a\u699c\u57ce\u5e02\u6570</th>';
   }
-  html += '<th style="'+th+';text-align:right;width:95px">网友推荐总数</th>';
-  html += '<th style="'+th+';width:160px"></th>';
+  html += '<th style="'+th+';text-align:right;width:110px">\u7f51\u53cb\u63a8\u8350\u603b\u6570</th>';
+  html += '<th style="'+th+';width:180px"></th>';
   html += '</tr></thead><tbody>';
 
   var medalColors = ['#FFD700','#C0C0C0','#CD7F32'];
@@ -3012,19 +3168,15 @@ function dishRankRender() {
       : '<span style="color:#aaa;font-size:12px">'+(i+1)+'</span>';
     var barPct = Math.max((r.total / maxVal) * 100, 2);
     var barColor = i < 3 ? '#C75050' : i < 10 ? '#D0894A' : '#4A82A8';
-    var priceStr = r.price > 0 ? '¥'+r.price : '-';
-    var storeStr = r.nationalStores > 0 ? r.nationalStores.toLocaleString() : '-';
     html += '<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0;transition:background .15s" onmouseenter="this.style.background=\'#f5f0eb\'" onmouseleave="this.style.background=\''+bg+'\'">';
     html += '<td style="padding:9px 14px;text-align:center">'+rank+'</td>';
-    html += '<td style="padding:9px 14px;font-weight:600;color:#2c2c2c">'+r.brand+'</td>';
-    html += '<td style="padding:9px 14px;text-align:center;color:#888;font-size:12px">'+priceStr+'</td>';
-    html += '<td style="padding:9px 14px;text-align:center;color:#888;font-size:12px">'+storeStr+'</td>';
-    html += '<td style="padding:9px 14px;color:#555">'+r.dish+'</td>';
-    if(dishCurCat === '全部') {
+    html += '<td style="padding:9px 14px;font-weight:600;color:#2c2c2c">'+r.name+'</td>';
+    if(dishCurCat === '\u5168\u90e8') {
       html += '<td style="padding:9px 14px;text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(74,130,168,.08);color:#4A82A8">'+(DISH_CAT_NAMES[r.cat]||r.cat)+'</span></td>';
     }
+    html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600">'+r.brandCount+' <span style="color:#bbb;font-size:11px">\u4e2a\u54c1\u724c</span></td>';
     if(isAllCity) {
-      html += '<td style="padding:9px 14px;text-align:center;color:#888;font-size:12px">'+r.cityCount+'城</td>';
+      html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600">'+r.cityCount+' <span style="color:#bbb;font-size:11px">\u57ce</span></td>';
     }
     html += '<td style="padding:9px 14px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c">'+r.total.toLocaleString()+'</td>';
     html += '<td style="padding:9px 14px"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
@@ -3032,12 +3184,24 @@ function dishRankRender() {
   });
 
   if(ranked.length === 0) {
-    html += '<tr><td colspan="9" style="padding:40px;text-align:center;color:#ccc;font-size:14px">该筛选条件下暂无数据</td></tr>';
+    html += '<tr><td colspan="7" style="padding:40px;text-align:center;color:#ccc;font-size:14px">\u8be5\u7b5b\u9009\u6761\u4ef6\u4e0b\u6682\u65e0\u6570\u636e</td></tr>';
   }
   html += '</tbody></table>';
   document.getElementById('dishRankTable').innerHTML = html;
+  document.getElementById('dishNote').textContent = '\u5c55\u793aTop100 \u00b7 \u7f51\u53cb\u63a8\u8350\u603b\u6570 = \u8be5\u83dc\u54c1\u5728\u6240\u6709\u54c1\u724c\u6240\u6709\u4e0a\u699c\u95e8\u5e97\u7684\u63a8\u8350\u6570\u52a0\u603b';
+}
 
-  document.getElementById('dishNote').textContent = '展示Top100 · 网友推荐总数 = 该品牌所有上榜门店的该菜品推荐数加总 · 客单价和全国门店数取该品牌上榜门店中的最大值';
+function dishRankRender() {
+  if(!dishData) {
+    loadDishData().then(function(){ dishRankRender(); });
+    return;
+  }
+  dishInit();
+  if(dishCurTab === 'brand') {
+    dishRenderBrand();
+  } else {
+    dishRenderSku();
+  }
 }
 
 
