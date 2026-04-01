@@ -508,7 +508,7 @@ tr:hover td{background:#faf9f7}
           <div id="dishTabSku" class="dish-tab" onclick="dishSwitchTab('sku')" style="padding:7px 22px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:#fff;color:#3d5a80">菜品维度</div>
         </div>
         <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">城市</label><select id="dishCitySelect" onchange="dishSelectCity(this.value)" style="min-width:140px"><option value="全部">全部城市</option></select></div>
-        <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">门店数</label><select id="dishStoreSelect" onchange="dishSelectStore(this.value)" style="min-width:100px"><option value="全部">全部</option><option value="lte10">≤10家</option><option value="10to50">10-50家</option><option value="gt50">50家以上</option></select></div>
+        <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">品牌拥有门店数</label><select id="dishStoreSelect" onchange="dishSelectStore(this.value)" style="min-width:100px"><option value="全部">全部</option><option value="lte10">≤10家</option><option value="10to50">10-50家</option><option value="gt50">50家以上</option></select></div>
         <div style="flex:1"></div>
         <div style="font-size:11px;color:#aaa">数据来源: 久谦中台53城火锅口味榜</div>
       </div>
@@ -2888,7 +2888,7 @@ var dishCurStore = '\u5168\u90e8';
 
 function dishSelectStore(v) {
   dishCurStore = v;
-  dishRender();
+  dishRankRender();
 }
 
 function dishStoreMatch(storeCount) {
