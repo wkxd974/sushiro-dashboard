@@ -508,7 +508,7 @@ tr:hover td{background:#faf9f7}
           <div id="dishTabSku" class="dish-tab" onclick="dishSwitchTab('sku')" style="padding:7px 22px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:#fff;color:#3d5a80">菜品维度</div>
         </div>
         <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">城市</label><select id="dishCitySelect" onchange="dishSelectCity(this.value)" style="min-width:140px"><option value="全部">全部城市</option></select></div>
-        <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">品牌拥有门店数</label><select id="dishStoreSelect" onchange="dishSelectStore(this.value)" style="min-width:100px"><option value="全部">全部</option><option value="lte10">≤10家</option><option value="10to50">10-50家</option><option value="gt50">50家以上</option></select></div>
+        <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">品牌拥有门店数</label><select id="dishStoreSelect" onchange="dishSelectStore(this.value)" style="min-width:100px"><option value="全部">全部</option><option value="eq1">单店</option><option value="2to10">2-10家</option><option value="10to50">10-50家</option><option value="gt50">50家以上</option></select></div>
         <div style="flex:1"></div>
         <div style="font-size:11px;color:#aaa">数据来源: 久谦中台53城火锅口味榜</div>
       </div>
@@ -2893,7 +2893,8 @@ function dishSelectStore(v) {
 
 function dishStoreMatch(storeCount) {
   if(dishCurStore === '\u5168\u90e8') return true;
-  if(dishCurStore === 'lte10') return storeCount <= 10;
+  if(dishCurStore === 'eq1') return storeCount <= 1;
+  if(dishCurStore === '2to10') return storeCount >= 2 && storeCount <= 10;
   if(dishCurStore === '10to50') return storeCount > 10 && storeCount <= 50;
   if(dishCurStore === 'gt50') return storeCount > 50;
   return true;
@@ -2937,13 +2938,13 @@ function reclassifyDish(r) {
   var filterOut = ['销量王下酒菜','含下酒小菜无限畅吃','主食水果饮料冷饮零食无限自助',
     '自助水果饮品零食','自助饮料水果小食','饮料甜品无限畅吃','茶点无限畅吃',
     '下酒小菜无限畅吃','自助饮品小食','自助酒水','自助饮料','下酒菜',
-    '凉菜水果酱料冷饮零食自助','店家调好的蘸料','自助调料水果','自助水果酱料','自助水果小料'];
+    '凉菜水果酱料冷饮零食自助','店家调好的蘸料','自助调料水果','自助水果酱料','自助水果小料',
+    '秘制自助酱汁'];
   for(var f=0;f<filterOut.length;f++){
     if(n === filterOut[f]) { r._filtered = true; return; }
   }
-  // vagueNames removed — these are now category ZL in Supabase, no longer filtered
 
-  // === STEP 0.5: Fix ZL items that are actually food (饼/面/凉皮 etc) ===
+  // === STEP 0.5: Fix ZL items that are actually food ===
   if(r.category === 'ZL') {
     var zlFoodKw = ['饼','面','凉皮','粿条','饭','串','包子','馒头','卷','糕','面筋'];
     for(var z=0;z<zlFoodKw.length;z++){
@@ -2951,11 +2952,128 @@ function reclassifyDish(r) {
     }
   }
 
-  // === STEP 0.6: Fix QR items that should be SC or JS ===
+  // === STEP 0.7: Fix HX items that are actually vegetables (海带/海苔/紫菜) ===
+  if(r.category === 'HX') {
+    var seaweedKw = ['海带','海苔','紫菜'];
+    var realSeafood = ['虾','鱼','蟹','蚝','贝','蛤','蚌','鲍','参','鱿','螺','蛏'];
+    for(var s=0;s<seaweedKw.length;s++){
+      if(n.indexOf(seaweedKw[s])>=0){
+        var hasSF = false;
+        for(var sf=0;sf<realSeafood.length;sf++){
+          if(n.indexOf(realSeafood[sf])>=0){hasSF=true;break;}
+        }
+        if(!hasSF){
+          // 海苔肉松油条 → XC (snack); 紫菜海鲜锅 → GD (pot base); rest → SC
+          if(n.indexOf('油条')>=0||n.indexOf('拌饭')>=0||n.indexOf('发糕')>=0){r.category='XC';return;}
+          if(n.indexOf('锅')>=0){r.category='GD';return;}
+          r.category='SC';return;
+        }
+        break;
+      }
+    }
+  }
+
+  // === STEP 0.8: Fix QR items — massive reclassification ===
   if(r.category === 'QR') {
-    var qrToSC = ['枸杞叶','枸杞苗','枸杞芽','红薯叶','番薯叶','地瓜叶','豆苗尖','豌豆尖'];
-    for(var z=0;z<qrToSC.length;z++){ if(n===qrToSC[z]){r.category='SC';return;} }
-    if(n.indexOf('酱茶')>=0 || n.indexOf('酱酱茶')>=0){ r.category='JS'; return; }
+    // --- Explicit overrides (items keyword rules can't catch) ---
+    var qrExplicit = {'红糖馒头配秘制回锅肉':'XC','酒酿丸子':'TP'};
+    if(qrExplicit[n]){r.category=qrExplicit[n];return;}
+
+    // --- QR → SC: vegetable/tofu/mushroom items ---
+    var qrVegKw = ['豆腐','豆皮','腐皮','腐竹','酸菜','泡菜','菌菇','青菜拼','蔬菜拼',
+      '萝卜','冬瓜','芋头','藕','山药','木耳','竹笋','笋尖','花菜','西兰花',
+      '娃娃菜','生菜','油麦菜','菠菜','苋菜','空心菜','韭菜','黄花菜','豆芽',
+      '千张','豆干','魔芋','枸杞叶','枸杞苗','枸杞芽','红薯叶','番薯叶','地瓜叶',
+      '豆苗尖','豌豆尖','包浆豆腐','冻豆腐','老豆腐','嫩豆腐','水性杨花','海花草'];
+    var mushroomKw = ['牛肝菌','鸡枞','松茸','金耳菌','干巴菌','松露','竹荪',
+      '野生菌','山菌','羊肚菌','虎掌菌','鸡油菌','见手青','老人头菌',
+      '青头菌','奶浆菌','野菌','杂菌','白参菌','鸡纵菌','红菌','鲜菌'];
+    // Meat keywords (to avoid moving meat dishes)
+    var meatKw = ['牛','羊','猪','鸡','鸭','鹅','肉','肠','肝','肚','脑','骨','蹄',
+      '虾','鱼','蟹','蚝','贝','螺','参','鱿','排骨','蛋','血'];
+    // Mushroom names that contain meat-like characters but are NOT meat
+    var mushroomFalseMeat = ['牛肝菌','鸡枞','鸡油菌','羊肚菌','鸡蛋菌','鸡纵菌'];
+
+    var isVeg = false;
+    for(var v=0;v<qrVegKw.length;v++){
+      if(n.indexOf(qrVegKw[v])>=0){
+        // Strip mushroom false-meat names before checking meat
+        var nc = n;
+        for(var fm=0;fm<mushroomFalseMeat.length;fm++) nc=nc.split(mushroomFalseMeat[fm]).join('');
+        var hasMeat = false;
+        for(var m=0;m<meatKw.length;m++){if(nc.indexOf(meatKw[m])>=0){hasMeat=true;break;}}
+        if(!hasMeat){isVeg=true;break;}
+      }
+    }
+    if(!isVeg){
+      for(var mk=0;mk<mushroomKw.length;mk++){
+        if(n.indexOf(mushroomKw[mk])>=0){
+          // Exclude 炒饭/面/汤锅 (these are staples with mushroom)
+          if(n.indexOf('饭')>=0||n.indexOf('面')>=0||n.indexOf('汤锅')>=0||n.indexOf('锅底')>=0) break;
+          isVeg=true;break;
+        }
+      }
+    }
+    if(isVeg){r.category='SC';return;}
+
+    // --- QR → XC: staple/snack items (no meat) ---
+    var snackKw = ['煲仔饭','炒饭','炒面','拌面','手擀面','面条','饼','馒头',
+      '包子','饺子','花卷','捞面','擀面','烧麦','面皮','手工面','挂面','凉面',
+      '刀削面','米线','米粉','粿条','窝窝头','锅贴','春卷','飞饼'];
+    var isSnack = false;
+    for(var sk=0;sk<snackKw.length;sk++){
+      if(n.indexOf(snackKw[sk])>=0){
+        // Staple foods always → XC even with meat ingredients
+        if(n.indexOf('煲仔饭')>=0||n.indexOf('炒饭')>=0||n.indexOf('拌面')>=0||n.indexOf('炒面')>=0||n.indexOf('米线')>=0||n.indexOf('米粉')>=0){isSnack=true;break;}
+        // For other snacks, check meat — keep as QR if clearly a meat dish (e.g. 赵云挂面鸭肠)
+        var nc2 = n;
+        var hasMeat2 = false;
+        for(var m=0;m<meatKw.length;m++){if(nc2.indexOf(meatKw[m])>=0){hasMeat2=true;break;}}
+        if(!hasMeat2){isSnack=true;break;}
+      }
+    }
+    if(isSnack){r.category='XC';return;}
+
+    // --- QR → TP: dessert items ---
+    var dessertKw = ['糍粑','冰粉','冰淇淋','麻薯','年糕','冰沙','甜品','布丁',
+      '果冻','银耳羹','龟苓膏','双皮奶','杨枝甘露','芋圆','西米露'];
+    for(var dk=0;dk<dessertKw.length;dk++){
+      if(n.indexOf(dessertKw[dk])>=0){
+        var hasMeat3 = false;
+        for(var m=0;m<meatKw.length;m++){if(n.indexOf(meatKw[m])>=0){hasMeat3=true;break;}}
+        if(!hasMeat3){r.category='TP';return;}
+      }
+    }
+
+    // --- QR → JS: drink items ---
+    var drinkNames = ['马蹄竹蔗水','甘蔗茅根水','京涮棠奶皮子酸奶','三重柚香冰饮',
+      '木姜子酸角汁','宁夏手工八宝茶','宁夏特产八宝茶','手打水蜜桃',
+      '酸角汁','竹蔗马蹄水','竹蔗茅根水','甘蔗汁','马蹄甘蔗水','茅根竹蔗水',
+      '冰糖雪梨水','柠檬水','酸梅汤','桂花乌梅汤','冰镇酸梅汤',
+      '乌梅子酱酱茶','冬瓜茶','凉茶','菊花茶','罗汉果茶','冬瓜山茶',
+      '餐前冰沙','手打柠檬茶','酸角果汁'];
+    for(var dn=0;dn<drinkNames.length;dn++){if(n===drinkNames[dn]){r.category='JS';return;}}
+    if(n.indexOf('酱茶')>=0){r.category='JS';return;}
+
+    // --- QR → ZL: condiment items ---
+    if(n==='辣椒油'){r.category='ZL';return;}
+
+    // --- QR → GD: pot base items ---
+    if(n.indexOf('锅')>=0 && (n.indexOf('泉水锅')>=0||n.indexOf('汤锅')>=0||n.indexOf('全锅')>=0||n.indexOf('锅底')>=0)){
+      r.category='GD';return;
+    }
+
+    // --- QR → HX: seafood items ---
+    var qrSeafoodKw = ['鲍','刺身'];
+    for(var hs=0;hs<qrSeafoodKw.length;hs++){
+      if(n.indexOf(qrSeafoodKw[hs])>=0){
+        if(n.indexOf('锅')>=0){r.category='GD';return;}
+        r.category='HX';return;
+      }
+    }
+
+    // --- QR → TP: fruit items ---
+    if(n==='餐前水果'||n==='水果拼盘'||n==='餐后水果'){r.category='TP';return;}
   }
 
   // === STEP 1: Specific name -> category overrides ===
