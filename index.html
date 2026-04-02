@@ -509,7 +509,7 @@ tr:hover td{background:#faf9f7}
         </div>
         <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">城市</label><select id="dishCitySelect" onchange="dishSelectCity(this.value)" style="min-width:140px"><option value="全部">全部城市</option></select></div>
         <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">品牌拥有门店数</label><select id="dishStoreSelect" onchange="dishSelectStore(this.value)" style="min-width:100px"><option value="全部">全部</option><option value="eq1">单店</option><option value="2to10">2-10家</option><option value="10to50">10-50家</option><option value="gt50">50家以上</option></select></div>
-        <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">排名方式</label><select id="dishRankMethod" onchange="dishSelectRankMethod(this.value)" style="min-width:130px"><option value="total">网友推荐总数</option><option value="avg">店均网友推荐数</option></select></div>
+        <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">排名方式</label><select id="dishRankMethod" onchange="dishSelectRankMethod(this.value)" style="min-width:130px"><option value="avg">店均网友推荐数</option><option value="total">网友推荐总数</option></select></div>
         <div style="flex:1"></div>
         <div style="font-size:11px;color:#aaa">数据来源: 久谦中台53城火锅口味榜</div>
       </div>
@@ -2886,7 +2886,7 @@ var dishCurTab = 'brand';
 var dishCurCat = '\u5168\u90e8';
 var dishCurCity = '\u5168\u90e8';
 var dishCurStore = '\u5168\u90e8';
-var dishRankMode = 'total';
+var dishRankMode = 'avg';
 
 function dishSelectStore(v) {
   dishCurStore = v;
@@ -3325,11 +3325,12 @@ function dishRenderBrand() {
   var brandAgg = {};
   filtered.forEach(function(r){
     var bk = r.brand;
+    var ns = Number(r.national_stores) || 0;
     if(!brandAgg[bk]) brandAgg[bk] = {total:0, dishes:{}, cities:{}, price:0, stores:0, storeCount:0};
     brandAgg[bk].total += r.recommends;
     brandAgg[bk].cities[r.city] = 1;
     if(r.price > brandAgg[bk].price) brandAgg[bk].price = r.price;
-    if(r.national_stores > brandAgg[bk].stores) brandAgg[bk].stores = r.national_stores;
+    if(ns > brandAgg[bk].stores) brandAgg[bk].stores = ns;
     // Track unique store entries for per-store average
     brandAgg[bk].storeCount++;
     // Collect dish recommends for top5
@@ -3443,7 +3444,7 @@ function dishRenderSku() {
   var filtered = dishData.filter(function(r){
     if(!isAllCity && r.city !== dishCurCity) return false;
     if(dishCurCat !== '\u5168\u90e8' && r.category !== dishCurCat) return false;
-    if(!dishStoreMatch(r.national_stores)) return false;
+    if(!dishStoreMatch(Number(r.national_stores)||0)) return false;
     return true;
   });
 
@@ -3451,10 +3452,10 @@ function dishRenderSku() {
   var dishAgg = {};
   filtered.forEach(function(r){
     var dk = r.dish_name;
-    if(!dishAgg[dk]) dishAgg[dk] = {name:dk, cat:r.category, total:0, brands:{}, cities:{}, totalStores:0};
+    var ns = Number(r.national_stores) || 0;
+    if(!dishAgg[dk]) dishAgg[dk] = {name:dk, cat:r.category, total:0, brands:{}, cities:{}};
     dishAgg[dk].total += r.recommends;
-    dishAgg[dk].brands[r.brand] = (dishAgg[dk].brands[r.brand] || 0);
-    if(r.national_stores > dishAgg[dk].brands[r.brand]) dishAgg[dk].brands[r.brand] = r.national_stores;
+    dishAgg[dk].brands[r.brand] = Math.max(dishAgg[dk].brands[r.brand] || 0, ns);
     dishAgg[dk].cities[r.city] = 1;
   });
 
