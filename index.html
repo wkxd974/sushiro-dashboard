@@ -2960,7 +2960,8 @@ function reclassifyDish(r) {
 
   // === STEP 0.5: Fix ZL items that are actually food ===
   if(r.category === 'ZL') {
-    var zlFoodKw = ['饼','面','凉皮','粿条','饭','串','包子','馒头','卷','糕','面筋'];
+    var zlFoodKw = ['饼','面','凉皮','粿条','饭','串','包子','馒头','卷','糕','面筋',
+      '白肉','凉粉','黄瓜','青瓜','茄子','猪肝','羊脸','米皮','龙豆','豆腐'];
     for(var z=0;z<zlFoodKw.length;z++){
       if(n.indexOf(zlFoodKw[z])>=0){ r.category='XC'; return; }
     }
@@ -3227,6 +3228,20 @@ function loadDishData() {
   if(tbl) tbl.innerHTML = '<div style="text-align:center;padding:60px;color:#aaa"><div style="display:inline-block;width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#4A82A8;border-radius:50%;animation:sp 1s linear infinite"></div><p style="margin-top:12px;font-size:14px">\u6b63\u5728\u52a0\u8f7d\u83dc\u54c1\u6570\u636e...</p></div>';
   dishLoading = supaAll('dish_ranking', 'id.asc').then(function(rows) {
     rows.forEach(function(r){ reclassifyDish(r); });
+    // Post-reclassification: filter vague ZL names that convey no specific sauce info
+    var sauceTypeKw = ['沙茶','芝麻','花生','韭菜花','小米辣','蒜泥','蒜蓉','豆瓣','腐乳',
+      '梅子','芥末','辣椒','辣酱','香辣','麻辣','酸甜','避风塘','干碟','油碟','香油',
+      '牛油','麻酱','麻汁','果木','榴莲','海鲜','芝士','八宝','番茄','豆豉','姜蓉',
+      '腰果','酱油','椒盐','蒜香','葱油','红油','藤椒'];
+    rows.forEach(function(r){
+      if(r._filtered || r.category !== 'ZL') return;
+      var n = r.dish_name || '';
+      var hasSpecific = false;
+      for(var i=0;i<sauceTypeKw.length;i++){
+        if(n.indexOf(sauceTypeKw[i])>=0){hasSpecific=true;break;}
+      }
+      if(!hasSpecific){ r._filtered = true; }
+    });
     dishData = rows.filter(function(r){ return !r._filtered; });
     dishLoading = false;
     return rows;
