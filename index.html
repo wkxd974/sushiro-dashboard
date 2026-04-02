@@ -3372,7 +3372,6 @@ function dishRenderBrand() {
   var sortValB = useAvgB ? (ranked.length ? ranked[0].avgPerStore : 1) : (ranked.length ? ranked[0].total : 1);
   var maxVal = sortValB;
   var th = 'padding:11px 14px;color:#8c8c8c;font-weight:600;font-size:12px;white-space:nowrap';
-  var thActive = th + ';color:#C75050';
   var html = '<table style="width:100%;border-collapse:collapse;font-size:13px">';
   html += '<thead><tr style="background:#fafaf8;border-bottom:2px solid #eee">';
   html += '<th style="'+th+';text-align:center;width:36px">#</th>';
@@ -3386,9 +3385,8 @@ function dishRenderBrand() {
   if(isAllCity) {
     html += '<th style="'+th+';text-align:center;width:80px">\u4e0a\u699c\u57ce\u5e02</th>';
   }
-  html += '<th style="'+(useAvgB?th:thActive)+';text-align:center;width:90px">\u63a8\u8350\u603b\u6570</th>';
-  html += '<th style="'+(useAvgB?thActive:th)+';text-align:center;width:90px">\u5e97\u5747\u63a8\u8350\u6570</th>';
-  html += '<th style="'+th+';width:110px"></th>';
+  html += '<th style="'+th+';text-align:center;width:100px">'+(useAvgB ? '\u5e97\u5747\u63a8\u8350\u6570' : '\u63a8\u8350\u603b\u6570')+'</th>';
+  html += '<th style="'+th+';width:130px"></th>';
   html += '</tr></thead><tbody>';
 
   var medalColors = ['#FFD700','#C0C0C0','#CD7F32'];
@@ -3397,13 +3395,11 @@ function dishRenderBrand() {
     var rank = i < 3
       ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:'+medalColors[i]+';color:#fff;font-weight:700;font-size:11px">'+(i+1)+'</span>'
       : '<span style="color:#aaa;font-size:12px">'+(i+1)+'</span>';
-    var barVal = useAvgB ? r.avgPerStore : r.total;
-    var barPct = Math.max((barVal / maxVal) * 100, 2);
+    var displayVal = useAvgB ? r.avgPerStore : r.total;
+    var barPct = Math.max((displayVal / maxVal) * 100, 2);
     var barColor = i < 3 ? '#C75050' : i < 10 ? '#D0894A' : '#4A82A8';
     var priceStr = r.price > 0 ? '\u00a5'+r.price : '-';
     var storeStr = r.nationalStores > 0 ? r.nationalStores.toLocaleString() : '-';
-    var totalStyle = useAvgB ? 'color:#888' : 'color:#2c2c2c;font-weight:600';
-    var avgStyle = useAvgB ? 'color:#2c2c2c;font-weight:600' : 'color:#888';
     // Top5 dishes as numbered list
     var top5Html = r.top5.map(function(d,j){
       var opacity = 1 - j * 0.15;
@@ -3422,14 +3418,13 @@ function dishRenderBrand() {
     if(isAllCity) {
       html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:middle">'+(r.cityCount < 5 ? r.cityNames.join('\u3001') : r.cityCount+'\u57ce')+'</td>';
     }
-    html += '<td style="padding:9px 10px;text-align:center;font-variant-numeric:tabular-nums;vertical-align:middle;'+totalStyle+'">'+r.total.toLocaleString()+'</td>';
-    html += '<td style="padding:9px 10px;text-align:center;font-variant-numeric:tabular-nums;vertical-align:middle;'+avgStyle+'">'+r.avgPerStore.toLocaleString()+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c;vertical-align:middle">'+displayVal.toLocaleString()+'</td>';
     html += '<td style="padding:9px 10px;vertical-align:middle"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
     html += '</tr>';
   });
 
   if(ranked.length === 0) {
-    html += '<tr><td colspan="10" style="padding:40px;text-align:center;color:#ccc;font-size:14px">\u8be5\u7b5b\u9009\u6761\u4ef6\u4e0b\u6682\u65e0\u6570\u636e</td></tr>';
+    html += '<tr><td colspan="9" style="padding:40px;text-align:center;color:#ccc;font-size:14px">\u8be5\u7b5b\u9009\u6761\u4ef6\u4e0b\u6682\u65e0\u6570\u636e</td></tr>';
   }
   html += '</tbody></table>';
   document.getElementById('dishRankTable').innerHTML = html;
