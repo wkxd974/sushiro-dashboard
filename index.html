@@ -2939,9 +2939,17 @@ function reclassifyDish(r) {
     '自助水果饮品零食','自助饮料水果小食','饮料甜品无限畅吃','茶点无限畅吃',
     '下酒小菜无限畅吃','自助饮品小食','自助酒水','自助饮料','下酒菜',
     '凉菜水果酱料冷饮零食自助','店家调好的蘸料','自助调料水果','自助水果酱料','自助水果小料',
-    '秘制自助酱汁'];
+    '秘制自助酱汁','火锅','雪花','串串','雪花肉','地锅鸡','鸳鸯锅','鸳鸯锅底','羊肉'];
   for(var f=0;f<filterOut.length;f++){
     if(n === filterOut[f]) { r._filtered = true; return; }
+  }
+  // Filter vague ZL names (蘸料/小料/酱料 etc that carry no info)
+  if(r.category === 'ZL' || n.indexOf('蘸料')>=0 || n.indexOf('小料')>=0) {
+    var zlFilter = ['蘸料','小料','酱料','调料','特色蘸料','招牌蘸料','自助小料','自助蘸料',
+      '秘制蘸料','秘制自助小料','自主小料','自主蘸料','自助酱料水果','标配调料','自制小料'];
+    for(var zf=0;zf<zlFilter.length;zf++){
+      if(n === zlFilter[zf]) { r._filtered = true; return; }
+    }
   }
 
   // === STEP 0.5: Fix ZL items that are actually food ===
@@ -2950,6 +2958,40 @@ function reclassifyDish(r) {
     for(var z=0;z<zlFoodKw.length;z++){
       if(n.indexOf(zlFoodKw[z])>=0){ r.category='XC'; return; }
     }
+  }
+
+  // === STEP 0.55: Fix GD items ===
+  if(r.category === 'GD') {
+    if(n === '火锅蘸料') { r.category='ZL'; return; }
+    if(n === '冰煮羊') { r.category='YR'; return; }
+  }
+
+  // === STEP 0.56: Fix YR items (mushrooms wrongly in lamb) ===
+  if(r.category === 'YR') {
+    if(n.indexOf('羊肚菌')>=0) { r.category='SC'; return; }
+  }
+
+  // === STEP 0.57: Fix HX items (锅 items = pot base) ===
+  if(r.category === 'HX') {
+    if(n.indexOf('锅')>=0 && n.indexOf('冷锅')<0 && n.indexOf('干锅')<0) { r.category='GD'; return; }
+  }
+
+  // === STEP 0.58: Fix JS items (冰粉→TP, meat dishes→QR/XC, 锅→GD) ===
+  if(r.category === 'JS') {
+    if(n.indexOf('冰粉')>=0) { r.category='TP'; return; }
+    if(n.indexOf('锅')>=0) { r.category='GD'; return; }
+    if(n.indexOf('酸菜')>=0 && n.indexOf('汁')<0) { r.category='SC'; return; }
+    var jsToMeat = ['椰皇香芋鸡','椰子文昌鸡','海南特色椰奶鸡','山野茉莉茶花鸡','菊花鸭胗'];
+    var jsToTP2 = ['椰香奶豆腐','榴莲椰奶煲','马蹄椰肉'];
+    for(var jt=0;jt<jsToTP2.length;jt++){ if(n===jsToTP2[jt]){r.category='TP';return;} }
+    for(var jm=0;jm<jsToMeat.length;jm++){ if(n===jsToMeat[jm]){r.category='QR';return;} }
+    if(n.indexOf('凤爪')>=0 || n.indexOf('鸡爪')>=0) { r.category='XC'; return; }
+  }
+
+  // === STEP 0.59: Fix SC items (炸/油条类→XC) ===
+  if(r.category === 'SC') {
+    if(n.indexOf('油条')>=0) { r.category='XC'; return; }
+    if(n.indexOf('炸')>=0 && (n.indexOf('豆皮')>=0||n.indexOf('腐竹')>=0||n.indexOf('腐皮')>=0||n.indexOf('花生')>=0)) { r.category='XC'; return; }
   }
 
   // === STEP 0.7: Fix HX items that are actually vegetables (海带/海苔/紫菜) ===
@@ -2976,7 +3018,12 @@ function reclassifyDish(r) {
   // === STEP 0.8: Fix QR items — massive reclassification ===
   if(r.category === 'QR') {
     // --- Explicit overrides (items keyword rules can't catch) ---
-    var qrExplicit = {'红糖馒头配秘制回锅肉':'XC','酒酿丸子':'TP'};
+    var qrExplicit = {'红糖馒头配秘制回锅肉':'XC','酒酿丸子':'TP',
+      '暴打青瓜芒果':'SC','珍珠马蹄':'SC','糖蒜':'SC',
+      '东星斑':'HX','响铃卷':'XC',
+      '客家招牌手打牛腿丸子':'NR','草原千层肚':'NR','胸口油':'NR',
+      '极品千层肚':'NR','牛展加蛋':'NR','千层肚':'NR',
+      '胸口酪':'NR','撒尿牛丸':'NR','五花腱':'NR'};
     if(qrExplicit[n]){r.category=qrExplicit[n];return;}
 
     // --- QR → SC: vegetable/tofu/mushroom items ---
@@ -3056,11 +3103,17 @@ function reclassifyDish(r) {
     if(n.indexOf('酱茶')>=0){r.category='JS';return;}
 
     // --- QR → ZL: condiment items ---
-    if(n==='辣椒油'){r.category='ZL';return;}
+    if(n==='辣椒油'||n.indexOf('蘸料')>=0||n.indexOf('沾料')>=0){r.category='ZL';return;}
 
-    // --- QR → GD: pot base items ---
-    if(n.indexOf('锅')>=0 && (n.indexOf('泉水锅')>=0||n.indexOf('汤锅')>=0||n.indexOf('全锅')>=0||n.indexOf('锅底')>=0)){
+    // --- QR → GD: pot base items (锅 keyword, exclude 冷锅/干锅/回锅/火锅三脆) ---
+    if(n.indexOf('锅')>=0 && n.indexOf('冷锅')<0 && n.indexOf('干锅')<0 && n.indexOf('回锅')<0 && n.indexOf('火锅三')<0 && n.indexOf('锅巴')<0 && n.indexOf('锅贴')<0 && n.indexOf('坚持锅')<0 && n.indexOf('老杨锅')<0){
       r.category='GD';return;
+    }
+
+    // --- QR → YR: lamb items ---
+    if(n.indexOf('羊')>=0 || n.indexOf('羔')>=0) {
+      // Exclude 羊肚菌 (mushroom)
+      if(n.indexOf('羊肚菌')<0){ r.category='YR'; return; }
     }
 
     // --- QR → HX: seafood items ---
@@ -3150,7 +3203,13 @@ function reclassifyDish(r) {
     '鲜切牛舌':'牛舌','薄切牛舌':'牛舌',
     '现炸腐竹':'炸腐竹','鲜炸腐竹':'炸腐竹','香炸腐竹':'炸腐竹',
     '鲜切羊肉卷':'羊肉卷','精切羊肉卷':'羊肉卷','手切羊肉卷':'羊肉卷',
-    '新鲜鹅肠':'鹅肠','鲜鹅肠':'鹅肠'
+    '新鲜鹅肠':'鹅肠','鲜鹅肠':'鹅肠',
+    // NR merges
+    '精品肥牛肉':'精品肥牛',
+    // YR merges
+    '烤羊肉串':'羊肉串',
+    // JS冰粉 merges
+    '冰粉儿':'冰粉'
   };
   if(mergeMap[n]) { r.dish_name = mergeMap[n]; }
 }
