@@ -509,6 +509,7 @@ tr:hover td{background:#faf9f7}
         </div>
         <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">城市</label><select id="dishCitySelect" onchange="dishSelectCity(this.value)" style="min-width:140px"><option value="全部">全部城市</option></select></div>
         <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">品牌拥有门店数</label><select id="dishStoreSelect" onchange="dishSelectStore(this.value)" style="min-width:100px"><option value="全部">全部</option><option value="eq1">单店</option><option value="2to10">2-10家</option><option value="10to50">10-50家</option><option value="gt50">50家以上</option></select></div>
+        <div class="fg" style="margin:0"><label style="font-size:12px;color:#888">排名方式</label><select id="dishRankMethod" onchange="dishSelectRankMethod(this.value)" style="min-width:130px"><option value="total">网友推荐总数</option><option value="avg">店均网友推荐数</option></select></div>
         <div style="flex:1"></div>
         <div style="font-size:11px;color:#aaa">数据来源: 久谦中台53城火锅口味榜</div>
       </div>
@@ -2885,9 +2886,14 @@ var dishCurTab = 'brand';
 var dishCurCat = '\u5168\u90e8';
 var dishCurCity = '\u5168\u90e8';
 var dishCurStore = '\u5168\u90e8';
+var dishRankMode = 'total';
 
 function dishSelectStore(v) {
   dishCurStore = v;
+  dishRankRender();
+}
+function dishSelectRankMethod(v) {
+  dishRankMode = v;
   dishRankRender();
 }
 
@@ -3343,26 +3349,30 @@ function dishRenderBrand() {
       nationalStores: a.stores
     };
   });
-  ranked.sort(function(a,b){ return b.avgPerStore - a.avgPerStore; });
+  var useAvgB = dishRankMode === 'avg';
+  ranked.sort(function(a,b){ return useAvgB ? (b.avgPerStore - a.avgPerStore) : (b.total - a.total); });
   ranked = ranked.slice(0, 100);
 
-  var maxVal = ranked.length ? ranked[0].avgPerStore : 1;
+  var sortValB = useAvgB ? (ranked.length ? ranked[0].avgPerStore : 1) : (ranked.length ? ranked[0].total : 1);
+  var maxVal = sortValB;
   var th = 'padding:11px 14px;color:#8c8c8c;font-weight:600;font-size:12px;white-space:nowrap';
+  var thActive = th + ';color:#C75050';
   var html = '<table style="width:100%;border-collapse:collapse;font-size:13px">';
   html += '<thead><tr style="background:#fafaf8;border-bottom:2px solid #eee">';
   html += '<th style="'+th+';text-align:center;width:36px">#</th>';
-  html += '<th style="'+th+';text-align:center">品牌</th>';
-  html += '<th style="'+th+';text-align:center;width:60px">客单价</th>';
-  html += '<th style="'+th+';text-align:center;width:70px">全国门店数</th>';
-  html += '<th style="'+th+';text-align:center;min-width:220px">推荐数最高的菜品 (Top5)</th>';
+  html += '<th style="'+th+';text-align:center">\u54c1\u724c</th>';
+  html += '<th style="'+th+';text-align:center;width:60px">\u5ba2\u5355\u4ef7</th>';
+  html += '<th style="'+th+';text-align:center;width:70px">\u5168\u56fd\u95e8\u5e97\u6570</th>';
+  html += '<th style="'+th+';text-align:center;min-width:220px">\u63a8\u8350\u6570\u6700\u9ad8\u7684\u83dc\u54c1 (Top5)</th>';
   if(dishCurCat === '\u5168\u90e8') {
-    html += '<th style="'+th+';text-align:center;width:75px">品类</th>';
+    html += '<th style="'+th+';text-align:center;width:75px">\u54c1\u7c7b</th>';
   }
   if(isAllCity) {
-    html += '<th style="'+th+';text-align:center;width:80px">上榜城市</th>';
+    html += '<th style="'+th+';text-align:center;width:80px">\u4e0a\u699c\u57ce\u5e02</th>';
   }
-  html += '<th style="'+th+';text-align:center;width:90px">店均推荐数</th>';
-  html += '<th style="'+th+';width:130px"></th>';
+  html += '<th style="'+(useAvgB?th:thActive)+';text-align:center;width:90px">\u63a8\u8350\u603b\u6570</th>';
+  html += '<th style="'+(useAvgB?thActive:th)+';text-align:center;width:90px">\u5e97\u5747\u63a8\u8350\u6570</th>';
+  html += '<th style="'+th+';width:110px"></th>';
   html += '</tr></thead><tbody>';
 
   var medalColors = ['#FFD700','#C0C0C0','#CD7F32'];
@@ -3371,10 +3381,13 @@ function dishRenderBrand() {
     var rank = i < 3
       ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:'+medalColors[i]+';color:#fff;font-weight:700;font-size:11px">'+(i+1)+'</span>'
       : '<span style="color:#aaa;font-size:12px">'+(i+1)+'</span>';
-    var barPct = Math.max((r.avgPerStore / maxVal) * 100, 2);
+    var barVal = useAvgB ? r.avgPerStore : r.total;
+    var barPct = Math.max((barVal / maxVal) * 100, 2);
     var barColor = i < 3 ? '#C75050' : i < 10 ? '#D0894A' : '#4A82A8';
     var priceStr = r.price > 0 ? '\u00a5'+r.price : '-';
     var storeStr = r.nationalStores > 0 ? r.nationalStores.toLocaleString() : '-';
+    var totalStyle = useAvgB ? 'color:#888' : 'color:#2c2c2c;font-weight:600';
+    var avgStyle = useAvgB ? 'color:#2c2c2c;font-weight:600' : 'color:#888';
     // Top5 dishes as numbered list
     var top5Html = r.top5.map(function(d,j){
       var opacity = 1 - j * 0.15;
@@ -3393,17 +3406,20 @@ function dishRenderBrand() {
     if(isAllCity) {
       html += '<td style="padding:9px 10px;text-align:center;color:#888;font-size:12px;vertical-align:middle">'+(r.cityCount < 5 ? r.cityNames.join('\u3001') : r.cityCount+'\u57ce')+'</td>';
     }
-    html += '<td style="padding:9px 10px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c;vertical-align:middle">'+r.avgPerStore.toLocaleString()+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;font-variant-numeric:tabular-nums;vertical-align:middle;'+totalStyle+'">'+r.total.toLocaleString()+'</td>';
+    html += '<td style="padding:9px 10px;text-align:center;font-variant-numeric:tabular-nums;vertical-align:middle;'+avgStyle+'">'+r.avgPerStore.toLocaleString()+'</td>';
     html += '<td style="padding:9px 10px;vertical-align:middle"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
     html += '</tr>';
   });
 
   if(ranked.length === 0) {
-    html += '<tr><td colspan="9" style="padding:40px;text-align:center;color:#ccc;font-size:14px">\u8be5\u7b5b\u9009\u6761\u4ef6\u4e0b\u6682\u65e0\u6570\u636e</td></tr>';
+    html += '<tr><td colspan="10" style="padding:40px;text-align:center;color:#ccc;font-size:14px">\u8be5\u7b5b\u9009\u6761\u4ef6\u4e0b\u6682\u65e0\u6570\u636e</td></tr>';
   }
   html += '</tbody></table>';
   document.getElementById('dishRankTable').innerHTML = html;
-  document.getElementById('dishNote').textContent = '\u5c55\u793aTop100 \u00b7 \u5e97\u5747\u63a8\u8350\u6570 = \u8be5\u54c1\u724c\u63a8\u8350\u603b\u6570 \u00f7 \u4e0a\u699c\u57ce\u5e02\u6570 \u00b7 Top5\u62ec\u53f7\u5185\u4e3a\u5404\u83dc\u54c1\u63a8\u8350\u6570 \u00b7 \u4e0d\u8db35\u4e2a\u8868\u793a\u8be5\u54c1\u724c\u5728\u6b64\u54c1\u7c7b\u4e0b\u7684\u63a8\u8350\u83dc\u4e0d\u8db35\u9053';
+  document.getElementById('dishNote').textContent = useAvgB
+    ? '\u5c55\u793aTop100 \u00b7 \u5e97\u5747\u63a8\u8350\u6570 = \u8be5\u54c1\u724c\u63a8\u8350\u603b\u6570 \u00f7 \u5168\u56fd\u95e8\u5e97\u6570 \u00b7 Top5\u62ec\u53f7\u5185\u4e3a\u5404\u83dc\u54c1\u63a8\u8350\u6570'
+    : '\u5c55\u793aTop100 \u00b7 \u63a8\u8350\u603b\u6570 = \u8be5\u54c1\u724c\u5728\u6240\u6709\u4e0a\u699c\u57ce\u5e02\u7684\u63a8\u8350\u6570\u52a0\u603b \u00b7 Top5\u62ec\u53f7\u5185\u4e3a\u5404\u83dc\u54c1\u63a8\u8350\u6570';
 }
 
 // === TAB 2: SKU/Dish view ===
@@ -3420,28 +3436,36 @@ function dishRenderSku() {
   var dishAgg = {};
   filtered.forEach(function(r){
     var dk = r.dish_name;
-    if(!dishAgg[dk]) dishAgg[dk] = {name:dk, cat:r.category, total:0, brands:{}, cities:{}, stores:0};
+    if(!dishAgg[dk]) dishAgg[dk] = {name:dk, cat:r.category, total:0, brands:{}, cities:{}, totalStores:0};
     dishAgg[dk].total += r.recommends;
-    dishAgg[dk].brands[r.brand] = 1;
+    dishAgg[dk].brands[r.brand] = (dishAgg[dk].brands[r.brand] || 0);
+    if(r.national_stores > dishAgg[dk].brands[r.brand]) dishAgg[dk].brands[r.brand] = r.national_stores;
     dishAgg[dk].cities[r.city] = 1;
-    if(r.national_stores > dishAgg[dk].stores) dishAgg[dk].stores = r.national_stores;
   });
 
   var ranked = Object.values(dishAgg).map(function(a){
+    var brandNames = Object.keys(a.brands);
+    var sumStores = 0;
+    brandNames.forEach(function(b){ sumStores += a.brands[b]; });
+    var avgPerStore = sumStores > 0 ? Math.round(a.total / sumStores) : a.total;
     return {
       name: a.name,
       cat: a.cat,
       total: a.total,
-      brandCount: Object.keys(a.brands).length,
+      avgPerStore: avgPerStore,
+      brandCount: brandNames.length,
       cityCount: Object.keys(a.cities).length,
       cityNames: Object.keys(a.cities)
     };
   });
-  ranked.sort(function(a,b){ return b.total - a.total; });
+  var useAvg = dishRankMode === 'avg';
+  ranked.sort(function(a,b){ return useAvg ? (b.avgPerStore - a.avgPerStore) : (b.total - a.total); });
   ranked = ranked.slice(0, 100);
 
-  var maxVal = ranked.length ? ranked[0].total : 1;
+  var sortVal = useAvg ? ranked[0].avgPerStore : ranked[0].total;
+  var maxVal = ranked.length ? sortVal : 1;
   var th = 'padding:11px 14px;color:#8c8c8c;font-weight:600;font-size:12px;white-space:nowrap';
+  var thActive = th + ';color:#C75050';
   var html = '<table style="width:100%;border-collapse:collapse;font-size:13px">';
   html += '<thead><tr style="background:#fafaf8;border-bottom:2px solid #eee">';
   html += '<th style="'+th+';text-align:center;width:36px">#</th>';
@@ -3453,8 +3477,9 @@ function dishRenderSku() {
   if(isAllCity) {
     html += '<th style="'+th+';text-align:center;width:80px">\u4e0a\u699c\u57ce\u5e02\u6570</th>';
   }
-  html += '<th style="'+th+';text-align:right;width:110px">\u7f51\u53cb\u63a8\u8350\u603b\u6570</th>';
-  html += '<th style="'+th+';width:180px"></th>';
+  html += '<th style="'+(useAvg?th:thActive)+';text-align:right;width:110px">\u7f51\u53cb\u63a8\u8350\u603b\u6570</th>';
+  html += '<th style="'+(useAvg?thActive:th)+';text-align:right;width:110px">\u5e97\u5747\u63a8\u8350\u6570</th>';
+  html += '<th style="'+th+';width:150px"></th>';
   html += '</tr></thead><tbody>';
 
   var medalColors = ['#FFD700','#C0C0C0','#CD7F32'];
@@ -3463,8 +3488,11 @@ function dishRenderSku() {
     var rank = i < 3
       ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:'+medalColors[i]+';color:#fff;font-weight:700;font-size:11px">'+(i+1)+'</span>'
       : '<span style="color:#aaa;font-size:12px">'+(i+1)+'</span>';
-    var barPct = Math.max((r.total / maxVal) * 100, 2);
+    var barVal = useAvg ? r.avgPerStore : r.total;
+    var barPct = Math.max((barVal / maxVal) * 100, 2);
     var barColor = i < 3 ? '#C75050' : i < 10 ? '#D0894A' : '#4A82A8';
+    var totalStyle = useAvg ? 'color:#888' : 'color:#2c2c2c;font-weight:600';
+    var avgStyle = useAvg ? 'color:#2c2c2c;font-weight:600' : 'color:#888';
     html += '<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0;transition:background .15s" onmouseenter="this.style.background=\'#f5f0eb\'" onmouseleave="this.style.background=\''+bg+'\'">';
     html += '<td style="padding:9px 14px;text-align:center">'+rank+'</td>';
     html += '<td style="padding:9px 14px;font-weight:600;color:#2c2c2c">'+r.name+'</td>';
@@ -3475,17 +3503,20 @@ function dishRenderSku() {
     if(isAllCity) {
       html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600">'+(r.cityCount < 5 ? r.cityNames.join('\u3001') : r.cityCount+' <span style="color:#bbb;font-size:11px">\u57ce</span>')+'</td>';
     }
-    html += '<td style="padding:9px 14px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:#2c2c2c">'+r.total.toLocaleString()+'</td>';
+    html += '<td style="padding:9px 14px;text-align:right;font-variant-numeric:tabular-nums;'+totalStyle+'">'+r.total.toLocaleString()+'</td>';
+    html += '<td style="padding:9px 14px;text-align:right;font-variant-numeric:tabular-nums;'+avgStyle+'">'+r.avgPerStore.toLocaleString()+'</td>';
     html += '<td style="padding:9px 14px"><div style="background:#f0eeeb;border-radius:3px;height:16px;overflow:hidden"><div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s"></div></div></td>';
     html += '</tr>';
   });
 
   if(ranked.length === 0) {
-    html += '<tr><td colspan="7" style="padding:40px;text-align:center;color:#ccc;font-size:14px">\u8be5\u7b5b\u9009\u6761\u4ef6\u4e0b\u6682\u65e0\u6570\u636e</td></tr>';
+    html += '<tr><td colspan="8" style="padding:40px;text-align:center;color:#ccc;font-size:14px">\u8be5\u7b5b\u9009\u6761\u4ef6\u4e0b\u6682\u65e0\u6570\u636e</td></tr>';
   }
   html += '</tbody></table>';
   document.getElementById('dishRankTable').innerHTML = html;
-  document.getElementById('dishNote').textContent = '\u5c55\u793aTop100 \u00b7 \u7f51\u53cb\u63a8\u8350\u603b\u6570 = \u8be5\u83dc\u54c1\u5728\u6240\u6709\u54c1\u724c\u6240\u6709\u4e0a\u699c\u95e8\u5e97\u7684\u63a8\u8350\u6570\u52a0\u603b';
+  document.getElementById('dishNote').textContent = useAvg
+    ? '\u5c55\u793aTop100 \u00b7 \u5e97\u5747\u63a8\u8350\u6570 = \u63a8\u8350\u603b\u6570 \u00f7 \u5404\u54c1\u724c\u5168\u56fd\u95e8\u5e97\u6570\u4e4b\u548c \u00b7 \u6309\u5e97\u5747\u63a8\u8350\u6570\u6392\u5e8f'
+    : '\u5c55\u793aTop100 \u00b7 \u7f51\u53cb\u63a8\u8350\u603b\u6570 = \u8be5\u83dc\u54c1\u5728\u6240\u6709\u54c1\u724c\u6240\u6709\u4e0a\u699c\u95e8\u5e97\u7684\u63a8\u8350\u6570\u52a0\u603b';
 }
 
 function dishRankRender() {
