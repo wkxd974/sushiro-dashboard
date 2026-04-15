@@ -3489,12 +3489,15 @@ function dishRenderSku() {
     var sumStores = 0;
     brandNames.forEach(function(b){ sumStores += a.brands[b]; });
     var avgPerStore = sumStores > 0 ? Math.round(a.total / sumStores) : a.total;
+    // 按门店数量倒序排列品牌名称
+    var brandsSorted = brandNames.slice().sort(function(x, y){ return a.brands[y] - a.brands[x]; });
     return {
       name: a.name,
       cat: a.cat,
       total: a.total,
       avgPerStore: avgPerStore,
       brandCount: brandNames.length,
+      brandNames: brandsSorted,
       cityCount: Object.keys(a.cities).length,
       cityNames: Object.keys(a.cities)
     };
@@ -3514,7 +3517,7 @@ function dishRenderSku() {
   if(dishCurCat === '\u5168\u90e8') {
     html += '<th style="'+th+';text-align:center;width:85px">\u54c1\u7c7b</th>';
   }
-  html += '<th style="'+th+';text-align:center;width:80px">\u8986\u76d6\u54c1\u724c\u6570</th>';
+  html += '<th style="'+th+';text-align:center;width:220px">\u8986\u76d6\u54c1\u724c</th>';
   if(isAllCity) {
     html += '<th style="'+th+';text-align:center;width:80px">\u4e0a\u699c\u57ce\u5e02\u6570</th>';
   }
@@ -3540,7 +3543,14 @@ function dishRenderSku() {
     if(dishCurCat === '\u5168\u90e8') {
       html += '<td style="padding:9px 14px;text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(74,130,168,.08);color:#4A82A8">'+(DISH_CAT_NAMES[r.cat]||r.cat)+'</span></td>';
     }
-    html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600">'+r.brandCount+' <span style="color:#bbb;font-size:11px">\u54c1\u724c</span></td>';
+    // 覆盖品牌：≤5 个全列；>5 个列 Top5（按门店数量）+ 等 N 个
+    var brandDisplay;
+    if(r.brandCount <= 5) {
+      brandDisplay = r.brandNames.join('\u3001');
+    } else {
+      brandDisplay = r.brandNames.slice(0, 5).join('\u3001') + ' <span style="color:#bbb;font-size:11px">\u7b49 '+r.brandCount+' \u4e2a\u54c1\u724c</span>';
+    }
+    html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600;font-size:12px">'+brandDisplay+'</td>';
     if(isAllCity) {
       html += '<td style="padding:9px 14px;text-align:center;color:#555;font-weight:600">'+(r.cityCount < 5 ? r.cityNames.join('\u3001') : r.cityCount+' <span style="color:#bbb;font-size:11px">\u57ce</span>')+'</td>';
     }
