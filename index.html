@@ -2982,10 +2982,38 @@ function reclassifyDish(r) {
     }
   }
 
-  // === STEP 0.55: Fix GD items ===
+  // === STEP 0.55: Fix GD items (严格规则：名字必须含"锅"或"底"才保留为锅底，特例黑名单除外) ===
   if(r.category === 'GD') {
     if(n === '火锅蘸料') { r.category='ZL'; return; }
     if(n === '冰煮羊') { r.category='YR'; return; }
+
+    // 黑名单：名字虽含"锅"或"底"但实际不是锅底的特例
+    var gdBlacklist = ['火锅三脆','猪油锅底拌饭'];
+    var isGdBlacklisted = false;
+    for(var gb=0;gb<gdBlacklist.length;gb++){
+      if(n === gdBlacklist[gb]){ isGdBlacklisted=true; break; }
+    }
+
+    // 主规则：不含"锅"也不含"底" 或 在黑名单里 → 按食材关键字重分类
+    if((n.indexOf('锅')<0 && n.indexOf('底')<0) || isGdBlacklisted) {
+      // 优先判断：主食/小吃（拌饭、盖饭、粉、面、粥等）
+      if(n.indexOf('拌饭')>=0 || n.indexOf('盖饭')>=0 || n.indexOf('炒饭')>=0
+         || n.indexOf('煲仔饭')>=0 || n.indexOf('米粉')>=0 || n.indexOf('米线')>=0
+         || n.indexOf('面条')>=0 || n.indexOf('粥')>=0) {
+        r.category='XC'; return;
+      }
+      // 河海鲜（龙虾/虾/鱼/蟹/贝类等）
+      var gdHxKw = ['龙虾','虾','鱼','蟹','蚝','贝','蛤','蚌','鲍','鱿','螺','蛏'];
+      for(var gh=0;gh<gdHxKw.length;gh++){
+        if(n.indexOf(gdHxKw[gh])>=0){ r.category='HX'; return; }
+      }
+      // 牛肉
+      if(n.indexOf('牛')>=0){ r.category='NR'; return; }
+      // 羊肉
+      if(n.indexOf('羊')>=0){ r.category='YR'; return; }
+      // 其他（鸡、鸭、猪、郡肝、鸡煲等）→ 荤菜·其他
+      r.category='QR'; return;
+    }
   }
 
   // === STEP 0.56: Fix YR items (mushrooms wrongly in lamb) ===
@@ -3252,6 +3280,94 @@ function reclassifyDish(r) {
     '冰粉儿':'冰粉'
   };
   if(mergeMap[n]) { r.dish_name = mergeMap[n]; }
+
+  // ================================================================
+  // === FINAL STEP: 分类完整性审核（整体扫描每个类别，排除明显错误） ===
+  // ================================================================
+  // 规则：每个品类都有食材特征。名字里完全没有该品类特征关键字的，先按自动规则挪走；
+  //      机器拿不准的，标记为 _uncertain，进"分类待审核"面板让人工决定。
+  var nm = r.dish_name || '';
+
+  // --- NR（牛肉）完整性检查 ---
+  if(r.category === 'NR') {
+    // 明显错：含猪字 → 荤菜·其他（例如 猪黄喉、猪蹄筋）
+    if(nm.indexOf('\u732a')>=0 && nm.indexOf('\u725b')<0) { r.category='QR'; return; }
+    // 明显错：含羊字且不含牛 → 羊肉
+    if(nm.indexOf('\u7f8a')>=0 && nm.indexOf('\u725b')<0 && nm.indexOf('\u7f8a\u809a\u83cc')<0) { r.category='YR'; return; }
+    // 明显错：含鸡/鸭/鹅且不含牛 → 荤菜·其他
+    if((nm.indexOf('\u9e21')>=0||nm.indexOf('\u9e2d')>=0||nm.indexOf('\u9e45')>=0) && nm.indexOf('\u725b')<0) { r.category='QR'; return; }
+    // 明显错：含明确海鲜且不含牛 → 河海鲜
+    var nrToHxKw = ['\u9f99\u867e','\u867e','\u87f9','\u8822','\u9c8d','\u9c7f','\u87ac','\u87a4','\u87ae','\u8803'];
+    for(var nh=0;nh<nrToHxKw.length;nh++){
+      if(nm.indexOf(nrToHxKw[nh])>=0 && nm.indexOf('\u725b')<0){ r.category='HX'; return; }
+    }
+    // 可疑：名字完全没有"牛/毛肚/肥牛/牛腩..."等牛类关键字 → 标记待审核
+    var nrBeefKw = ['\u725b','\u6bdb\u809a','\u80a5\u725b'];
+    var hasBeef = false;
+    for(var bk=0;bk<nrBeefKw.length;bk++){ if(nm.indexOf(nrBeefKw[bk])>=0){hasBeef=true;break;} }
+    if(!hasBeef) { r._uncertain = true; r._uncertain_reason = '\u5f52\u4e3a\u8364\u83dc\u00b7\u725b\u8089\uff0c\u4f46\u540d\u5b57\u65e0\u660e\u663e\u725b\u7c7b\u5173\u952e\u5b57'; }
+  }
+
+  // --- YR（羊肉）完整性检查 ---
+  if(r.category === 'YR') {
+    if(nm.indexOf('\u7f8a\u809a\u83cc')>=0) { r.category='SC'; return; }
+    if(nm.indexOf('\u725b')>=0 && nm.indexOf('\u7f8a')<0) { r.category='NR'; return; }
+    if((nm.indexOf('\u9e21')>=0||nm.indexOf('\u9e2d')>=0||nm.indexOf('\u9e45')>=0||nm.indexOf('\u732a')>=0) && nm.indexOf('\u7f8a')<0 && nm.indexOf('\u7f94')<0) { r.category='QR'; return; }
+    if(nm.indexOf('\u7f8a')<0 && nm.indexOf('\u7f94')<0) {
+      r._uncertain = true; r._uncertain_reason = '\u5f52\u4e3a\u8364\u83dc\u00b7\u7f8a\u8089\uff0c\u4f46\u540d\u5b57\u65e0\u7f8a/\u7f94\u5173\u952e\u5b57';
+    }
+  }
+
+  // --- HX（河海鲜）完整性检查 ---
+  if(r.category === 'HX') {
+    var hxValidKw = ['\u867e','\u9c7c','\u87f9','\u8822','\u8d1d','\u86e4','\u868c','\u9c8d','\u53c2','\u9c7f','\u87ba','\u8803','\u7ae0\u9c7c','\u58a8\u9c7c','\u4e4c\u8d3c','\u9f99\u867e','\u6d77\u5e26','\u6d77\u82d4','\u7d2b\u83dc','\u6d77\u9c9c','\u523a\u8eab','\u751f\u8822','\u7261\u86ce','\u6247\u8d1d','\u7504'];
+    var hasSeafood = false;
+    for(var sfk=0;sfk<hxValidKw.length;sfk++){ if(nm.indexOf(hxValidKw[sfk])>=0){hasSeafood=true;break;} }
+    if(!hasSeafood) { r._uncertain = true; r._uncertain_reason = '\u5f52\u4e3a\u8364\u83dc\u00b7\u6cb3\u6d77\u9c9c\uff0c\u4f46\u540d\u5b57\u65e0\u6c34\u4ea7\u5173\u952e\u5b57'; }
+  }
+
+  // --- QR（荤菜·其他）完整性检查：以"汤"结尾的通常是锅底 ---
+  if(r.category === 'QR') {
+    if(nm.length > 0 && nm.charAt(nm.length-1) === '\u6c64'
+       && nm.indexOf('\u6c64\u5706')<0 && nm.indexOf('\u6c64\u5305')<0
+       && nm.indexOf('\u6c64\u7c89')<0 && nm.indexOf('\u6c64\u9762')<0
+       && nm.indexOf('\u6c64\u5934')<0) {
+      r.category='GD'; return;
+    }
+  }
+
+  // --- JS（酒水饮料）完整性检查：含明确食物关键字 → 可疑 ---
+  if(r.category === 'JS') {
+    var jsFoodKw = ['\u8089','\u9e21','\u9e2d','\u9e45','\u725b','\u7f8a','\u732a','\u9c7c','\u867e','\u87f9','\u9762','\u996d','\u9971','\u997c','\u7cd5','\u51b0\u7c89','\u4e38\u5b50','\u9171','\u7c92'];
+    for(var jfk=0;jfk<jsFoodKw.length;jfk++){
+      if(nm.indexOf(jsFoodKw[jfk])>=0){
+        r._uncertain = true; r._uncertain_reason = '\u5f52\u4e3a\u9152\u6c34\u996e\u6599\uff0c\u4f46\u540d\u5b57\u542b\u98df\u7269\u5173\u952e\u5b57\uff08'+jsFoodKw[jfk]+'\uff09';
+        break;
+      }
+    }
+  }
+
+  // --- TP（甜品）完整性检查：含肉类关键字 → 可疑 ---
+  if(r.category === 'TP') {
+    var tpMeatKw = ['\u8089','\u9e21','\u9e2d','\u9e45','\u725b','\u7f8a','\u732a','\u9c7c','\u867e','\u87f9','\u9b9a','\u8111'];
+    for(var tmk=0;tmk<tpMeatKw.length;tmk++){
+      if(nm.indexOf(tpMeatKw[tmk])>=0){
+        r._uncertain = true; r._uncertain_reason = '\u5f52\u4e3a\u751c\u54c1\uff0c\u4f46\u540d\u5b57\u542b\u8089\u7c7b\u5173\u952e\u5b57\uff08'+tpMeatKw[tmk]+'\uff09';
+        break;
+      }
+    }
+  }
+
+  // --- SC（素菜）完整性检查：含明确肉类关键字 → 可疑 ---
+  if(r.category === 'SC') {
+    var scMeatKw = ['\u725b\u8089','\u7f8a\u8089','\u732a\u8089','\u9e21\u8089','\u9e2d\u8089','\u867e\u4ec1','\u80a5\u725b','\u91cc\u810a','\u4e94\u82b1\u8089'];
+    for(var smk=0;smk<scMeatKw.length;smk++){
+      if(nm.indexOf(scMeatKw[smk])>=0){
+        r._uncertain = true; r._uncertain_reason = '\u5f52\u4e3a\u7d20\u83dc\uff0c\u4f46\u540d\u5b57\u542b\u8089\u7c7b\u5173\u952e\u5b57\uff08'+scMeatKw[smk]+'\uff09';
+        break;
+      }
+    }
+  }
 }
 
 function loadDishData() {
@@ -3290,6 +3406,7 @@ function dishSwitchTab(tab) {
   document.getElementById('dishTabSku').style.color = tab === 'sku' ? '#fff' : '#3d5a80';
   dishRankRender();
 }
+
 
 function dishSelectCat(code) {
   dishCurCat = code;
