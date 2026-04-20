@@ -1293,11 +1293,27 @@ function lightenColor(hex, amount) {
 }
 
 // === Sushiro store opening dates (store_id → YYYY-MM-DD) ===
-var SUSHIRO_OPEN_DATES={'1':'2021-09-22','2':'2021-11-29','3':'2022-01-25','4':'2022-03-25','5':'2022-05-11','6':'2022-06-27','7':'2022-07-30','8':'2022-09-08','9':'2022-10-14','10':'2022-12-16','11':'2022-12-10','12':'2023-01-20','13':'2023-03-05','15':'2023-04-28','16':'2023-06-09','17':'2023-06-17','18':'2023-07-27','19':'2023-08-03','21':'2023-09-06','23':'2023-12-08','24':'2023-12-10','25':'2024-07-13','26':'2024-08-03','27':'2024-10-18','28':'2025-01-19','29':'2025-01-26','30':'2025-03-07','31':'2025-04-12','32':'2025-10-18','34':'2025-12-25','35':'2026-03-01','1001':'2022-09-15','1002':'2022-11-18','1003':'2023-01-11','1004':'2023-02-17','1005':'2023-03-14','1006':'2023-06-11','1007':'2023-06-22','1008':'2023-11-17','1009':'2024-02-14','1010':'2025-05-16','1011':'2025-06-20','1012':'2026-01-01','1013':'2026-03-06','2001':'2022-11-29','2003':'2023-02-20','2004':'2023-04-11','2006':'2023-10-28','2007':'2023-12-23','3001':'2024-05-10','3002':'2024-06-07','3003':'2024-07-27','3004':'2024-08-21','3005':'2024-09-27','3006':'2024-10-07','3007':'2024-11-22','3008':'2024-12-24','3009':'2025-01-29','3010':'2025-03-29','3011':'2025-04-30','3012':'2025-05-09','3013':'2025-05-17','3014':'2025-06-01','3015':'2025-06-28','3016':'2025-07-05','3017':'2025-07-12','3018':'2025-08-08','3019':'2025-08-23','3020':'2025-10-01','3021':'2025-10-01','3022':'2025-11-08','3023':'2025-11-22','3024':'2025-11-29','3025':'2025-12-06','3026':'2025-12-06','3027':'2025-12-29','3028':'2025-12-19','3029':'2025-12-24','3030':'2026-01-01','3031':'2026-01-17','3032':'2026-01-17','3033':'2026-01-31','3034':'2026-02-07','3035':'2026-02-08','3036':'2026-02-12','3037':'2026-02-13','3038':'2026-02-14','3039':'2026-03-14','3040':'2026-03-14'};
+var SUSHIRO_OPEN_DATES={'1':'2021-09-22','2':'2021-11-29','3':'2022-01-25','4':'2022-03-25','5':'2022-05-11','6':'2022-06-27','7':'2022-07-30','8':'2022-09-08','9':'2022-10-14','10':'2022-12-16','11':'2022-12-10','12':'2023-01-20','13':'2023-03-05','15':'2023-04-28','16':'2023-06-09','17':'2023-06-17','18':'2023-07-27','19':'2023-08-03','21':'2023-09-06','23':'2023-12-08','24':'2023-12-10','25':'2024-07-13','26':'2024-08-03','27':'2024-10-18','28':'2025-01-19','29':'2025-01-26','30':'2025-03-07','31':'2025-04-12','32':'2025-10-18','34':'2025-12-25','35':'2026-03-01','1001':'2022-09-15','1002':'2022-11-18','1003':'2023-01-11','1004':'2023-02-17','1005':'2023-03-14','1006':'2023-06-11','1007':'2023-06-22','1008':'2023-11-17','1009':'2024-02-14','1010':'2025-05-16','1011':'2025-06-20','1012':'2026-01-01','1013':'2026-03-06','2001':'2022-11-29','2003':'2023-02-20','2004':'2023-04-11','2006':'2023-10-28','2007':'2023-12-23','3001':'2024-05-10','3002':'2024-06-07','3003':'2024-07-27','3004':'2024-08-21','3005':'2024-09-27','3006':'2024-10-07','3007':'2024-11-22','3008':'2024-12-24','3009':'2025-01-29','3010':'2025-03-29','3011':'2025-04-30','3012':'2025-05-09','3013':'2025-05-17','3014':'2025-06-01','3015':'2025-06-28','3016':'2025-07-05','3017':'2025-07-12','3018':'2025-08-08','3019':'2025-08-23','3020':'2025-10-01','3021':'2025-10-01','3022':'2025-11-08','3023':'2025-11-22','3024':'2025-11-29','3025':'2025-12-06','3026':'2025-12-06','3027':'2025-12-29','3028':'2025-12-19','3029':'2025-12-24','3030':'2026-01-01','3031':'2026-01-17','3032':'2026-01-17','3033':'2026-01-31','3034':'2026-02-07','3035':'2026-02-08','3036':'2026-02-12','3037':'2026-02-13','3038':'2026-02-14','3039':'2026-03-14','3040':'2026-03-14','3041':'2026-03-28','3042':'2026-03-28','3043':'2026-04-07','3044':'2026-04-11','3045':'2026-04-18','3046':'2026-04-18'};
 function sushiroOpenBefore(storeId,monthEnd){
   var d=SUSHIRO_OPEN_DATES[String(storeId)];
   if(!d)return true; // no date info → assume open
   return d<=monthEnd;
+}
+// 从 store_base 计算某月末已开业门店数（按城市分组）
+function storeBaseCountByCity(monthStr) {
+  var end = monthStr ? monthLastDay(monthStr) : '9999-12-31';
+  var counts = {};
+  var total = 0;
+  sushiroStoreBase.forEach(function(s) {
+    if (s.status !== '开业') return;
+    if (s.open_date && s.open_date > end) return;
+    var c = normCity(s.city || '');
+    if (!c) return;
+    if (!counts[c]) counts[c] = 0;
+    counts[c]++;
+    total++;
+  });
+  return { byCity: counts, total: total };
 }
 function monthLastDay(m){
   // m = 'YYYY-MM', return 'YYYY-MM-DD' of last day
@@ -1307,7 +1323,7 @@ function monthLastDay(m){
 }
 
 // === Data stores ===
-var sushiroCityData=[], sushiroStoreData=[], sushiroDailyData=[];
+var sushiroCityData=[], sushiroStoreData=[], sushiroDailyData=[], sushiroStoreBase=[];
 var banuCityData=[], banuStoreData=[], banuDailyData=[];
 var hpBrandData=[], hpCityData=[], hpStoreData=[];
 var curSection='sushiro', curSTab='s_city', curBTab='b_city', curHpSumTab='hps_queue';
@@ -1370,7 +1386,9 @@ function loadAllData() {
     supaAll('hotpot_store_daily', 'date.desc,brand.asc,city.asc'),
     // HDL turnover tables (0414 起的增量数据)
     supa('hdl_national_turnover', '&order=date.asc'),
-    supa('hdl_city_turnover', '&order=date.asc,city.asc')
+    supa('hdl_city_turnover', '&order=date.asc,city.asc'),
+    // 寿司郎门店基础信息（用于准确计算门店数）
+    supa('store_base', '&order=city.asc')
   ]).then(function(results) {
     sushiroCityData = Array.isArray(results[0]) ? results[0] : [];
     sushiroStoreData = Array.isArray(results[1]) ? results[1] : [];
@@ -1394,6 +1412,9 @@ function loadAllData() {
         HDL_CITY_TURNOVER[r.date][r.city] = r.turnover_rate;
       }
     });
+
+    // 门店基础信息
+    sushiroStoreBase = Array.isArray(results[11]) ? results[11] : [];
 
     var counts = [sushiroCityData.length, sushiroStoreData.length, sushiroDailyData.length, banuCityData.length, banuStoreData.length, banuDailyData.length, hpBrandData.length, hpCityData.length, hpStoreData.length];
     var total = counts.reduce(function(a,b){return a+b;},0);
@@ -1721,12 +1742,18 @@ function renderSCity(f){
   var avgQ50=d.reduce(function(s,r){return s+(r.queue50_hour_pct||0);},0)/n;
   var dataStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
 
-  // Get authoritative total store count from city_monthly (dedupe by normalized city)
+  // Get authoritative total store count from store_base (开业 stores whose open_date <= month end)
   var cmMonth=f.month!=='全部'?f.month:(sushiroCityData.length?sushiroCityData[0].month:'');
-  var cmData=sushiroCityData.filter(function(r){return(cmMonth?r.month===cmMonth:true)&&r.city!=='总计'&&normCity(r.city)!=='总计'&&(cityMatch(r.city,f.city));});
-  var cmDedup={};cmData.forEach(function(r){var nc=normCity(r.city);if(!cmDedup[nc])cmDedup[nc]=0;cmDedup[nc]=Math.max(cmDedup[nc],r.store_count||0);});
-  var totalStoresAuth=Object.values(cmDedup).reduce(function(s,v){return s+v;},0);
-  if(!totalStoresAuth) totalStoresAuth=dataStores; // fallback
+  var sbResult=storeBaseCountByCity(cmMonth);
+  var totalStoresAuth=0;
+  if(f.city&&f.city!=='全部'){
+    // filter by selected city
+    var nc=normCity(f.city);
+    totalStoresAuth=sbResult.byCity[nc]||0;
+  } else {
+    totalStoresAuth=sbResult.total;
+  }
+  if(!totalStoresAuth) totalStoresAuth=dataStores; // fallback if store_base empty
 
   el.innerHTML='<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">累计不含税收入下限</div><div class="kv">¥'+(sumRev/10000).toFixed(0)+'万</div><div class="ks">'+n+' 个城市合计</div></div>'
@@ -1881,25 +1908,29 @@ function renderSTrend(f){
 }
 
 function renderSExpand(f){
-  // Sushiro expansion overview: use daily data for consistency with city tab
+  // Sushiro expansion overview: use store_base for accurate store counts
   var el=document.getElementById('sp-s_expand');
-  if(!sushiroDailyData.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  if(!sushiroDailyData.length&&!sushiroStoreBase.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
 
-  // Build city-month store count from daily data (unique stores per city per month)
-  // Only count stores that opened on or before the last day of that month
-  var cm={};sushiroDailyData.forEach(function(r){
-    if(!r.city||!r.date)return;
-    var nc=normCity(r.city);
-    var m=r.date.slice(0,7);
-    var sid=r.store_id||r.store_name;
-    if(!sushiroOpenBefore(sid,monthLastDay(m)))return;
-    var key=nc+'|'+m;
-    if(!cm[key])cm[key]={};
-    cm[key][sid]=1;
-  });
+  // Get all months from daily data
   var allMonths=[...new Set(sushiroDailyData.map(function(r){return r.date?r.date.slice(0,7):'';}).filter(Boolean))].sort();
-  var allCities=[...new Set(sushiroDailyData.map(function(r){return r.city?normCity(r.city):'';}).filter(Boolean))].sort();
-  var cmCounts={};Object.keys(cm).forEach(function(key){cmCounts[key]=Object.keys(cm[key]).length;});
+
+  // Build city-month store count from store_base (开业 stores whose open_date <= month end)
+  var cmCounts={};
+  var allCitiesSet={};
+  allMonths.forEach(function(m){
+    var end=monthLastDay(m);
+    sushiroStoreBase.forEach(function(s){
+      if(s.status!=='开业')return;
+      if(s.open_date&&s.open_date>end)return;
+      var nc=normCity(s.city||'');
+      if(!nc)return;
+      allCitiesSet[nc]=1;
+      var key=nc+'|'+m;
+      cmCounts[key]=(cmCounts[key]||0)+1;
+    });
+  });
+  var allCities=Object.keys(allCitiesSet).sort();
 
   var latest=allMonths[allMonths.length-1]||'';
   // Sort cities by latest month store count descending
