@@ -1367,7 +1367,10 @@ function loadAllData() {
     // Hotpot tables
     supa('hotpot_brand_daily', '&order=date.desc,brand.asc'),
     supaAll('hotpot_city_daily', 'date.desc,brand.asc,city.asc'),
-    supaAll('hotpot_store_daily', 'date.desc,brand.asc,city.asc')
+    supaAll('hotpot_store_daily', 'date.desc,brand.asc,city.asc'),
+    // HDL turnover tables (0414 起的增量数据)
+    supa('hdl_national_turnover', '&order=date.asc'),
+    supa('hdl_city_turnover', '&order=date.asc,city.asc')
   ]).then(function(results) {
     sushiroCityData = Array.isArray(results[0]) ? results[0] : [];
     sushiroStoreData = Array.isArray(results[1]) ? results[1] : [];
@@ -1378,6 +1381,19 @@ function loadAllData() {
     hpBrandData = Array.isArray(results[6]) ? results[6] : [];
     hpCityData = Array.isArray(results[7]) ? results[7] : [];
     hpStoreData = Array.isArray(results[8]) ? results[8] : [];
+
+    // 合并 HDL 翻台率：硬编码(≤0413) + Supabase(≥0414)
+    var hdlNatRows = Array.isArray(results[9]) ? results[9] : [];
+    var hdlCityRows = Array.isArray(results[10]) ? results[10] : [];
+    hdlNatRows.forEach(function(r) {
+      if(r.date && r.turnover_rate != null) HDL_NATIONAL_TURNOVER[r.date] = r.turnover_rate;
+    });
+    hdlCityRows.forEach(function(r) {
+      if(r.date && r.city && r.turnover_rate != null) {
+        if(!HDL_CITY_TURNOVER[r.date]) HDL_CITY_TURNOVER[r.date] = {};
+        HDL_CITY_TURNOVER[r.date][r.city] = r.turnover_rate;
+      }
+    });
 
     var counts = [sushiroCityData.length, sushiroStoreData.length, sushiroDailyData.length, banuCityData.length, banuStoreData.length, banuDailyData.length, hpBrandData.length, hpCityData.length, hpStoreData.length];
     var total = counts.reduce(function(a,b){return a+b;},0);
