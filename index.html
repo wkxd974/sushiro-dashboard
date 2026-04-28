@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head>
-<script>
-if(window.innerWidth<768 && !location.search.includes("pc=1")) location.replace("mobile.html");
-</script><meta charset="UTF-8">
+<html lang="zh-CN"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+if((window.innerWidth<768 || /Mobi/.test(navigator.userAgent)) && !location.search.includes("pc=1")) location.replace("mobile.html");
+</script>
 <title>餐饮竞品数据看板</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
