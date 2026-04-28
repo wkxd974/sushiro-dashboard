@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8">
+<html lang="zh-CN"><head>
+<script>
+if(window.innerWidth<768 && !location.search.includes("pc=1")) location.replace("mobile.html");
+</script><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>餐饮竞品数据看板</title>
 <style>
@@ -182,7 +185,7 @@ tr:hover td{background:#faf9f7}
         <div class="tab" onclick="bTab('b_store')">门店看板</div>
 
         <div class="tab" onclick="bTab('b_trend')">趋势分析</div>
-        <div class="tab" onclick="bTab('b_expand')">拓展概览</div>
+        <div class="tab" onclick="bTab('b_expand')">营业门店数</div>
       </div>
       <div class="filters" id="banuFilters">
         <div class="fg"><label>月份</label><select id="bfMonth" onchange="onBMonthChange()"></select></div>
@@ -1732,7 +1735,7 @@ function renderSCity(f){
       total_sales_revenue:c.rev
     };
   });
-  document.getElementById('sDataCount').textContent='城市: '+d.length+' 条 ('+dd.length+' 条日数据)';
+  document.getElementById('sDataCount').textContent='城市: '+d.length+' 个 ('+dd.length+' 条日数据)';
   var el=document.getElementById('sp-s_city');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var n=d.length;
@@ -2063,7 +2066,7 @@ function renderBCity(f){
       queue_hour_pct:c.bh?c.qh/c.bh:0
     };
   });
-  document.getElementById('bDataCount').textContent='城市: '+d.length+' 条 ('+dd.length+' 条日数据)';
+  document.getElementById('bDataCount').textContent='城市: '+d.length+' 个 ('+dd.length+' 条日数据)';
   var noteEl=document.getElementById('bFilterNote');
   if(noteEl)noteEl.innerHTML='<b>备注：</b>已筛除闭店/未开业门店及 '+BANU_EXCLUDED_CITIES.length+' 个门店较少的低线城市';
   var el=document.getElementById('sp-b_city');
