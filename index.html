@@ -925,7 +925,7 @@ function macroTurnoverRender() {
   var startDate = document.getElementById('turnoverStartDate').value;
   var endDate = document.getElementById('turnoverEndDate').value;
 
-  // Collect Banu turnover data (average daily_turnover_rate across stores)
+  // Collect Banu turnover data (weighted average: sum(daily_sales_tables)/sum(tables))
   var banuData = {};
   if(banuDailyData && Array.isArray(banuDailyData)) {
     banuDailyData.forEach(function(record) {
@@ -936,11 +936,12 @@ function macroTurnoverRender() {
       }
       var rate = record.daily_turnover_rate;
       if(rate === undefined || rate === null || rate <= 0) return;
+      if(!record.tables || record.tables <= 0) return;
       if(!banuData[record.date]) {
-        banuData[record.date] = { sum: 0, count: 0 };
+        banuData[record.date] = { salesTables: 0, tables: 0 };
       }
-      banuData[record.date].sum += rate;
-      banuData[record.date].count++;
+      banuData[record.date].salesTables += (record.daily_sales_tables || 0);
+      banuData[record.date].tables += (record.tables || 0);
     });
   }
 
@@ -982,8 +983,8 @@ function macroTurnoverRender() {
   });
 
   var banuSeries = filteredDates.map(function(date) {
-    if(banuData[date] && banuData[date].count > 0) {
-      return +(banuData[date].sum / banuData[date].count).toFixed(2);
+    if(banuData[date] && banuData[date].tables > 0) {
+      return +(banuData[date].salesTables / banuData[date].tables).toFixed(2);
     }
     return null;
   });
@@ -2044,7 +2045,7 @@ function renderBCity(f){
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
     return mc&&md;
   });
-  var cg={};dd.forEach(function(r){
+  var cg={};var wtTotalSalesTables=0,wtTotalTables=0;dd.forEach(function(r){
     if(!r.city)return;
     if(!cg[r.city])cg[r.city]={city:r.city,stores:{},dates:{},tables:0,qh:0,bh:0,turnSum:0,turnN:0};
     cg[r.city].stores[r.store_id||r.store_name]=1;
@@ -2054,6 +2055,8 @@ function renderBCity(f){
     cg[r.city].bh+=(r.biz_hours||0);
     cg[r.city].turnSum+=(r.daily_turnover_rate||0);
     cg[r.city].turnN++;
+    wtTotalSalesTables+=(r.daily_sales_tables||0);
+    wtTotalTables+=(r.tables||0);
   });
   var d=Object.values(cg).map(function(c){
     var nStores=Object.keys(c.stores).length;
@@ -2072,7 +2075,7 @@ function renderBCity(f){
   var el=document.getElementById('sp-b_city');
   if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var n=d.length;
-  var avgTurn=d.reduce(function(s,r){return s+(r.monthly_turnover_rate||0);},0)/n;
+  var avgTurn=wtTotalTables?wtTotalSalesTables/wtTotalTables:0;
   var avgQueue=d.reduce(function(s,r){return s+(r.queue_hour_pct||0);},0)/n;
   var dataStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
 
