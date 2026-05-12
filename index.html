@@ -487,13 +487,14 @@ tr:hover td{background:#faf9f7}
       <div class="card" style="padding:0">
         <div id="turnoverChart" style="width:100%;height:500px"></div>
       </div>
+      <div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-top:8px;font-size:12px;color:#e65100">⚠️ 因0430-0506巴奴小程序升级，排队数据丢失</div>
     </div>
 
     <div id="sec-macro_queue" class="hidden">
       <div class="filters">
         <div class="fg">
           <label>开始日期</label>
-          <input type="date" id="queueMapStartDate" onchange="macroQueueRender()">
+          <input type="date" id="queueMapStartDate" value="2026-02-01" onchange="macroQueueRender()">
         </div>
         <div class="fg">
           <label>结束日期</label>
@@ -552,8 +553,8 @@ var S_COLORS = ['#C47A6C','#7B6478','#6A967A','#A8845C','#8B6E99'];
 var B_COLORS = ['#A06850','#6B8A6B','#8A7260','#7A85A0'];
 
 // === Banu excluded dates (data quality < 80% hourly coverage) ===
-var BANU_EXCLUDED_DATES = ['2026-03-10','2026-05-01','2026-05-02','2026-05-03','2026-05-04','2026-05-05'];
-var BANU_EXCLUDED_NOTE = '⚠️ 以下日期因数据采集异常（小时覆盖率<80%）已排除：2026-03-10（仅凌晨0点1小时数据，覆盖率8.3%）｜因0501-0506巴奴小程序升级，排队数据丢失';
+var BANU_EXCLUDED_DATES = ['2026-03-10','2026-04-30','2026-05-01','2026-05-02','2026-05-03','2026-05-04','2026-05-05'];
+var BANU_EXCLUDED_NOTE = '⚠️ 以下日期因数据采集异常（小时覆盖率<80%）已排除：2026-03-10（仅凌晨0点1小时数据，覆盖率8.3%）｜因0430-0506巴奴小程序升级，排队数据丢失';
 
 // === Banu excluded cities (single-store cities, sample size too small) ===
 var BANU_EXCLUDED_CITIES = ['三门峡','临沂','周口','咸阳','唐山','廊坊','开封','惠州','扬州','昆明','汕头','江门','泰州','淄博','淮安','湖州','焦作','盐城','芜湖','菏泽','连云港','镇江','长治','保定','信阳','嘉兴','漯河','濮阳','许昌','鹤壁','商丘','平顶山','洛阳','驻马店'];
@@ -1050,7 +1051,7 @@ function macroTurnoverRender() {
         lineStyle: { width: 2 },
         symbol: 'circle',
         symbolSize: 4,
-        connectNulls: true
+        connectNulls: false
       },
       {
         name: '海底捞',
@@ -2943,6 +2944,17 @@ function initAllFilters(){
     if(hdlDates.length > 0) {
       document.getElementById('turnoverEndDate').value = hdlDates[hdlDates.length - 1];
     }
+  }
+  // 排号数地图：结束日期默认取所有数据源中的最新日期
+  var queueMaxDate = '';
+  if(banuDailyData && Array.isArray(banuDailyData)) {
+    banuDailyData.forEach(function(r){ if(r.date && r.date > queueMaxDate) queueMaxDate = r.date; });
+  }
+  if(hpStoreData && Array.isArray(hpStoreData)) {
+    hpStoreData.forEach(function(r){ if(r.date && r.date > queueMaxDate) queueMaxDate = r.date; });
+  }
+  if(queueMaxDate) {
+    document.getElementById('queueMapEndDate').value = queueMaxDate;
   }
 }
 
