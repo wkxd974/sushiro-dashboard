@@ -1035,7 +1035,7 @@ function renderTurnoverBody(){
 
   if(!dates.length){
     c.innerHTML = '<div class="card"><h3>'+(f.city||'全国')+' 翻台率对比</h3><div class="empty">所选范围内暂无数据</div></div>'
-      +'<div class="note blue" style="margin-top:12px">📌 海底捞数据来源：当前仅包含 Supabase 中 2026-04-14 起的增量数据。如需更早历史数据，请从 PC 版查看（已包含历史导入数据）。</div>';
+      +'<div class="note blue" style="margin-top:12px">⚠️ 因0430-0506巴奴小程序升级，排队数据丢失</div>';
     return;
   }
 
@@ -1049,7 +1049,7 @@ function renderTurnoverBody(){
 
   var html = '';
   html += '<div class="card"><h3>'+(f.city||'全国')+' 翻台率对比</h3><div class="desc">巴奴 vs 海底捞，按日</div><div id="t-chart" class="chart tall"></div></div>';
-  html += '<div class="note blue">📌 海底捞数据来源：仅 Supabase 增量（2026-04-14 起）。如需早期历史，请从 PC 版查看。</div>';
+  html += '<div class="note blue">⚠️ 因0430-0506巴奴小程序升级，排队数据丢失</div>';
   html += '<div class="card"><h3>每日明细</h3><div id="t-list"></div></div>';
   c.innerHTML = html;
 
@@ -1064,7 +1064,7 @@ function renderTurnoverBody(){
     xAxis: {type:'category', data:labels, axisLabel:{fontSize:10, interval:Math.max(0, Math.floor(labels.length/8))}, boundaryGap:false},
     yAxis: {type:'value', axisLabel:{fontSize:10}, splitLine:{lineStyle:{color:'#f0f0f0'}}},
     series: [
-      {name:'巴奴', type:'line', data:banuArr, color:'#A06850', smooth:true, symbol:'circle', symbolSize:4, lineStyle:{width:2}, connectNulls:true},
+      {name:'巴奴', type:'line', data:banuArr, color:'#A06850', smooth:true, symbol:'circle', symbolSize:4, lineStyle:{width:2}, connectNulls:false},
       {name:'海底捞', type:'line', data:hdlArr, color:'#E04040', smooth:true, symbol:'circle', symbolSize:4, lineStyle:{width:2}, connectNulls:true}
     ]
   });
