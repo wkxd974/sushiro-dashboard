@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>海底捞宏观追踪看板 · 宏观经济指标</title>
 
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
@@ -1154,26 +1157,72 @@ body{
 
 
   <style>
-    /* === macro.html 单页模式覆盖 (放在 head 末尾, 覆盖大看板侧边栏布局) === */
-    html, body { margin: 0 !important; padding: 0 !important; }
-    body { display: block !important; }          /* 大看板 body 可能是 flex(配侧栏), 这里还原 */
-    /* 隐藏可能残留的侧边栏 / 全局壳 (本页只有 macro 内容) */
-    .sidebar, #sidebar, .sb-item, .app-shell, .global-nav { display: none !important; }
-    .macro-standalone-wrap { max-width: 1200px; margin: 0 auto; padding: 16px 24px 64px; }
-    .macro-standalone-bar {
-      display: flex; align-items: center; gap: 12px;
-      font-size: 12px; color: var(--muted); padding: 10px 2px 4px; margin-bottom: 6px;
-      border-bottom: 1px solid var(--line);
+    /* === 多页外壳补充样式 (叠加在大看板视觉之上) === */
+    .sb-item.nav-soon { opacity: .42; cursor: default !important; }
+    .sb-item.nav-soon:hover { background: transparent !important; }
+    .sb-item-soonmark {
+      margin-left: auto; font-size: 10px; padding: 1px 6px; border-radius: 999px;
+      color: var(--muted, #999); border: 1px solid rgba(255,255,255,.14); white-space: nowrap;
     }
-    .macro-standalone-bar a { color: var(--hdl-red, #c0392b); text-decoration: none; font-weight: 600; }
-    .macro-standalone-bar a:hover { text-decoration: underline; }
-    #page-macro { display: block !important; }   /* 强制可见, 盖过 .page{display:none} */
+    .sb-brand { cursor: pointer; }
+    #page-macro { display: block !important; }
   </style>
+
 
 </head>
 <body>
-<div class="macro-standalone-wrap">
-<div class="macro-standalone-bar"><a href="portal.html">← 返回看板首页</a><span>·</span><span>宏观经济指标 · 月度 / 季度 / 年度 (公开数据)</span></div>
+<div class="app">
+<aside class="sidebar">
+<div class="sb-brand" onclick="location.href='portal.html'">
+<div class="sb-brand-name">海底捞<span class="dot">·</span>宏观追踪</div>
+<div class="sb-brand-sub">MACRO PULSE v2.0</div>
+</div>
+<div class="sb-group">
+<div class="sb-group-head">宏观经济指标</div>
+<div class="sb-item active" onclick="location.href='macro.html'">
+<span class="sb-item-dot"></span>
+<span class="sb-item-text">宏观经济指标</span>
+<span class="sb-item-badge live">月/季/年</span>
+</div>
+</div>
+<div class="sb-group">
+<div class="sb-group-head">每日资金面</div>
+<div class="sb-item" onclick="location.href='daily.html'">
+<span class="sb-item-dot"></span>
+<span class="sb-item-text">每日资金面</span>
+<span class="sb-item-badge live">日度</span>
+</div>
+</div>
+<div class="sb-group">
+<div class="sb-group-head">政策追踪</div>
+<div class="sb-item nav-soon">
+<span class="sb-item-dot"></span>
+<span class="sb-item-text">政策追踪</span>
+
+<span class="sb-item-soonmark">即将上线</span></div>
+</div>
+<div class="sb-group">
+<div class="sb-group-head">海底捞经营透视</div>
+<div class="sb-item nav-soon">
+<span class="sb-item-dot"></span>
+<span class="sb-item-text">海底捞 vs 社零餐饮</span>
+<span class="sb-item-soonmark">需登录</span></div>
+<div class="sb-item nav-soon">
+<span class="sb-item-dot"></span>
+<span class="sb-item-text">专题分析</span>
+
+<span class="sb-item-soonmark">即将上线</span></div>
+</div>
+<div class="sb-group">
+<div class="sb-group-head">省份/大区经理经营追踪</div>
+<div class="sb-item nav-soon">
+<span class="sb-item-dot"></span>
+<span class="sb-item-text">Peer Benchmark</span>
+
+<span class="sb-item-soonmark">需登录</span></div>
+</div>
+</aside>
+<main>
 <div class="page" id="page-macro" style="display:block">
 <style>
     /* ===== 锚点导航 ===== */
@@ -2237,6 +2286,7 @@ body{
   }
   </script>
 </div>
+</main>
 </div>
 </body>
 </html>
