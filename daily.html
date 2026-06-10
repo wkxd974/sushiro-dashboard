@@ -74,7 +74,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 // 部署版直接写在这里, 团队访问无需输入。务必用"只读"的 anon key(不是 service_role)。
 // 安全提醒: 建议用 roll 后的新 anon key; 切勿把 service_role key 写在这里。
 const SUPABASE_URL = "https://fdjbromuixfgkedrdtuu.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkamJyb211aXhmZ2tlZHJkdHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTM4NzQsImV4cCI6MjA5NjU2OTg3NH0.2tVSxUOdpiRO6F_GtyiAybJG5gqMU73b2CSm-Ow4hZs";   // ← 把 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkamJyb211aXhmZ2tlZHJkdHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTM4NzQsImV4cCI6MjA5NjU2OTg3NH0.2tVSxUOdpiRO6F_GtyiAybJG5gqMU73b2CSm-Ow4hZs 整体替换成你的 anon key
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkamJyb211aXhmZ2tlZHJkdHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTM4NzQsImV4cCI6MjA5NjU2OTg3NH0.2tVSxUOdpiRO6F_GtyiAybJG5gqMU73b2CSm-Ow4hZs";   // ← 把 __ANON_KEY__ 整体替换成你的 anon key
 const SPARK_DAYS = 30;
 
 // ================= 配置(由 daily_module.py 导出, 与看板内嵌版一致) =================
@@ -190,21 +190,17 @@ function bindExpand(){
 
 // ================= 取数: anon key fetch daily_metrics =================
 function getAnonKey(){
-  // 部署版: 直接用写死的常量(团队免输入)。本地调试: 若未替换占位符, 回退到本地存储/弹框输入。
-  let k = SUPABASE_ANON_KEY;
-  if(k && k!=="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkamJyb211aXhmZ2tlZHJkdHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTM4NzQsImV4cCI6MjA5NjU2OTg3NH0.2tVSxUOdpiRO6F_GtyiAybJG5gqMU73b2CSm-Ow4hZs" && k!=="PASTE_YOUR_ANON_KEY_HERE") return k;
-  k = localStorage.getItem("dq_anon_key") || "";
-  if(!k){
-    k = (window.prompt("请粘贴你的 Supabase anon key (只读, 仅存本浏览器):","")||"").trim();
-    if(k) localStorage.setItem("dq_anon_key", k);
-  }
-  return k;
+  // 部署版: 只用文件里写死的 anon key, 不读浏览器存储、不弹框(避免多端不一致)。
+  // 未替换占位符 → 返回空, 页面给出明确提示(而非弹框)。
+  const k = SUPABASE_ANON_KEY;
+  if(k && k!=="__ANON_KEY__" && k!=="PASTE_YOUR_ANON_KEY_HERE") return k;
+  return "";
 }
 async function load(){
   try{
     const anonKey = getAnonKey();
     if(!anonKey){
-      document.getElementById('content').innerHTML='<div class="dq-err">未提供 anon key,无法加载。刷新页面可重新输入。<br>(如需清除已存的 key:浏览器控制台执行 localStorage.removeItem("dq_anon_key"))</div>';
+      document.getElementById('content').innerHTML='<div class="dq-err">daily.html 里的 anon key 未填写(仍是占位符 __ANON_KEY__)。请在文件中替换为真实 anon key 后重新部署。</div>';
       return;
     }
     const sb=supabase.createClient(SUPABASE_URL,anonKey);
@@ -223,10 +219,8 @@ async function load(){
     render(byKey,latest);
   }catch(e){
     const msg=(e&&(e.message||e.hint||''))+'';
-    // key 无效/权限错 → 清掉本地存的坏 key, 让用户刷新后重新输入
     if(/api key|JWT|401|invalid|unauthor/i.test(msg)){
-      localStorage.removeItem("dq_anon_key");
-      document.getElementById('content').innerHTML='<div class="dq-err">anon key 无效或权限不足: '+esc(msg)+'<br><b>已清除,请刷新页面重新输入正确的 anon key。</b></div>';
+      document.getElementById('content').innerHTML='<div class="dq-err">anon key 无效或权限不足: '+esc(msg)+'<br>检查 daily.html 里的 anon key 是否为当前有效的只读 key(roll 过则旧 key 失效)。</div>';
     }else{
       document.getElementById('content').innerHTML='<div class="dq-err">加载失败: '+esc(msg)+'<br>检查 RLS 是否允许 anon 只读、网络是否能访问 Supabase。</div>';
     }
