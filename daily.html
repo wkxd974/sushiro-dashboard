@@ -211,6 +211,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-delta{font-family:var(--mono);font-size:12px;font-weight:700;display:block;margin-bottom:3px;}
 .dq-up{color:var(--dq-up);}.dq-down{color:var(--dq-down);}.dq-flat{color:var(--dq-flat);}
 .dq-primary-name{font-size:11px;color:var(--muted);margin-top:4px;}
+.dq-src{font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;letter-spacing:.2px;opacity:.85;}
+.dq-src-cell{font-size:11px;color:var(--muted);}
 .dq-click-hint{font-size:10px;color:var(--dq-flat);opacity:.7;}
 .dq-stale{font-size:10px;color:var(--dq-flat);font-family:var(--mono);margin-left:6px;font-weight:400;}
 .dq-sub{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px;padding-top:5px;border-top:1px dashed var(--border);}
@@ -372,9 +374,9 @@ function render(byKey, latest){
   Object.keys(byKey).sort().forEach(k=>{const m=byKey[k];
     rows+='<tr><td>'+esc(meta(k).name)+'</td><td class="dq-mono">'+esc(k)+'</td>'+
       '<td class="num">'+fmt(m.value,k)+unit(k)+'</td><td class="num">'+deltaHTML(m.value,m.prev,k)+'</td>'+
-      '<td>'+esc(m.date)+'</td></tr>';});
+      '<td>'+esc(m.date)+'</td><td class="dq-src-cell">'+esc(m.source||'')+'</td></tr>';});
   html+='<div class="dq-section-title">全指标明细</div><table class="dq-table"><thead><tr><th>指标</th><th>key</th>'+
-    '<th class="num">最新值</th><th class="num">日环比</th><th>数据日期</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    '<th class="num">最新值</th><th class="num">日环比</th><th>数据日期</th><th>数据来源(发布机构)</th></tr></thead><tbody>'+rows+'</tbody></table>';
   document.getElementById('content').innerHTML=html;
   bindExpand();
 }
@@ -396,6 +398,7 @@ function cardHTML(c,byKey,latest){
     '<div class="dq-main-right">'+deltaHTML(m.value,m.prev,pk)+sparkSVG(m.series||[])+'</div></div>'+
     '<div class="dq-primary-name">'+esc(meta(pk).name)+' <span class="dq-click-hint">点击看30日</span></div>'+
     subs+'<div class="dq-expand"><div class="dq-exp-title"></div><div class="dq-exp-body"></div></div>'+
+    (m.source?'<div class="dq-src">来源 · '+esc(m.source)+'</div>':'')+
     '<div class="dq-tip">'+tip+'</div></div>';
 }
 
@@ -453,15 +456,15 @@ async function load(){
     const sb=supabase.createClient(SUPABASE_URL,anonKey);
     // 取近 ~45 天(够画30日走势 + 算环比)
     const since=new Date(Date.now()-60*864e5).toISOString().slice(0,10);
-    const {data,error}=await sb.from('daily_metrics').select('date,key,name,value').gte('date',since).order('date',{ascending:true});
+    const {data,error}=await sb.from('daily_metrics').select('date,key,name,value,source').gte('date',since).order('date',{ascending:true});
     if(error)throw error;
     if(!data||!data.length){document.getElementById('content').innerHTML='<div class="dq-err">daily_metrics 暂无数据。请先在本地跑 push_daily_to_supabase.py 推送。</div>';return;}
     // 组织: byKey[key] = {value,date,prev,series:[[date,value]...]}
-    const groups={};
-    for(const r of data){(groups[r.key]=groups[r.key]||[]).push([r.date,r.value]);}
+    const groups={},srcByKey={};
+    for(const r of data){(groups[r.key]=groups[r.key]||[]).push([r.date,r.value]);srcByKey[r.key]=r.source;}
     const byKey={};let latest='';
     for(const k in groups){const s=groups[k].slice(-SPARK_DAYS);const last=s[s.length-1];
-      byKey[k]={value:last[1],date:last[0],prev:s.length>1?s[s.length-2][1]:null,series:s};
+      byKey[k]={value:last[1],date:last[0],prev:s.length>1?s[s.length-2][1]:null,series:s,source:srcByKey[k]};
       if(last[0]>latest)latest=last[0];}
     render(byKey,latest);
   }catch(e){
