@@ -212,6 +212,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-up{color:var(--dq-up);}.dq-down{color:var(--dq-down);}.dq-flat{color:var(--dq-flat);}
 .dq-primary-name{font-size:11px;color:var(--muted);margin-top:4px;}
 .dq-src{font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;letter-spacing:.2px;opacity:.85;}
+.dq-conv{font-size:11px;color:var(--muted);margin:2px 0 0 0;padding-left:2px;opacity:.9;}
 .dq-src-cell{font-size:11px;color:var(--muted);}
 .dq-click-hint{font-size:10px;color:var(--dq-flat);opacity:.7;}
 .dq-stale{font-size:10px;color:var(--dq-flat);font-family:var(--mono);margin-left:6px;font-weight:400;}
@@ -380,7 +381,7 @@ function render(byKey, latest){
   document.getElementById('content').innerHTML=html;
   bindExpand();
 }
-function seriesAttr(k,m){return "data-s='"+esc(JSON.stringify(m.series||[]))+"' data-n=\""+esc(meta(k).name)+"\" data-u=\""+esc(unit(k))+"\" data-d=\""+meta(k).dec+"\"";}
+function seriesAttr(k,m){return "data-s='"+esc(JSON.stringify(m.series||[]))+"' data-n=\""+esc(meta(k).name)+"\" data-u=\""+esc(unit(k))+"\" data-d=\""+meta(k).dec+"\" data-src=\""+esc(m.source||'')+"\"";}
 function cardHTML(c,byKey,latest){
   const tip=esc(c.tip);
   if(!c.primary){const ph=esc(c.placeholder||'待接入');
@@ -391,7 +392,11 @@ function cardHTML(c,byKey,latest){
   let stale='';if(latest&&m.date&&m.date<latest)stale='<span class="dq-stale">@'+esc(m.date.slice(5))+'</span>';
   let subs='';
   for(const sk of (c.subs||[])){const sm=byKey[sk];const sn=esc(meta(sk).name);
-    if(sm)subs+='<div class="dq-sub dq-metric" '+seriesAttr(sk,sm)+'><span class="dq-sub-n">'+sn+'</span><span class="dq-sub-v">'+fmt(sm.value,sk)+unit(sk)+' '+deltaHTML(sm.value,sm.prev,sk)+'</span></div>';
+    if(sm){let _extra='';
+      if(sk==='comm.gold_xau'){const cp=byKey['fx.usdcny_central'];
+        if(cp&&cp.value){const rmbg=sm.value*cp.value/31.1035;
+          _extra='<div class="dq-conv">\u2248 '+rmbg.toFixed(2)+' 元/克 · 按中间价('+cp.value.toFixed(4)+')折</div>';}}
+      subs+='<div class="dq-sub dq-metric" '+seriesAttr(sk,sm)+'><span class="dq-sub-n">'+sn+'</span><span class="dq-sub-v">'+fmt(sm.value,sk)+unit(sk)+' '+deltaHTML(sm.value,sm.prev,sk)+'</span></div>'+_extra;}
     else subs+='<div class="dq-sub"><span class="dq-sub-n">'+sn+'</span><span class="dq-sub-v dq-todo">待补</span></div>';}
   return '<div class="dq-card"><div class="dq-card-title">'+esc(c.title)+stale+'</div>'+
     '<div class="dq-main dq-metric" '+seriesAttr(pk,m)+'><div class="dq-val">'+fmt(m.value,pk)+'<span class="dq-unit">'+unit(pk)+'</span></div>'+
@@ -431,8 +436,9 @@ function bindExpand(){
   document.getElementById('content').addEventListener('click',function(ev){
     const el=ev.target.closest('.dq-metric');if(!el)return;const card=el.closest('.dq-card');
     const exp=card.querySelector('.dq-expand'),ttl=card.querySelector('.dq-exp-title'),body=card.querySelector('.dq-exp-body');
-    if(exp.classList.contains('open')&&exp.dataset.cur===el.dataset.n){exp.classList.remove('open');card.querySelectorAll('.dq-metric').forEach(x=>x.classList.remove('dq-active'));return;}
+    if(exp.classList.contains('open')&&exp.dataset.cur===el.dataset.n){exp.classList.remove('open');card.querySelectorAll('.dq-metric').forEach(x=>x.classList.remove('dq-active'));const _s0=card.querySelector('.dq-src'),_mn=card.querySelector('.dq-main');if(_s0&&_mn&&_mn.dataset.src)_s0.textContent='来源 · '+_mn.dataset.src;return;}
     card.querySelectorAll('.dq-metric').forEach(x=>x.classList.remove('dq-active'));el.classList.add('dq-active');
+    const _sEl=card.querySelector('.dq-src');if(_sEl&&el.dataset.src)_sEl.textContent='来源 · '+el.dataset.src;
     let series=[];try{series=JSON.parse(el.getAttribute('data-s')||'[]');}catch(e){}
     ttl.textContent=el.dataset.n+' · 近30日';drawChart(body,series,el.dataset.n,el.dataset.u||'',parseInt(el.dataset.d||'2',10));
     exp.classList.add('open');exp.dataset.cur=el.dataset.n;});
