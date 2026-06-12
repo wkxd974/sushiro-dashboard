@@ -233,6 +233,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-ax{font-family:var(--mono);font-size:7px;fill:var(--dq-flat);}
 .dq-spark{display:block;}
 .dq-section-title{font-weight:700;font-size:13px;margin:26px 0 8px;}
+/* ===== 本周关键发布日历卡 ===== */
+.cal-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:18px;}
+.cal-day{padding:9px 0;border-top:1px solid var(--line-soft);}
+.cal-day:first-of-type{border-top:none;}
+.cal-day-head{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:5px;font-family:var(--mono);}
+.cal-day-head.today{color:var(--hdl-red);}
+.cal-ev{display:flex;align-items:baseline;gap:8px;padding:3px 0;font-size:13px;line-height:1.5;}
+.cal-dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;position:relative;top:5px;}
+.cal-dot.imp3{background:var(--red);}
+.cal-dot.imp2{background:#c79a3a;}
+.cal-dot.imp1{background:var(--muted-2);}
+.cal-ev-time{color:var(--muted);font-family:var(--mono);font-size:12px;flex:0 0 auto;}
+.cal-ev-name{color:var(--ink-2);}
+.cal-ev-name a{color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted-2);}
+.cal-ev-name a:hover{color:var(--hdl-red);border-bottom-color:var(--hdl-red);}
+.cal-ev-region{font-size:11px;color:var(--muted-2);border:1px solid var(--line);border-radius:3px;padding:0 4px;flex:0 0 auto;}
+.cal-empty{color:var(--muted);font-size:13px;padding:4px 0;}
 .dq-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
 .dq-table th,.dq-table td{border-bottom:1px solid var(--border);padding:6px 8px;text-align:left;}
 .dq-table .num{text-align:right;font-family:var(--mono);}
@@ -315,6 +332,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div class="wrap">
   <h1 class="page-title">每日资金面</h1>
   <div class="page-sub">8★ 资金面/汇率/避险/净值监测 · 数据源:AkShare/FRED · 经 Supabase 实时读取</div>
+  <div id="calendar-card"></div>
   <div id="content"><div class="dq-loading">正在加载数据…</div></div>
 </div>
 
@@ -482,6 +500,50 @@ async function load(){
     }
   }
 }
+// ================= 本周关键发布日历 (独立 fetch calendar_week.json) =================
+// 与 Supabase 数据流解耦: 日历失败不影响行情数据, 反之亦然。
+function renderCalendar(data){
+  const wrap=document.getElementById('calendar-card');
+  if(!wrap)return;
+  const days=(data&&data.days)||[];
+  if(!days.length){wrap.innerHTML='';return;}  // 无数据则不占位
+  const today=new Date().toISOString().slice(0,10);
+  let rows='';
+  for(const d of days){
+    const isToday=d.date===today;
+    const evs=(d.events||[]);
+    let evHTML='';
+    if(!evs.length){
+      evHTML='<div class="cal-empty">—</div>';
+    }else{
+      for(const e of evs){
+        const imp=e.importance>=3?'imp3':(e.importance===2?'imp2':'imp1');
+        const time=e.hm?esc(e.hm):'';
+        const region=e.region?'<span class="cal-ev-region">'+esc(e.region)+'</span>':'';
+        const name=esc(e.event||e.indicator||'');
+        const nameHTML=e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+name+'</a>':name;
+        evHTML+='<div class="cal-ev"><span class="cal-dot '+imp+'"></span>'+
+                (time?'<span class="cal-ev-time">'+time+'</span>':'')+
+                region+'<span class="cal-ev-name">'+nameHTML+'</span></div>';
+      }
+    }
+    rows+='<div class="cal-day"><div class="cal-day-head'+(isToday?' today':'')+'">'+
+          esc(d.date)+(d.weekday?' 周'+esc(d.weekday):'')+(isToday?' · 今天':'')+'</div>'+evHTML+'</div>';
+  }
+  wrap.innerHTML='<div class="cal-card"><div class="dq-group-head">本周关键数据发布</div>'+rows+'</div>';
+}
+async function loadCalendar(){
+  try{
+    const r=await fetch('calendar_week.json',{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    renderCalendar(await r.json());
+  }catch(e){
+    // 静默: 日历拉取失败不影响行情数据展示
+    const wrap=document.getElementById('calendar-card');
+    if(wrap)wrap.innerHTML='';
+  }
+}
+loadCalendar();
 load();
 </script>
 
