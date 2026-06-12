@@ -235,6 +235,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-section-title{font-weight:700;font-size:13px;margin:26px 0 8px;}
 /* ===== 本周关键发布日历卡 ===== */
 .cal-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:18px;}
+.cal-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.cal-head-title{font-weight:700;font-size:14px;padding-left:8px;border-left:3px solid var(--hdl-red);}
+.cal-toggle{font-size:12px;color:var(--muted);font-family:var(--mono);white-space:nowrap;}
+.cal-head:hover .cal-toggle{color:var(--hdl-red);}
+.cal-summary{margin-top:9px;}
+.cal-sum-ev{padding:0;}
+.cal-sum-date{font-size:12px;color:var(--muted);font-family:var(--mono);font-weight:700;flex:0 0 auto;}
+.cal-sum-date.today{color:var(--hdl-red);}
+.cal-full{margin-top:8px;border-top:1px solid var(--line-soft);padding-top:4px;}
 .cal-day{padding:9px 0;border-top:1px solid var(--line-soft);}
 .cal-day:first-of-type{border-top:none;}
 .cal-day-head{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:5px;font-family:var(--mono);}
@@ -508,30 +517,50 @@ function renderCalendar(data){
   const days=(data&&data.days)||[];
   if(!days.length){wrap.innerHTML='';return;}  // 无数据则不占位
   const today=new Date().toISOString().slice(0,10);
-  let rows='';
+  // 单条事件的内容(圆点+时间+地区+名称)
+  function evInner(e){
+    const imp=e.importance>=3?'imp3':(e.importance===2?'imp2':'imp1');
+    const time=e.hm?'<span class="cal-ev-time">'+esc(e.hm)+'</span>':'';
+    const region=e.region?'<span class="cal-ev-region">'+esc(e.region)+'</span>':'';
+    const name=esc(e.event||e.indicator||'');
+    const nameHTML=e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+name+'</a>':name;
+    return '<span class="cal-dot '+imp+'"></span>'+time+region+'<span class="cal-ev-name">'+nameHTML+'</span>';
+  }
+  // 全部(展开时显示)
+  let fullRows='', total=0;
   for(const d of days){
     const isToday=d.date===today;
-    const evs=(d.events||[]);
-    let evHTML='';
-    if(!evs.length){
-      evHTML='<div class="cal-empty">—</div>';
-    }else{
-      for(const e of evs){
-        const imp=e.importance>=3?'imp3':(e.importance===2?'imp2':'imp1');
-        const time=e.hm?esc(e.hm):'';
-        const region=e.region?'<span class="cal-ev-region">'+esc(e.region)+'</span>':'';
-        const name=esc(e.event||e.indicator||'');
-        const nameHTML=e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+name+'</a>':name;
-        evHTML+='<div class="cal-ev"><span class="cal-dot '+imp+'"></span>'+
-                (time?'<span class="cal-ev-time">'+time+'</span>':'')+
-                region+'<span class="cal-ev-name">'+nameHTML+'</span></div>';
-      }
-    }
-    rows+='<div class="cal-day"><div class="cal-day-head'+(isToday?' today':'')+'">'+
-          esc(d.date)+(d.weekday?' 周'+esc(d.weekday):'')+(isToday?' · 今天':'')+'</div>'+evHTML+'</div>';
+    const evs=(d.events||[]); total+=evs.length;
+    const evHTML=evs.length?evs.map(e=>'<div class="cal-ev">'+evInner(e)+'</div>').join(''):'<div class="cal-empty">—</div>';
+    fullRows+='<div class="cal-day"><div class="cal-day-head'+(isToday?' today':'')+'">'+
+      esc(d.date)+(d.weekday?' 周'+esc(d.weekday):'')+(isToday?' · 今天':'')+'</div>'+evHTML+'</div>';
   }
-  wrap.innerHTML='<div class="cal-card"><div class="dq-group-head">本周关键数据发布</div>'+rows+'</div>';
+  // 最近一条(收起时显示, 带日期前缀)
+  let near=null,nd=null,nwd=null,nToday=false;
+  for(const d of days){ if(d.events&&d.events.length){ near=d.events[0]; nd=d.date; nwd=d.weekday; nToday=(d.date===today); break; } }
+  let summary='';
+  if(near){
+    const dateStr=esc(nd)+(nToday?' 今天':(nwd?' 周'+esc(nwd):''));
+    summary='<div class="cal-ev cal-sum-ev"><span class="cal-sum-date'+(nToday?' today':'')+'">'+dateStr+'</span>'+evInner(near)+'</div>';
+  }
+  const label='展开全部 '+total+' 项 ▾';
+  const toggle=total>1?'<span class="cal-toggle" data-open="'+label+'">'+label+'</span>':'';
+  wrap.innerHTML=
+    '<div class="cal-card">'+
+      '<div class="cal-head" onclick="toggleCal(this)">'+
+        '<span class="cal-head-title">本周关键数据发布</span>'+toggle+
+      '</div>'+
+      '<div class="cal-summary">'+summary+'</div>'+
+      '<div class="cal-full" style="display:none">'+fullRows+'</div>'+
+    '</div>';
 }
+window.toggleCal=function(head){
+  const card=head.closest('.cal-card'); if(!card)return;
+  const full=card.querySelector('.cal-full'), sum=card.querySelector('.cal-summary'), tog=head.querySelector('.cal-toggle');
+  const open=full.style.display!=='none';
+  if(open){ full.style.display='none'; sum.style.display='block'; if(tog)tog.textContent=tog.dataset.open; }
+  else { full.style.display='block'; sum.style.display='none'; if(tog)tog.textContent='收起 ▴'; }
+};
 async function loadCalendar(){
   try{
     const r=await fetch('calendar_week.json',{cache:'no-store'});
