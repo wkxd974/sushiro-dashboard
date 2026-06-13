@@ -1,40 +1,6 @@
 {
-  "generated_at": "2026-06-12T11:31:01",
+  "generated_at": "2026-06-13T18:50:02",
   "days": [
-    {
-      "date": "2026-06-12",
-      "weekday": "五",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "M2",
-          "subtype": "同比",
-          "event": "5月M2货币供应同比",
-          "datetime": "2026-06-12 12:02:00",
-          "hm": "12:02",
-          "importance": 3,
-          "actual": null,
-          "forecast": null,
-          "previous": 8.6,
-          "link": "https://wallstreetcn.com/calendar/CN191442/overview",
-          "date": "2026-06-12"
-        },
-        {
-          "region": "中国",
-          "indicator": "社融",
-          "subtype": "累计",
-          "event": "1至5月社会融资规模增量(亿人民币)",
-          "datetime": "2026-06-12 12:02:00",
-          "hm": "12:02",
-          "importance": 3,
-          "actual": null,
-          "forecast": null,
-          "previous": 154500.0,
-          "link": "https://wallstreetcn.com/calendar/CN131334/overview",
-          "date": "2026-06-12"
-        }
-      ]
-    },
     {
       "date": "2026-06-16",
       "weekday": "二",
