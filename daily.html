@@ -240,6 +240,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-tip2{position:fixed;z-index:9999;pointer-events:none;background:rgba(34,32,29,.96);color:#fff;font-size:11px;
   padding:5px 9px;border-radius:5px;white-space:nowrap;transform:translate(-50%,-130%);display:none;
   font-family:var(--mono);box-shadow:0 2px 10px rgba(0,0,0,.25);}
+.cal-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:18px;}
+.cal-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.cal-head-title{font-weight:700;font-size:14px;padding-left:8px;border-left:3px solid var(--hdl-red);}
+.cal-toggle{font-size:12px;color:var(--muted);font-family:var(--mono);white-space:nowrap;}
+.cal-head:hover .cal-toggle{color:var(--hdl-red);}
+.cal-summary{margin-top:9px;}
+.cal-sum-ev{padding:0;}
+.cal-sum-date{font-size:12px;color:var(--muted);font-family:var(--mono);font-weight:700;flex:0 0 auto;}
+.cal-sum-date.today{color:var(--hdl-red);}
+.cal-full{margin-top:8px;border-top:1px solid var(--line-soft);padding-top:4px;}
+.cal-day{padding:9px 0;border-top:1px solid var(--line-soft);}
+.cal-day:first-of-type{border-top:none;}
+.cal-day-head{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:5px;font-family:var(--mono);}
+.cal-day-head.today{color:var(--hdl-red);}
+.cal-ev{display:flex;align-items:baseline;gap:8px;padding:3px 0;font-size:13px;line-height:1.5;}
+.cal-dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;position:relative;top:5px;}
+.cal-dot.imp3{background:var(--red);}
+.cal-dot.imp2{background:#c79a3a;}
+.cal-dot.imp1{background:var(--muted-2);}
+.cal-ev-time{color:var(--muted);font-family:var(--mono);font-size:12px;flex:0 0 auto;}
+.cal-ev-name{color:var(--ink-2);}
+.cal-ev-name a{color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted-2);}
+.cal-ev-name a:hover{color:var(--hdl-red);border-bottom-color:var(--hdl-red);}
+.cal-ev-region{font-size:11px;color:var(--muted-2);border:1px solid var(--line);border-radius:3px;padding:0 4px;flex:0 0 auto;}
+.cal-empty{color:var(--muted);font-size:13px;padding:4px 0;}
 </style>
 
 
@@ -315,70 +340,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div class="wrap">
   <h1 class="page-title">每日资金面</h1>
   <div class="page-sub">8★ 资金面/汇率/避险/净值监测 · 数据源:AkShare/FRED · 经 Supabase 实时读取</div>
+  <div id="calendar-card"></div>
   <div id="content"><div class="dq-loading">正在加载数据…</div></div>
-  <!-- ============================================================
-     本周财经日历卡 · 注入片段 (2026-06-11)
-     用法: 把整段贴进 daily_src.html 的 <div class="wrap"> 内、
-           #content 之后(即指标卡区域下方)。它独立 fetch calendar_week.json,
-           不走 Supabase/GROUPS, 与指标卡解耦, 不会互相干扰。
-     数据: 同目录的 calendar_week.json(由 macro_calendar_alert.py 每日导出并推送)。
-     ============================================================ -->
-<section id="cal-week" style="margin:28px 0 8px; font-family:inherit;">
-  <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-    <span style="font-size:18px; font-weight:600; color:#2c2c2a;">本周财经日历</span>
-    <span style="font-size:12px; color:#9b9890; margin-left:auto;">未来7天 · 中美关键发布</span>
-  </div>
-  <div id="cal-week-body" style="background:#fff; border:1px solid #e7e4da; border-radius:12px; padding:6px 16px 10px; font-size:13px; color:#2c2c2a;">
-    <div style="color:#9b9890; padding:10px 0;">加载中…</div>
-  </div>
-  <div style="font-size:11px; color:#b4b2a9; margin:6px 2px;">来源 · 华尔街见闻经济日历（每日 08:30 更新）</div>
-</section>
-<script>
-(function(){
-  var box = document.getElementById('cal-week-body');
-  function fmtVal(ind, v){
-    if(v===null || v===undefined || v==='') return '';
-    var f = Number(v);
-    if(isNaN(f)) return String(v);
-    if(ind==='社融') return (f/10000).toFixed(2)+'万亿';
-    return (Math.round(f*100)/100).toString();
-  }
-  function ref(e){
-    if(e.forecast!==null && e.forecast!==undefined) return '预期 '+fmtVal(e.indicator,e.forecast);
-    if(e.previous!==null && e.previous!==undefined) return '前值 '+fmtVal(e.indicator,e.previous);
-    return '';
-  }
-  function tag(region){
-    var us = region==='美国';
-    var bg = us?'#f7efe0':'#e8eff7', fg = us?'#854f0b':'#185fa5', t = us?'美':'中';
-    return '<span style="background:'+bg+';color:'+fg+';font-size:11px;padding:1px 7px;border-radius:7px;">'+t+'</span>';
-  }
-  function esc(s){ return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
-  fetch('./calendar_week.json', {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
-    var days = (j && j.days) || [];
-    if(!days.length){ box.innerHTML='<div style="color:#9b9890;padding:10px 0;">未来7天无关注发布</div>'; return; }
-    var html='';
-    days.forEach(function(d, di){
-      var top = di===0 ? '' : 'border-top:1px solid #efece3;margin-top:4px;';
-      html += '<div style="'+top+'padding-top:'+(di===0?'8':'6')+'px;">';
-      html += '<div style="font-size:13px;font-weight:500;color:#5f5e5a;margin:4px 0 2px;">'+esc(d.date.slice(5))+' 周'+esc(d.weekday)+'</div>';
-      (d.events||[]).forEach(function(e){
-        var st = (e.subtype && e.subtype!=='主条') ? '<span style="color:#b4b2a9;">('+esc(e.subtype)+')</span>' : '';
-        html += '<div style="display:flex;align-items:baseline;gap:10px;padding:5px 0;">'
-              +   '<span style="color:#b4b2a9;min-width:42px;">'+esc(e.hm||'—')+'</span>'
-              +   tag(e.region)
-              +   '<span style="flex:1;">'+esc(e.indicator)+st+'</span>'
-              +   '<span style="color:#5f5e5a;">'+esc(ref(e))+'</span>'
-              + '</div>';
-      });
-      html += '</div>';
-    });
-    box.innerHTML = html;
-  }).catch(function(){
-    box.innerHTML='<div style="color:#9b9890;padding:10px 0;">日历暂不可用（calendar_week.json 未就绪）</div>';
-  });
-})();
-</script>
+
 
 <div id="detail" style="margin-top:8px;"></div>
 </div>
@@ -547,6 +511,65 @@ async function load(){
     }
   }
 }
+// ================= æ¬å¨å³é®åå¸æ¥å (ç¬ç« fetch calendar_week.json) =================
+function renderCalendar(data){
+  const wrap=document.getElementById('calendar-card');
+  if(!wrap)return;
+  const days=(data&&data.days)||[];
+  if(!days.length){wrap.innerHTML='';return;}
+  const today=new Date().toISOString().slice(0,10);
+  function evInner(e){
+    const imp=e.importance>=3?'imp3':(e.importance===2?'imp2':'imp1');
+    const time=e.hm?'<span class="cal-ev-time">'+esc(e.hm)+'</span>':'';
+    const region=e.region?'<span class="cal-ev-region">'+esc(e.region)+'</span>':'';
+    const name=esc(e.event||e.indicator||'');
+    const nameHTML=e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+name+'</a>':name;
+    return '<span class="cal-dot '+imp+'"></span>'+time+region+'<span class="cal-ev-name">'+nameHTML+'</span>';
+  }
+  let fullRows='', total=0;
+  for(const d of days){
+    const isToday=d.date===today;
+    const evs=(d.events||[]); total+=evs.length;
+    const evHTML=evs.length?evs.map(e=>'<div class="cal-ev">'+evInner(e)+'</div>').join(''):'<div class="cal-empty">—</div>';
+    fullRows+='<div class="cal-day"><div class="cal-day-head'+(isToday?' today':'')+'">'+
+      esc(d.date)+(d.weekday?' 周'+esc(d.weekday):'')+(isToday?' · 今天':'')+'</div>'+evHTML+'</div>';
+  }
+  let near=null,nd=null,nwd=null,nToday=false;
+  for(const d of days){ if(d.events&&d.events.length){ near=d.events[0]; nd=d.date; nwd=d.weekday; nToday=(d.date===today); break; } }
+  let summary='';
+  if(near){
+    const dateStr=esc(nd)+(nToday?' 今天':(nwd?' 周'+esc(nwd):''));
+    summary='<div class="cal-ev cal-sum-ev"><span class="cal-sum-date'+(nToday?' today':'')+'">'+dateStr+'</span>'+evInner(near)+'</div>';
+  }
+  const label='展开全部 '+total+' 项 ▾';
+  const toggle=total>1?'<span class="cal-toggle" data-open="'+label+'">'+label+'</span>':'';
+  wrap.innerHTML=
+    '<div class="cal-card">'+
+      '<div class="cal-head" onclick="toggleCal(this)">'+
+        '<span class="cal-head-title">本周关键数据发布</span>'+toggle+
+      '</div>'+
+      '<div class="cal-summary">'+summary+'</div>'+
+      '<div class="cal-full" style="display:none">'+fullRows+'</div>'+
+    '</div>';
+}
+window.toggleCal=function(head){
+  const card=head.closest('.cal-card'); if(!card)return;
+  const full=card.querySelector('.cal-full'), sum=card.querySelector('.cal-summary'), tog=head.querySelector('.cal-toggle');
+  const open=full.style.display!=='none';
+  if(open){ full.style.display='none'; sum.style.display='block'; if(tog)tog.textContent=tog.dataset.open; }
+  else { full.style.display='block'; sum.style.display='none'; if(tog)tog.textContent='收起 ▴'; }
+};
+async function loadCalendar(){
+  try{
+    const r=await fetch('calendar_week.json',{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    renderCalendar(await r.json());
+  }catch(e){
+    const wrap=document.getElementById('calendar-card');
+    if(wrap)wrap.innerHTML='';
+  }
+}
+loadCalendar();
 load();
 </script>
 
