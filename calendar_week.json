@@ -1,42 +1,6 @@
 {
-  "generated_at": "2026-06-16T15:24:26",
+  "generated_at": "2026-06-17T08:30:12",
   "days": [
-    {
-      "date": "2026-06-16",
-      "weekday": "二",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "社零",
-          "subtype": "同比累计",
-          "event": "1至5月社会消费品零售总额同比",
-          "datetime": "2026-06-16 10:00:00",
-          "hm": "10:00",
-          "importance": 2,
-          "actual": 1.4,
-          "forecast": null,
-          "previous": 1.9,
-          "link": "",
-          "date": "2026-06-16",
-          "surprise": ""
-        },
-        {
-          "region": "中国",
-          "indicator": "社零",
-          "subtype": "同比",
-          "event": "5月社会消费品零售总额同比",
-          "datetime": "2026-06-16 10:00:00",
-          "hm": "10:00",
-          "importance": 4,
-          "actual": -0.6,
-          "forecast": null,
-          "previous": 0.2,
-          "link": "",
-          "date": "2026-06-16",
-          "surprise": ""
-        }
-      ]
-    },
     {
       "date": "2026-06-18",
       "weekday": "四",
