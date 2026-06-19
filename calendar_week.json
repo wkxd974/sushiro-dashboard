@@ -1,42 +1,6 @@
 {
-  "generated_at": "2026-06-18T08:30:04",
+  "generated_at": "2026-06-19T08:30:03",
   "days": [
-    {
-      "date": "2026-06-18",
-      "weekday": "四",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "下限",
-          "event": "FOMC利率决策(下限)",
-          "datetime": "2026-06-18 02:00:00",
-          "hm": "02:00",
-          "importance": 4,
-          "actual": 3.5,
-          "forecast": 3.5,
-          "previous": 3.5,
-          "link": "",
-          "date": "2026-06-18",
-          "surprise": "符合预期"
-        },
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "上限",
-          "event": "FOMC利率决策(上限)",
-          "datetime": "2026-06-18 02:00:00",
-          "hm": "02:00",
-          "importance": 4,
-          "actual": 3.75,
-          "forecast": 3.75,
-          "previous": 3.75,
-          "link": "",
-          "date": "2026-06-18",
-          "surprise": "符合预期"
-        }
-      ]
-    },
     {
       "date": "2026-06-22",
       "weekday": "一",
