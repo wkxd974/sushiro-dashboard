@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-23T08:35:30",
+  "generated_at": "2026-06-24T08:30:04",
   "days": [
     {
       "date": "2026-06-30",
@@ -46,6 +46,26 @@
           "previous": 50.0,
           "link": "",
           "date": "2026-06-30"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-01",
+      "weekday": "三",
+      "events": [
+        {
+          "region": "中国",
+          "indicator": "PMI",
+          "subtype": "主条",
+          "event": "6月RatingDog制造业PMI",
+          "datetime": "2026-07-01 09:45:00",
+          "hm": "09:45",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 51.8,
+          "link": "",
+          "date": "2026-07-01"
         }
       ]
     }
