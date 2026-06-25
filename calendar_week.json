@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T08:30:04",
+  "generated_at": "2026-06-25T08:30:03",
   "days": [
     {
       "date": "2026-06-30",
@@ -66,6 +66,26 @@
           "previous": 51.8,
           "link": "",
           "date": "2026-07-01"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-02",
+      "weekday": "四",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "非农",
+          "subtype": "主条",
+          "event": "6月非农就业人口变动(万人)",
+          "datetime": "2026-07-02 20:30:00",
+          "hm": "20:30",
+          "importance": 3,
+          "actual": null,
+          "forecast": 11.8,
+          "previous": 17.2,
+          "link": "",
+          "date": "2026-07-02"
         }
       ]
     }
