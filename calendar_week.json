@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-27T08:30:13",
+  "generated_at": "2026-06-28T08:30:07",
   "days": [
     {
       "date": "2026-06-30",
@@ -40,7 +40,7 @@
           "event": "6月官方制造业PMI",
           "datetime": "2026-06-30 09:30:00",
           "hm": "09:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": null,
           "previous": 50.0,
@@ -80,9 +80,9 @@
           "event": "6月非农就业人口变动(万人)",
           "datetime": "2026-07-02 20:30:00",
           "hm": "20:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
-          "forecast": 11.8,
+          "forecast": 11.5,
           "previous": 17.2,
           "link": "",
           "date": "2026-07-02"
