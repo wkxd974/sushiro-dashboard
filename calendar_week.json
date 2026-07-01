@@ -1,54 +1,6 @@
 {
-  "generated_at": "2026-06-30T08:30:03",
+  "generated_at": "2026-07-01T08:30:13",
   "days": [
-    {
-      "date": "2026-06-30",
-      "weekday": "二",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "6月官方综合PMI",
-          "datetime": "2026-06-30 09:30:00",
-          "hm": "09:30",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": 50.5,
-          "link": "",
-          "date": "2026-06-30"
-        },
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "6月官方非制造业PMI",
-          "datetime": "2026-06-30 09:30:00",
-          "hm": "09:30",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": 50.1,
-          "link": "",
-          "date": "2026-06-30"
-        },
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "6月官方制造业PMI",
-          "datetime": "2026-06-30 09:30:00",
-          "hm": "09:30",
-          "importance": 4,
-          "actual": null,
-          "forecast": null,
-          "previous": 50.0,
-          "link": "",
-          "date": "2026-06-30"
-        }
-      ]
-    },
     {
       "date": "2026-07-01",
       "weekday": "三",
