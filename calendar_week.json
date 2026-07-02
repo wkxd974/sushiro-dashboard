@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-07-01T08:30:13",
+  "generated_at": "2026-07-02T08:30:03",
   "days": [
-    {
-      "date": "2026-07-01",
-      "weekday": "三",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "6月RatingDog制造业PMI",
-          "datetime": "2026-07-01 09:45:00",
-          "hm": "09:45",
-          "importance": 3,
-          "actual": null,
-          "forecast": null,
-          "previous": 51.8,
-          "link": "",
-          "date": "2026-07-01"
-        }
-      ]
-    },
     {
       "date": "2026-07-02",
       "weekday": "四",
@@ -58,6 +38,68 @@
           "previous": 54.0,
           "link": "",
           "date": "2026-07-03"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-09",
+      "weekday": "四",
+      "events": [
+        {
+          "region": "中国",
+          "indicator": "CPI",
+          "subtype": "同比",
+          "event": "6月CPI同比",
+          "datetime": "2026-07-09 09:30:00",
+          "hm": "09:30",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 1.2,
+          "link": "",
+          "date": "2026-07-09"
+        },
+        {
+          "region": "中国",
+          "indicator": "PPI",
+          "subtype": "同比",
+          "event": "6月PPI同比",
+          "datetime": "2026-07-09 09:30:00",
+          "hm": "09:30",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 3.9,
+          "link": "",
+          "date": "2026-07-09"
+        },
+        {
+          "region": "中国",
+          "indicator": "M2",
+          "subtype": "同比",
+          "event": "6月M2货币供应同比",
+          "datetime": "2026-07-09 12:02:00",
+          "hm": "12:02",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 8.6,
+          "link": "",
+          "date": "2026-07-09"
+        },
+        {
+          "region": "中国",
+          "indicator": "社融",
+          "subtype": "累计",
+          "event": "1至6月社会融资规模增量(亿人民币)",
+          "datetime": "2026-07-09 12:02:00",
+          "hm": "12:02",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 174800.0,
+          "link": "",
+          "date": "2026-07-09"
         }
       ]
     }
