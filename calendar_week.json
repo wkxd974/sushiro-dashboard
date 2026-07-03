@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-07-02T08:30:03",
+  "generated_at": "2026-07-03T08:30:09",
   "days": [
-    {
-      "date": "2026-07-02",
-      "weekday": "四",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "非农",
-          "subtype": "主条",
-          "event": "6月非农就业人口变动(万人)",
-          "datetime": "2026-07-02 20:30:00",
-          "hm": "20:30",
-          "importance": 4,
-          "actual": null,
-          "forecast": 11.5,
-          "previous": 17.2,
-          "link": "",
-          "date": "2026-07-02"
-        }
-      ]
-    },
     {
       "date": "2026-07-03",
       "weekday": "五",
@@ -98,6 +78,20 @@
           "actual": null,
           "forecast": null,
           "previous": 174800.0,
+          "link": "",
+          "date": "2026-07-09"
+        },
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "FOMC永久票委、纽约联储主席威廉姆斯发表讲话。",
+          "datetime": "2026-07-09 21:00:00",
+          "hm": "21:00",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
           "link": "",
           "date": "2026-07-09"
         }
