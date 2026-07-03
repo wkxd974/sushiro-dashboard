@@ -490,9 +490,16 @@ async function load(){
     }
     const sb=supabase.createClient(SUPABASE_URL,anonKey);
     // 取近 ~45 天(够画30日走势 + 算环比)
+    // 修复(2026-07-03): Supabase REST 单次最多返 1000 行; 窗口内行数超限时,
+    // 升序取会把「最新日期」截掉(曾导致前端停在 06-29)。改为分页拉全量。
     const since=new Date(Date.now()-60*864e5).toISOString().slice(0,10);
-    const {data,error}=await sb.from('daily_metrics').select('date,key,name,value,source').gte('date',since).order('date',{ascending:true});
-    if(error)throw error;
+    const PAGE=1000;let data=[];
+    for(let page=0;;page++){
+      const {data:chunk,error}=await sb.from('daily_metrics').select('date,key,name,value,source').gte('date',since).order('date',{ascending:true}).range(page*PAGE,(page+1)*PAGE-1);
+      if(error)throw error;
+      data=data.concat(chunk||[]);
+      if(!chunk||chunk.length<PAGE)break;
+    }
     if(!data||!data.length){document.getElementById('content').innerHTML='<div class="dq-err">daily_metrics 暂无数据。请先在本地跑 push_daily_to_supabase.py 推送。</div>';return;}
     // 组织: byKey[key] = {value,date,prev,series:[[date,value]...]}
     const groups={},srcByKey={};
