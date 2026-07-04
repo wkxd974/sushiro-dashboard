@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-07-03T08:30:09",
+  "generated_at": "2026-07-04T08:30:06",
   "days": [
-    {
-      "date": "2026-07-03",
-      "weekday": "五",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "6月RatingDog综合PMI",
-          "datetime": "2026-07-03 09:45:00",
-          "hm": "09:45",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": 54.0,
-          "link": "",
-          "date": "2026-07-03"
-        }
-      ]
-    },
     {
       "date": "2026-07-09",
       "weekday": "四",
@@ -32,7 +12,7 @@
           "event": "6月CPI同比",
           "datetime": "2026-07-09 09:30:00",
           "hm": "09:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": null,
           "previous": 1.2,
@@ -46,7 +26,7 @@
           "event": "6月PPI同比",
           "datetime": "2026-07-09 09:30:00",
           "hm": "09:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": null,
           "previous": 3.9,
@@ -74,7 +54,7 @@
           "event": "1至6月社会融资规模增量(亿人民币)",
           "datetime": "2026-07-09 12:02:00",
           "hm": "12:02",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": null,
           "previous": 174800.0,
