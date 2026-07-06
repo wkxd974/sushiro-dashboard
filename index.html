@@ -2373,14 +2373,20 @@ function renderBExpand(f){
   months.forEach(function(m){matrixHtml+='<th style="text-align:center">'+m+'</th>';});
   matrixHtml+='</tr></thead><tbody>';
   matrixHtml+='<tr style="background:#fff3e0;font-weight:700"><td>总计</td>';
-  months.forEach(function(m){matrixHtml+='<td style="text-align:center">'+monthTotals[m]+'</td>';});
+  months.forEach(function(m,mi){
+    var arrow='';if(mi>0){var prev=monthTotals[months[mi-1]]||0;if(monthTotals[m]>prev)arrow=' <span style="font-size:10px;color:#52c41a">(↑)</span>';else if(monthTotals[m]<prev)arrow=' <span style="font-size:10px;color:#f5222d">(↓)</span>';}
+    matrixHtml+='<td style="text-align:center">'+monthTotals[m]+arrow+'</td>';
+  });
   matrixHtml+='</tr>';
   sortedCities.forEach(function(c){
     matrixHtml+='<tr><td style="font-weight:600">'+c+'</td>';
-    months.forEach(function(m){
+    months.forEach(function(m,mi){
       var v=cm[c+'|'+m];
-      if(v==null||v===undefined){matrixHtml+='<td style="text-align:center;color:#bbb">/</td>';}
-      else{matrixHtml+='<td style="text-align:center;font-weight:'+(v?'600':'400')+'">'+v+'</td>';}
+      if(v==null||v===undefined){matrixHtml+='<td style="text-align:center;color:#bbb">/</td>';return;}
+      // 箭头：仅当上一月也是口径内真实数字时才比较（跳过 / 月份，避免误判）
+      var arrow='';var pv=(mi>0)?cm[c+'|'+months[mi-1]]:undefined;
+      if(pv!=null&&pv!==undefined){if(v>pv)arrow=' <span style="font-size:10px;color:#52c41a">(↑)</span>';else if(v<pv)arrow=' <span style="font-size:10px;color:#f5222d">(↓)</span>';}
+      matrixHtml+='<td style="text-align:center;font-weight:'+(v?'600':'400')+'">'+v+arrow+'</td>';
     });
     matrixHtml+='</tr>';
   });
