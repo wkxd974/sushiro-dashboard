@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-06T08:30:05",
+  "generated_at": "2026-07-07T08:30:13",
   "days": [
     {
       "date": "2026-07-09",
@@ -74,6 +74,68 @@
           "previous": null,
           "link": "",
           "date": "2026-07-09"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-14",
+      "weekday": "二",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "CPI",
+          "subtype": "核心同比",
+          "event": "6月核心CPI同比",
+          "datetime": "2026-07-14 20:30:00",
+          "hm": "20:30",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 2.9,
+          "link": "",
+          "date": "2026-07-14"
+        },
+        {
+          "region": "美国",
+          "indicator": "CPI",
+          "subtype": "同比",
+          "event": "6月CPI同比",
+          "datetime": "2026-07-14 20:30:00",
+          "hm": "20:30",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 4.2,
+          "link": "",
+          "date": "2026-07-14"
+        },
+        {
+          "region": "美国",
+          "indicator": "CPI",
+          "subtype": "核心环比",
+          "event": "6月核心CPI环比",
+          "datetime": "2026-07-14 20:30:00",
+          "hm": "20:30",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": 0.2,
+          "link": "",
+          "date": "2026-07-14"
+        },
+        {
+          "region": "美国",
+          "indicator": "CPI",
+          "subtype": "环比",
+          "event": "6月CPI环比",
+          "datetime": "2026-07-14 20:30:00",
+          "hm": "20:30",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": 0.5,
+          "link": "",
+          "date": "2026-07-14"
         }
       ]
     }
