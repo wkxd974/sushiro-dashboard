@@ -1,82 +1,6 @@
 {
-  "generated_at": "2026-07-09T08:30:07",
+  "generated_at": "2026-07-10T08:30:07",
   "days": [
-    {
-      "date": "2026-07-09",
-      "weekday": "四",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "CPI",
-          "subtype": "同比",
-          "event": "6月CPI同比",
-          "datetime": "2026-07-09 09:30:00",
-          "hm": "09:30",
-          "importance": 4,
-          "actual": null,
-          "forecast": null,
-          "previous": 1.2,
-          "link": "",
-          "date": "2026-07-09"
-        },
-        {
-          "region": "中国",
-          "indicator": "PPI",
-          "subtype": "同比",
-          "event": "6月PPI同比",
-          "datetime": "2026-07-09 09:30:00",
-          "hm": "09:30",
-          "importance": 4,
-          "actual": null,
-          "forecast": null,
-          "previous": 3.9,
-          "link": "",
-          "date": "2026-07-09"
-        },
-        {
-          "region": "中国",
-          "indicator": "M2",
-          "subtype": "同比",
-          "event": "6月M2货币供应同比",
-          "datetime": "2026-07-09 12:02:00",
-          "hm": "12:02",
-          "importance": 3,
-          "actual": null,
-          "forecast": null,
-          "previous": 8.6,
-          "link": "",
-          "date": "2026-07-09"
-        },
-        {
-          "region": "中国",
-          "indicator": "社融",
-          "subtype": "累计",
-          "event": "1至6月社会融资规模增量(亿人民币)",
-          "datetime": "2026-07-09 12:02:00",
-          "hm": "12:02",
-          "importance": 4,
-          "actual": null,
-          "forecast": null,
-          "previous": 174800.0,
-          "link": "",
-          "date": "2026-07-09"
-        },
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "FOMC永久票委、纽约联储主席威廉姆斯发表讲话。",
-          "datetime": "2026-07-09 21:00:00",
-          "hm": "21:00",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-07-09"
-        }
-      ]
-    },
     {
       "date": "2026-07-14",
       "weekday": "二",
@@ -90,7 +14,7 @@
           "hm": "20:30",
           "importance": 3,
           "actual": null,
-          "forecast": null,
+          "forecast": 2.8,
           "previous": 2.9,
           "link": "",
           "date": "2026-07-14"
@@ -104,7 +28,7 @@
           "hm": "20:30",
           "importance": 3,
           "actual": null,
-          "forecast": null,
+          "forecast": 3.8,
           "previous": 4.2,
           "link": "",
           "date": "2026-07-14"
@@ -118,7 +42,7 @@
           "hm": "20:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 0.2,
           "previous": 0.2,
           "link": "",
           "date": "2026-07-14"
@@ -132,7 +56,7 @@
           "hm": "20:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": -0.1,
           "previous": 0.5,
           "link": "",
           "date": "2026-07-14"
