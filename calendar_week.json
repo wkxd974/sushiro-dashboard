@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T08:30:07",
+  "generated_at": "2026-07-11T08:30:03",
   "days": [
     {
       "date": "2026-07-14",
@@ -26,7 +26,7 @@
           "event": "6月CPI同比",
           "datetime": "2026-07-14 20:30:00",
           "hm": "20:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": 3.8,
           "previous": 4.2,
@@ -68,13 +68,27 @@
       "weekday": "三",
       "events": [
         {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2027年FOMC票委、芝加哥联储主席古尔斯比参加一场炉边谈话。",
+          "datetime": "2026-07-15 01:00:00",
+          "hm": "01:00",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-07-15"
+        },
+        {
           "region": "中国",
           "indicator": "社零",
           "subtype": "同比累计",
           "event": "1至6月社会消费品零售总额同比",
           "datetime": "2026-07-15 10:00:00",
           "hm": "10:00",
-          "importance": 3,
+          "importance": 2,
           "actual": null,
           "forecast": null,
           "previous": 1.4,
@@ -88,7 +102,7 @@
           "event": "6月社会消费品零售总额同比",
           "datetime": "2026-07-15 10:00:00",
           "hm": "10:00",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": null,
           "previous": -0.6,
@@ -130,10 +144,24 @@
           "event": "二季度GDP同比",
           "datetime": "2026-07-15 10:00:00",
           "hm": "10:00",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": null,
           "previous": 5.0,
+          "link": "",
+          "date": "2026-07-15"
+        },
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "FOMC永久票委、纽约联储主席威廉姆斯发表讲话。",
+          "datetime": "2026-07-15 20:45:00",
+          "hm": "20:45",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
           "link": "",
           "date": "2026-07-15"
         }
