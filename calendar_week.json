@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T08:30:03",
+  "generated_at": "2026-07-13T08:30:03",
   "days": [
     {
       "date": "2026-07-14",
@@ -164,6 +164,60 @@
           "previous": null,
           "link": "",
           "date": "2026-07-15"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-17",
+      "weekday": "五",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2026年FOMC票委、达拉斯联储主席洛根发表讲话。",
+          "datetime": "2026-07-17 00:30:00",
+          "hm": "00:30",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-07-17"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-20",
+      "weekday": "一",
+      "events": [
+        {
+          "region": "中国",
+          "indicator": "LPR",
+          "subtype": "5年",
+          "event": "7月五年期贷款市场报价利率(LPR)",
+          "datetime": "2026-07-20 09:00:00",
+          "hm": "09:00",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 3.5,
+          "link": "",
+          "date": "2026-07-20"
+        },
+        {
+          "region": "中国",
+          "indicator": "LPR",
+          "subtype": "1年",
+          "event": "7月一年期贷款市场报价利率(LPR)",
+          "datetime": "2026-07-20 09:00:00",
+          "hm": "09:00",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 3.0,
+          "link": "",
+          "date": "2026-07-20"
         }
       ]
     }
