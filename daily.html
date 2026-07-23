@@ -189,7 +189,8 @@
 *{box-sizing:border-box;}
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   background:#f5f2ea;margin:0;padding:24px;color:#22201d;}
-.wrap{max-width:1180px;margin:0 auto;}
+.wrap{max-width:1440px;margin:0 auto;}
+.mobile-topbar,.mobile-nav-mask{display:none;}
 .page-title{margin:0 0 4px;font-size:26px;font-weight:800;}
 .page-sub{color:var(--muted);font-size:13px;margin-bottom:16px;}
 .dq-asof{color:var(--muted);font-size:12px;font-family:var(--mono);margin-bottom:10px;}
@@ -201,21 +202,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-runtime-cache{color:#9a6700;}
 .dq-runtime-cache::before{background:#d6a11d;}
 .dq-runtime-time{font-family:var(--mono);}
-.dq-alert{padding:9px 14px;border-radius:6px;font-size:13px;margin-bottom:16px;font-weight:600;}
+.dq-alert{padding:10px 14px;border-radius:7px;font-size:13px;margin-bottom:16px;font-weight:650;border:1px solid transparent;}
 .dq-alert-ok{background:#e8f3ec;color:#1e8449;}
-.dq-alert-warn{background:#fbe3e0;color:#c0392b;}
+.dq-alert-watch{background:#fff5d9;color:#8a6100;border-color:#ead69a;}
+.dq-alert-danger{background:#fbe3e0;color:#b53227;border-color:#edbbb5;}
+.dq-viewbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;}
+.dq-viewhint{font-size:11px;color:var(--muted);}
+.dq-view-switch{display:inline-flex;padding:3px;background:#ebe6db;border-radius:8px;flex:0 0 auto;}
+.dq-view-btn{appearance:none;border:0;background:transparent;color:var(--muted);padding:7px 13px;border-radius:6px;
+  font-size:12px;font-weight:650;cursor:pointer;}
+.dq-view-btn.active{background:#fff;color:#22201d;box-shadow:0 1px 4px rgba(45,40,34,.12);}
 .dq-loading{padding:40px;text-align:center;color:var(--muted);}
 .dq-err{padding:16px;background:#fbe3e0;color:#c0392b;border-radius:8px;font-size:13px;}
-.dq-group-nav{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 22px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.dq-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 16px;}
+.dq-overview-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-width:0;}
+.dq-overview-label{font-size:11px;color:var(--muted);margin-bottom:5px;}
+.dq-overview-value{font-size:14px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dq-overview-note{font-size:10px;color:var(--muted);margin-top:3px;}
+.dq-group-nav{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 22px;padding:10px 0 16px;
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;background:#f5f2ea;}
 .dq-nav-btn{appearance:none;background:var(--bg-card);color:#292622;border:1px solid #ded7c8;border-radius:999px;padding:10px 17px;font-size:13px;font-weight:600;line-height:1;cursor:pointer;box-shadow:0 1px 0 rgba(34,32,29,.03);transition:border-color .15s,background .15s,transform .15s;}
 .dq-nav-btn:hover{border-color:#9b9487;background:#faf8f3;transform:translateY(-1px);}
+.dq-nav-btn.active{background:#24211e;color:#fff;border-color:#24211e;}
 .dq-nav-btn span{margin-left:5px;font-size:15px;}
 .dq-group{margin-bottom:28px;scroll-margin-top:96px;}
 .dq-group-head{font-weight:700;font-size:14px;margin:0 0 10px;padding-left:8px;border-left:3px solid var(--hdl-red);}
-.dq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
-.dq-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:13px 15px;}
+.dq-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+.dq-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:15px 16px;min-width:0;}
 .dq-card-ph{opacity:0.72;border-style:dashed;}
-.dq-card-title{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;}
+.dq-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px;}
+.dq-card-title{font-size:12px;color:var(--muted);font-weight:650;}
+.dq-card-date{font-family:var(--mono);font-size:10px;color:var(--dq-flat);white-space:nowrap;}
 .dq-main{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;}
 .dq-val{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1;}
 .dq-unit{font-size:12px;color:var(--muted);margin-left:3px;font-weight:400;}
@@ -229,10 +246,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-click-hint{font-size:10px;color:var(--dq-flat);opacity:.7;}
 .dq-stale{font-size:10px;color:var(--dq-flat);font-family:var(--mono);margin-left:6px;font-weight:400;}
 .dq-sub{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px;padding-top:5px;border-top:1px dashed var(--border);}
+.dq-subs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;margin-top:7px;}
+.dq-subs .dq-sub{min-width:0;}
+.dq-subs .dq-sub-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:6px;}
 .dq-sub-v{font-family:var(--mono);}
+.dq-sub-toggle{display:none;width:100%;margin-top:8px;padding:8px;border:0;border-radius:6px;background:#f5f2ea;
+  color:var(--muted);font-size:11px;cursor:pointer;}
 .dq-todo{color:var(--dq-flat);font-style:italic;}
 .dq-ph{font-size:16px;color:var(--dq-flat);padding:8px 0;font-style:italic;}
 .dq-tip{font-size:11px;color:var(--muted);margin-top:9px;padding-top:8px;border-top:1px solid var(--border);line-height:1.5;}
+.dq-why{margin-top:9px;padding-top:8px;border-top:1px solid var(--border);}
+.dq-why summary{cursor:pointer;color:var(--muted);font-size:11px;font-weight:650;list-style:none;user-select:none;}
+.dq-why summary::-webkit-details-marker{display:none;}
+.dq-why summary::after{content:' ▾';}
+.dq-why[open] summary::after{content:' ▴';}
+.dq-why-body{font-size:11px;color:var(--muted);line-height:1.55;margin-top:7px;}
 .dq-metric{cursor:pointer;border-radius:4px;transition:background .12s;}
 .dq-metric:hover{background:rgba(168,32,26,.05);}
 .dq-metric.dq-active{background:rgba(168,32,26,.09);}
@@ -283,6 +311,74 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .cal-ev-name a:hover{color:var(--hdl-red);border-bottom-color:var(--hdl-red);}
 .cal-ev-region{font-size:11px;color:var(--muted-2);border:1px solid var(--line);border-radius:3px;padding:0 4px;flex:0 0 auto;}
 .cal-empty{color:var(--muted);font-size:13px;padding:4px 0;}
+
+@media (min-width:768px) and (max-width:1199px){
+  body{padding:20px;}
+  .app{grid-template-columns:200px minmax(0,1fr)!important;}
+  .sidebar{display:block!important;position:sticky!important;top:0!important;width:200px!important;height:100vh!important;}
+  .app>main{padding:20px!important;min-width:0;}
+  .wrap{max-width:100%;}
+  .dq-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .dq-overview{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .dq-nav-btn{padding:9px 14px;}
+}
+
+@media (max-width:767px){
+  body{padding:0;background:#f5f2ea;}
+  .app{display:block!important;}
+  .app>main{padding:72px 14px 24px!important;min-width:0;}
+  .app>main .wrap,.wrap{max-width:none!important;width:100%;}
+  .mobile-topbar{display:flex;position:fixed;top:0;left:0;right:0;height:56px;z-index:1002;
+    align-items:center;justify-content:space-between;padding:0 14px;background:#1d1a17;color:#fff;
+    box-shadow:0 2px 12px rgba(0,0,0,.2);}
+  .mobile-menu-btn{appearance:none;border:0;background:transparent;color:#fff;font-size:25px;line-height:1;
+    padding:8px;margin-left:-8px;cursor:pointer;}
+  .mobile-top-title{font-size:15px;font-weight:750;}
+  .mobile-top-date{font-family:var(--mono);font-size:10px;color:#aaa49a;}
+  .sidebar{display:block!important;position:fixed!important;inset:0 auto 0 0!important;width:min(82vw,300px)!important;
+    height:100dvh!important;z-index:1004!important;transform:translateX(-105%);transition:transform .22s ease;
+    overflow-y:auto!important;box-shadow:8px 0 30px rgba(0,0,0,.25);}
+  body.mobile-nav-open .sidebar{transform:translateX(0);}
+  .mobile-nav-mask{position:fixed;inset:0;z-index:1003;background:rgba(0,0,0,.46);}
+  body.mobile-nav-open .mobile-nav-mask{display:block;}
+  body.mobile-nav-open{overflow:hidden;}
+  .page-title{font-size:25px;margin-bottom:6px;}
+  .page-sub{font-size:12px;line-height:1.55;margin-bottom:13px;}
+  .dq-runtime{display:grid;grid-template-columns:1fr;gap:6px;padding:11px 12px;}
+  .dq-viewbar{align-items:flex-start;}
+  .dq-viewhint{max-width:180px;line-height:1.4;}
+  .dq-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .dq-overview-card{padding:11px 12px;}
+  .dq-overview-value{font-size:13px;}
+  .dq-group-nav{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+    margin:0 -14px 20px;padding:10px 14px 12px;top:56px;box-shadow:0 3px 8px rgba(40,35,30,.05);}
+  .dq-group-nav::-webkit-scrollbar{display:none;}
+  .dq-nav-btn{flex:0 0 auto;padding:10px 14px;font-size:12px;}
+  .dq-group{margin-bottom:24px;scroll-margin-top:118px;}
+  .dq-group-head{font-size:14px;margin-bottom:9px;}
+  .dq-grid{grid-template-columns:1fr;gap:10px;}
+  .dq-card{padding:15px;border-radius:10px;}
+  .dq-val{font-size:27px;}
+  .dq-main{align-items:center;}
+  .dq-sub-extra{display:none;}
+  .dq-card.show-all-subs .dq-sub-extra{display:flex;}
+  .dq-subs{grid-template-columns:1fr;}
+  .dq-sub-toggle{display:block;}
+  .dq-expand.open{margin-left:-4px;margin-right:-4px;}
+  .dq-exp-chart{height:150px;touch-action:none;}
+  .dq-click-hint{font-size:11px;}
+  .cal-card{padding:13px 14px;}
+  .cal-full{max-height:52vh;overflow-y:auto;}
+  .dq-detail-summary{padding-top:14px;}
+  .dq-detail-body{overflow:visible;}
+  .dq-table,.dq-table tbody,.dq-table tr,.dq-table td{display:block;width:100%;}
+  .dq-table thead{display:none;}
+  .dq-table tr{background:#fff;border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-bottom:9px;}
+  .dq-table td{display:flex;justify-content:space-between;gap:12px;border:0;padding:4px 0;text-align:right!important;}
+  .dq-table td::before{content:attr(data-label);color:var(--muted);font-family:inherit;text-align:left;}
+  .dq-table td:first-child{font-weight:700;font-size:13px;padding-bottom:7px;margin-bottom:3px;border-bottom:1px solid var(--border);}
+  .dq-table td:first-child::before{content:'';}
+}
 </style>
 
 
@@ -354,6 +450,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 </aside>
 <main>
 
+<div class="mobile-topbar">
+  <button class="mobile-menu-btn" type="button" aria-label="打开导航" aria-expanded="false">☰</button>
+  <span class="mobile-top-title">每日资金面</span>
+  <span class="mobile-top-date" id="mobile-top-date">加载中</span>
+</div>
+<div class="mobile-nav-mask" aria-hidden="true"></div>
 <div class="wrap">
   <h1 class="page-title">每日资金面</h1>
   <div class="page-sub">资金价格、债券信用、汇率、海外利率、商品与配置 · 变动值均与上一条有效观测比较 · 经 Supabase 实时读取</div>
@@ -443,18 +545,75 @@ const GROUPS=[
   {title:"权益市场情绪",primary:"eq.csi300",subs:[],tip:"沪深300用于观察境内核心权益资产的风险偏好。"},
   {title:"现金类资产表现",primary:"cash.money_fund_index",subs:[],tip:"中证货币基金指数用于观察货币基金整体表现，不等同于单只产品7日年化收益率。"}]}
 ];
+const CORE_PRIMARY_KEYS=new Set([
+  "rate.interbank_1d","bond.cn_gov_10y","spread.credit_10y","ncd.aaa_issue_1y",
+  "fx.usdcny","fx.dxy","comm.gold_sge","comm.crude_brent","eq.csi300","cash.money_fund_index"
+]);
+let currentDailyView='core';
 
 // ================= 工具 =================
 function meta(k){return METRIC_META[k]||{name:k,unit:"",dec:2};}
 function fmt(v,k){if(v===null||v===undefined)return "—";const d=meta(k).dec;return Number(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});}
 function unit(k){return meta(k).unit;}
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+function deltaSpec(cur,prev,k){
+  if(cur==null||prev==null)return {flat:true,text:'—',raw:null};
+  const raw=cur-prev;
+  if(Math.abs(raw)<1e-12)return {flat:true,text:'→ 0',raw};
+  const rateLike=meta(k).unit==='%'&&(
+    k.startsWith('rate.')||k.startsWith('bond.')||k.startsWith('bill.')||
+    k.startsWith('ncd.')||(k.startsWith('spread.')&&k!=='spread.usdcny_spot_mid')
+  );
+  if(rateLike)return {flat:false,text:Math.abs(raw*100).toFixed(Math.abs(raw*100)>=10?1:2)+'bp',raw};
+  if(k==='fx.usdcny'||k==='fx.usdcny_mid'||k==='spread.usdcny_spot_mid')
+    return {flat:false,text:Math.abs(raw*10000).toFixed(0)+'基点',raw};
+  if(k.startsWith('comm.')||k.startsWith('eq.')||k.startsWith('cash.')||k==='fx.dxy'){
+    const pct=prev===0?0:raw/Math.abs(prev)*100;
+    return {flat:false,text:Math.abs(pct).toFixed(2)+'%',raw};
+  }
+  return {flat:false,text:Math.abs(raw).toFixed(meta(k).dec),raw};
+}
 function deltaHTML(cur,prev,k){
-  if(cur==null||prev==null)return '<span class="dq-delta dq-flat">—</span>';
-  const d=cur-prev,dec=meta(k).dec;
-  if(Math.abs(d)<Math.pow(10,-dec)/2)return '<span class="dq-delta dq-flat">→ 0</span>';
-  const arrow=d>0?'▲':'▼',cls=d>0?'dq-up':'dq-down';
-  return '<span class="dq-delta '+cls+'">'+arrow+' '+Math.abs(d).toFixed(dec)+'</span>';
+  const info=deltaSpec(cur,prev,k);
+  if(info.flat)return '<span class="dq-delta dq-flat">'+info.text+'</span>';
+  const arrow=info.raw>0?'▲':'▼',cls=info.raw>0?'dq-up':'dq-down';
+  return '<span class="dq-delta '+cls+'">'+arrow+' '+info.text+'</span>';
+}
+function latestDelta(byKey,key){
+  const m=byKey[key]; return (!m||m.prev==null)?null:m.value-m.prev;
+}
+function overviewChange(byKey,key,label){
+  const m=byKey[key];if(!m||m.prev==null)return '暂无可比数据';
+  const info=deltaSpec(m.value,m.prev,key);
+  if(info.flat)return label+'较上次持平';
+  return label+'较上次 '+(info.raw>0?'+':'-')+info.text;
+}
+function overviewHTML(byKey){
+  const liq=latestDelta(byKey,'rate.interbank_7d');
+  const bond=latestDelta(byKey,'bond.cn_gov_10y');
+  const fx=latestDelta(byKey,'spread.usdcny_spot_mid');
+  let warnCount=0,warnFirst='';
+  for(const k in ALERT_THRESHOLDS){
+    const m=byKey[k];
+    if(m&&m.prev!=null&&Math.abs(m.value-m.prev)>ALERT_THRESHOLDS[k]){
+      warnCount++;
+      if(!warnFirst){
+        const info=deltaSpec(m.value,m.prev,k);
+        warnFirst=meta(k).name+' '+(info.raw>0?'+':'-')+info.text;
+      }
+    }
+  }
+  const liqText=liq==null?'数据待补':(liq>0.05?'边际偏紧':liq<-0.05?'边际偏松':'总体平稳');
+  const bondText=bond==null?'数据待补':(bond>0.02?'收益率上行':bond<-0.02?'收益率下行':'窄幅波动');
+  const fxText=fx==null?'数据待补':(Math.abs(fx)>0.02?'压力需关注':'压力正常');
+  const item=(label,value,note)=>'<div class="dq-overview-card"><div class="dq-overview-label">'+label+
+    '</div><div class="dq-overview-value">'+value+'</div><div class="dq-overview-note">'+note+'</div></div>';
+  return '<div class="dq-overview">'+
+    item('资金面',liqText,overviewChange(byKey,'rate.interbank_7d','7D拆借'))+
+    item('债券环境',bondText,overviewChange(byKey,'bond.cn_gov_10y','国债10Y'))+
+    item('人民币汇率',fxText,overviewChange(byKey,'spread.usdcny_spot_mid','即期－中间价'))+
+    item('异常提醒',warnCount?warnCount+' 项需关注':'暂无异常',warnFirst||'基于页面阈值')+
+    '</div>';
 }
 function sparkSVG(series,w=120,h=30){
   const pts=series.map(p=>p[1]).filter(v=>v!=null);
@@ -470,22 +629,29 @@ function sparkSVG(series,w=120,h=30){
 // ================= 渲染 =================
 function render(byKey, latest, updatedAt, isCache){
   // 告警条
-  let hits=[];
+  let watchHits=[],dangerHits=[];
   for(const k in ALERT_THRESHOLDS){const m=byKey[k];if(!m||m.prev==null)continue;
-    const d=Math.abs(m.value-m.prev);if(d>ALERT_THRESHOLDS[k])hits.push(meta(k).name+' 日变动 '+d.toFixed(4)+' (阈值 '+ALERT_THRESHOLDS[k]+')');}
-  const alert=hits.length?'<div class="dq-alert dq-alert-warn">⚠ 触发告警:'+esc(hits.join(' · '))+'</div>'
-    :'<div class="dq-alert dq-alert-ok">✓ 今日无指标突破阈值,资金面平稳</div>';
+    const d=Math.abs(m.value-m.prev),label=meta(k).name+' '+deltaSpec(m.value,m.prev,k).text;
+    if(d>ALERT_THRESHOLDS[k]*2)dangerHits.push(label);
+    else if(d>ALERT_THRESHOLDS[k])watchHits.push(label);
+  }
+  let alert='';
+  if(dangerHits.length)alert='<div class="dq-alert dq-alert-danger">● 异常波动：'+esc(dangerHits.join(' · '))+'</div>';
+  else if(watchHits.length)alert='<div class="dq-alert dq-alert-watch">● 关注：'+esc(watchHits.join(' · '))+'</div>';
 
   let nav='<div class="dq-group-nav">';
   for(const g of GROUPS){const label=g.title.includes('·')?g.title.split('·').slice(1).join('·').trim():g.title;
-    nav+='<button class="dq-nav-btn" type="button" onclick="document.getElementById(\'dq-group-'+g.id+'\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">'+esc(label)+' <span aria-hidden="true">↓</span></button>';}
+    nav+='<button class="dq-nav-btn" data-group="'+esc(g.id)+'" type="button" onclick="document.getElementById(\'dq-group-'+g.id+'\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">'+esc(label)+' <span aria-hidden="true">↓</span></button>';}
   nav+='</div>';
   const statusClass=isCache?'dq-runtime-badge dq-runtime-cache':'dq-runtime-badge';
   const statusText=isCache?'API异常，本轮使用最近成功缓存':'万得 EDB API 数据正常';
   const updatedText=updatedAt?new Date(updatedAt).toLocaleString('zh-CN',{hour12:false}):'—';
   const runtime='<div class="dq-runtime"><span class="'+statusClass+'">'+esc(statusText)+'</span>'+
     '<span>质量门禁：已通过</span><span class="dq-runtime-time">最后成功更新：'+esc(updatedText)+'</span></div>';
-  let html=runtime+'<div class="dq-asof">数据截至: '+esc(latest)+'</div>'+alert+nav;
+  const viewbar='<div class="dq-viewbar"><div class="dq-viewhint">核心视图聚焦管理层日常关注的10项信号</div>'+
+    '<div class="dq-view-switch"><button class="dq-view-btn active" data-view="core" type="button">核心视图</button>'+
+    '<button class="dq-view-btn" data-view="all" type="button">全部指标</button></div></div>';
+  let html=runtime+'<div class="dq-asof">数据截至: '+esc(latest)+'</div>'+overviewHTML(byKey)+viewbar+alert+nav;
   for(const g of GROUPS){
     let cards='';
     for(const c of g.cards) cards+=cardHTML(c,byKey,latest);
@@ -495,9 +661,9 @@ function render(byKey, latest, updatedAt, isCache){
   let rows='';
   Object.keys(byKey).sort().forEach(k=>{const m=byKey[k];
     const windCode=WIND_CODE_BY_KEY[k]||'派生计算';
-    rows+='<tr><td>'+esc(meta(k).name)+'</td><td class="dq-mono">'+esc(windCode)+'</td>'+
-      '<td class="num">'+fmt(m.value,k)+unit(k)+'</td><td class="num">'+deltaHTML(m.value,m.prev,k)+'</td>'+
-      '<td>'+esc(m.date)+'</td></tr>';});
+    rows+='<tr><td data-label="指标">'+esc(meta(k).name)+'</td><td data-label="万得代码" class="dq-mono">'+esc(windCode)+'</td>'+
+      '<td data-label="最新值" class="num">'+fmt(m.value,k)+unit(k)+'</td><td data-label="较上次" class="num">'+deltaHTML(m.value,m.prev,k)+'</td>'+
+      '<td data-label="数据日期">'+esc(m.date)+'</td></tr>';});
   const detailHtml='<details class="dq-detail-panel"><summary class="dq-detail-summary">全指标明细</summary>'+
     '<div class="dq-detail-body"><table class="dq-table"><thead><tr><th>指标</th><th>万得指标代码</th>'+
     '<th class="num">最新值</th><th class="num">较上次</th><th>数据日期</th></tr></thead><tbody>'+rows+
@@ -505,6 +671,9 @@ function render(byKey, latest, updatedAt, isCache){
   document.getElementById('content').innerHTML=html;
   const dt=document.getElementById('detail'); if(dt) dt.innerHTML=detailHtml;
   bindExpand();
+  bindResponsiveUI(latest);
+  bindViewSwitch();
+  applyDailyView(currentDailyView);
 }
 function seriesAttr(k,m){return "data-s='"+esc(JSON.stringify(m.series||[]))+"' data-n=\""+esc(meta(k).name)+"\" data-u=\""+esc(unit(k))+"\" data-d=\""+meta(k).dec+"\" data-src=\""+esc(m.source||'')+"\"";}
 function cardHTML(c,byKey,latest){
@@ -514,22 +683,27 @@ function cardHTML(c,byKey,latest){
   const m=byKey[c.primary];
   if(!m)return '<div class="dq-card dq-card-ph"><div class="dq-card-title">'+esc(c.title)+'</div><div class="dq-ph">待补</div><div class="dq-tip">'+tip+'</div></div>';
   const pk=c.primary;
-  let stale='';if(latest&&m.date&&m.date<latest)stale='<span class="dq-stale">@'+esc(m.date.slice(5))+'</span>';
+  const isCore=CORE_PRIMARY_KEYS.has(pk);
+  const dateText=esc(m.date)+(latest&&m.date<latest?' · 较早':'');
   let subs='';
-  for(const sk of (c.subs||[])){const sm=byKey[sk];const sn=esc(meta(sk).name);
+  for(const [subIndex,sk] of (c.subs||[]).entries()){const sm=byKey[sk];const sn=esc(meta(sk).name);
+    const extraClass=subIndex>=2?' dq-sub-extra':'';
     if(sm){let _extra='';
       if(sk==='comm.gold_xau'){const cp=byKey['fx.usdcny_mid'];
         if(cp&&cp.value){const rmbg=sm.value*cp.value/31.1035;
           _extra='<div class="dq-conv">\u2248 '+rmbg.toFixed(2)+' 元/克 · 按中间价('+cp.value.toFixed(4)+')折</div>';}}
-      subs+='<div class="dq-sub dq-metric" '+seriesAttr(sk,sm)+'><span class="dq-sub-n">'+sn+'</span><span class="dq-sub-v">'+fmt(sm.value,sk)+unit(sk)+' '+deltaHTML(sm.value,sm.prev,sk)+'</span></div>'+_extra;}
-    else subs+='<div class="dq-sub"><span class="dq-sub-n">'+sn+'</span><span class="dq-sub-v dq-todo">待补</span></div>';}
-  return '<div class="dq-card"><div class="dq-card-title">'+esc(c.title)+stale+'</div>'+
+      subs+='<div class="dq-sub dq-metric'+extraClass+'" '+seriesAttr(sk,sm)+'><span class="dq-sub-n">'+sn+'</span><span class="dq-sub-v">'+fmt(sm.value,sk)+unit(sk)+' '+deltaHTML(sm.value,sm.prev,sk)+'</span></div>'+_extra;}
+    else subs+='<div class="dq-sub'+extraClass+'"><span class="dq-sub-n">'+sn+'</span><span class="dq-sub-v dq-todo">待补</span></div>';}
+  const subToggle=(c.subs||[]).length>2?'<button class="dq-sub-toggle" type="button">展开其余 '+((c.subs||[]).length-2)+' 项 ▾</button>':'';
+  const source=m.source?'<div class="dq-src">来源 · '+esc(m.source)+'</div>':'';
+  return '<div class="dq-card" data-core="'+(isCore?'1':'0')+'"><div class="dq-card-head"><div class="dq-card-title">'+esc(c.title)+'</div>'+
+    '<div class="dq-card-date">'+dateText+'</div></div>'+
     '<div class="dq-main dq-metric" '+seriesAttr(pk,m)+'><div class="dq-val">'+fmt(m.value,pk)+'<span class="dq-unit">'+unit(pk)+'</span></div>'+
     '<div class="dq-main-right">'+deltaHTML(m.value,m.prev,pk)+sparkSVG(m.series||[])+'</div></div>'+
     '<div class="dq-primary-name">'+esc(meta(pk).name)+' <span class="dq-click-hint">点击看30日</span></div>'+
-    subs+'<div class="dq-expand"><div class="dq-exp-title"></div><div class="dq-exp-body"></div></div>'+
-    (m.source?'<div class="dq-src">来源 · '+esc(m.source)+'</div>':'')+
-    '<div class="dq-tip">'+tip+'</div></div>';
+    '<div class="dq-subs">'+subs+'</div>'+subToggle+
+    '<div class="dq-expand"><div class="dq-exp-title"></div><div class="dq-exp-body"></div>'+source+'</div>'+
+    '<details class="dq-why"><summary>为什么关注</summary><div class="dq-why-body">'+tip+'</div></details></div>';
 }
 
 // ================= 点击展开30日 (复刻 daily_module 逻辑) =================
@@ -550,11 +724,11 @@ function drawChart(body,series,name,uni,dec){
   body.innerHTML=svg;
   const sv=body.querySelector('svg'),hit=body.querySelector('.dq-hit'),cur=body.querySelector('.dq-cur'),dot=body.querySelector('.dq-curdot');
   const tip=document.getElementById('dq-tip2');
-  hit.addEventListener('mousemove',function(ev){const br=sv.getBoundingClientRect();const mx=(ev.clientX-br.left)/br.width*W;
+  hit.addEventListener('pointermove',function(ev){const br=sv.getBoundingClientRect();const mx=(ev.clientX-br.left)/br.width*W;
     let bi=0,bd=1e9;for(let i=0;i<pts.length;i++){const dd=Math.abs(pts[i][0]-mx);if(dd<bd){bd=dd;bi=i;}}
     const p=pts[bi];cur.setAttribute('x1',p[0]);cur.setAttribute('x2',p[0]);cur.style.display='';dot.setAttribute('cx',p[0]);dot.setAttribute('cy',p[1]);dot.style.display='';
     tip.innerHTML='<b>'+series[bi][0]+'</b> · '+name+' '+series[bi][1].toFixed(dec)+uni;tip.style.left=ev.clientX+'px';tip.style.top=(ev.clientY-12)+'px';tip.style.display='block';});
-  hit.addEventListener('mouseleave',function(){cur.style.display='none';dot.style.display='none';tip.style.display='none';});
+  hit.addEventListener('pointerleave',function(){cur.style.display='none';dot.style.display='none';tip.style.display='none';});
 }
 function bindExpand(){
   if(!document.getElementById('dq-tip2')){const t=document.createElement('div');t.id='dq-tip2';t.className='dq-tip2';document.body.appendChild(t);}
@@ -567,6 +741,76 @@ function bindExpand(){
     let series=[];try{series=JSON.parse(el.getAttribute('data-s')||'[]');}catch(e){}
     ttl.textContent=el.dataset.n+' · 近30日';drawChart(body,series,el.dataset.n,el.dataset.u||'',parseInt(el.dataset.d||'2',10));
     exp.classList.add('open');exp.dataset.cur=el.dataset.n;});
+}
+function applyDailyView(view){
+  currentDailyView=view==='all'?'all':'core';
+  document.querySelectorAll('.dq-view-btn').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.view===currentDailyView);
+  });
+  document.querySelectorAll('.dq-group').forEach(group=>{
+    const cards=[...group.querySelectorAll('.dq-card')];
+    cards.forEach(card=>{
+      card.style.display=currentDailyView==='all'||card.dataset.core==='1'?'':'none';
+    });
+    const visible=cards.some(card=>card.style.display!=='none');
+    group.style.display=visible?'':'none';
+    const id=group.id.replace('dq-group-','');
+    const navBtn=document.querySelector('.dq-nav-btn[data-group="'+id+'"]');
+    if(navBtn)navBtn.style.display=visible?'':'none';
+  });
+}
+function bindViewSwitch(){
+  document.querySelectorAll('.dq-view-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>applyDailyView(btn.dataset.view));
+  });
+}
+function bindResponsiveUI(latest){
+  const mobileDate=document.getElementById('mobile-top-date');
+  if(mobileDate)mobileDate.textContent=latest||'—';
+
+  document.querySelectorAll('.dq-sub-toggle').forEach(btn=>{
+    btn.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      const card=btn.closest('.dq-card');
+      const open=card.classList.toggle('show-all-subs');
+      btn.textContent=open?'收起附属指标 ▴':'展开其余 '+card.querySelectorAll('.dq-sub-extra').length+' 项 ▾';
+    });
+  });
+
+  const buttons=[...document.querySelectorAll('.dq-nav-btn')];
+  const sections=[...document.querySelectorAll('.dq-group')];
+  if('IntersectionObserver' in window&&buttons.length&&sections.length){
+    const observer=new IntersectionObserver(entries=>{
+      const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top)[0];
+      if(!visible)return;
+      const id=visible.target.id.replace('dq-group-','');
+      buttons.forEach(btn=>btn.classList.toggle('active',btn.dataset.group===id));
+      const active=buttons.find(btn=>btn.dataset.group===id);
+      if(active&&window.innerWidth<768){
+        const rail=active.parentElement;
+        rail.scrollTo({left:active.offsetLeft-(rail.clientWidth-active.offsetWidth)/2,behavior:'smooth'});
+      }
+    },{rootMargin:'-120px 0px -65% 0px',threshold:0});
+    sections.forEach(section=>observer.observe(section));
+  }
+}
+
+function setupMobileNav(){
+  const btn=document.querySelector('.mobile-menu-btn');
+  const mask=document.querySelector('.mobile-nav-mask');
+  const close=()=>{
+    document.body.classList.remove('mobile-nav-open');
+    if(btn)btn.setAttribute('aria-expanded','false');
+  };
+  if(btn)btn.addEventListener('click',()=>{
+    const open=document.body.classList.toggle('mobile-nav-open');
+    btn.setAttribute('aria-expanded',String(open));
+  });
+  if(mask)mask.addEventListener('click',close);
+  document.addEventListener('click',ev=>{
+    if(ev.target.closest('.sidebar .sb-item'))close();
+  });
+  window.addEventListener('resize',()=>{if(window.innerWidth>=768)close();});
 }
 
 // ================= 取数: anon key fetch daily_metrics =================
@@ -684,6 +928,7 @@ async function loadCalendar(){
   }
 }
 loadCalendar();
+setupMobileNav();
 load();
 </script>
 
