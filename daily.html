@@ -272,6 +272,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-exp-empty{font-size:12px;color:var(--dq-flat);font-style:italic;padding:18px 0;text-align:center;}
 .dq-ax{font-family:var(--mono);font-size:7px;fill:var(--dq-flat);}
 .dq-spark{display:block;}
+.dq-compare-toggle{width:100%;margin-top:9px;padding:8px 10px;border:1px solid #ded7c8;border-radius:7px;
+  background:#faf8f3;color:#393631;font-size:11px;font-weight:650;cursor:pointer;text-align:left;}
+.dq-compare-toggle::after{content:'展开 ▾';float:right;color:var(--muted);font-weight:500;}
+.dq-compare-toggle.open::after{content:'收起 ▴';}
+.dq-compare{display:none;margin-top:8px;padding:10px;background:#f8f5ef;border:1px solid var(--border);border-radius:8px;}
+.dq-compare.open{display:block;}
+.dq-compare-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;}
+.dq-compare-label{font-size:10px;color:var(--muted);}
+.dq-compare-series{display:flex;flex-wrap:wrap;gap:5px;}
+.dq-series-btn{appearance:none;border:1px solid #d8d1c4;border-radius:999px;background:#fff;color:var(--muted);
+  padding:4px 9px;font:600 10px/1.2 var(--sans);cursor:pointer;}
+.dq-series-btn.active{color:#fff;border-color:var(--series-color);background:var(--series-color);}
+.dq-compare-chart{width:100%;height:142px;display:block;}
+.dq-compare-note{font-size:10px;color:var(--dq-flat);margin-top:3px;}
 .dq-section-title{font-weight:700;font-size:13px;margin:26px 0 8px;}
 .dq-detail-panel{margin-top:26px;border-top:1px solid var(--border);}
 .dq-detail-summary{display:flex;align-items:center;justify-content:space-between;padding:16px 2px 12px;cursor:pointer;font-weight:700;font-size:13px;list-style:none;user-select:none;}
@@ -527,20 +541,40 @@ Object.assign(ALERT_THRESHOLDS,{
 });
 const GROUPS=[
  {id:"liquidity",title:"1 · 境内资金面与融资成本",cards:[
-  {title:"银行间资金价格",primary:"rate.interbank_1d",subs:["rate.interbank_7d","rate.shibor_on","rate.shibor_1w"],tip:"观察银行间1天、7天拆借加权利率与SHIBOR；利率跳升通常意味着资金边际收紧。"},
-  {title:"票据融资成本 · 直贴/转贴",primary:"bill.direct_6m_national",subs:["bill.rediscount_6m_national","bill.rediscount_6m_city","spread.bill_direct_rediscount","rate.pboc_rediscount"],tip:"6M国股直贴最接近企业票据融资成本；转贴反映银行间票据价格，再贴现率为政策锚。"}]},
+  {title:"银行间资金价格",primary:"rate.interbank_1d",subs:["rate.interbank_7d","rate.shibor_on","rate.shibor_1w"],
+   compare:{title:"30日资金利率对比",keys:["rate.interbank_1d","rate.interbank_7d","rate.shibor_on","rate.shibor_1w"]},
+   tip:"观察银行间1天、7天拆借加权利率与SHIBOR；利率跳升通常意味着资金边际收紧。"},
+  {title:"票据融资成本 · 直贴/转贴",primary:"bill.direct_6m_national",subs:["bill.rediscount_6m_national","bill.rediscount_6m_city","spread.bill_direct_rediscount","rate.pboc_rediscount"],
+   compare:{title:"30日票据利率对比",keys:["bill.direct_6m_national","bill.rediscount_6m_national","bill.rediscount_6m_city","rate.pboc_rediscount"]},
+   tip:"6M国股直贴最接近企业票据融资成本；转贴反映银行间票据价格，再贴现率为政策锚。"}]},
  {id:"cn_bond",title:"2 · 境内债券与信用环境",cards:[
-  {title:"国债收益率曲线",primary:"bond.cn_gov_10y",subs:["bond.cn_gov_1y","bond.cn_gov_2y","bond.cn_gov_3y"],tip:"长端快速下行代表债牛和增长预期走弱；快速上行需警惕固收净值回撤。"},
-  {title:"信用债与信用利差",primary:"spread.credit_10y",subs:["bond.mtn_aaa_issue_1y","bond.mtn_aaa_issue_5y","bond.mtn_aaa_issue_10y"],tip:"信用利差走阔代表风险补偿上升；AAA中短票发行利率反映不同期限信用融资成本。"},
-  {title:"银行融资成本",primary:"ncd.aaa_issue_1y",subs:["ncd.aaa_issue_3m","ncd.aaa_issue_6m"],tip:"AAA同业存单发行利率直接反映银行短中期融资成本，替代原银行普通债近似指标。"}]},
+  {title:"国债收益率曲线",primary:"bond.cn_gov_10y",subs:["bond.cn_gov_1y","bond.cn_gov_2y","bond.cn_gov_3y"],
+   compare:{title:"30日国债期限对比",keys:["bond.cn_gov_1y","bond.cn_gov_2y","bond.cn_gov_3y","bond.cn_gov_10y"]},
+   tip:"长端快速下行代表债牛和增长预期走弱；快速上行需警惕固收净值回撤。"},
+  {title:"信用债与信用利差",primary:"spread.credit_10y",subs:["bond.mtn_aaa_issue_1y","bond.mtn_aaa_issue_5y","bond.mtn_aaa_issue_10y"],
+   compare:{title:"30日信用融资对比",keys:["spread.credit_10y","bond.mtn_aaa_issue_1y","bond.mtn_aaa_issue_5y","bond.mtn_aaa_issue_10y"]},
+   tip:"信用利差走阔代表风险补偿上升；AAA中短票发行利率反映不同期限信用融资成本。"},
+  {title:"银行融资成本",primary:"ncd.aaa_issue_1y",subs:["ncd.aaa_issue_3m","ncd.aaa_issue_6m"],
+   compare:{title:"30日同业存单对比",keys:["ncd.aaa_issue_3m","ncd.aaa_issue_6m","ncd.aaa_issue_1y"]},
+   tip:"AAA同业存单发行利率直接反映银行短中期融资成本，替代原银行普通债近似指标。"}]},
  {id:"fx",title:"3 · 人民币汇率与跨境压力",cards:[
-  {title:"人民币即期与中间价",primary:"fx.usdcny",subs:["fx.usdcny_mid","spread.usdcny_spot_mid"],tip:"即期汇率相对中间价的偏离用于观察境内人民币市场压力；两项均来自万得EDB。"},
-  {title:"人民币外部压力",primary:"fx.dxy",subs:["spread.cn_us_10y"],tip:"美元走强或中美利差扩大，通常增加人民币贬值和跨境资金压力。"}]},
+  {title:"人民币即期与中间价",primary:"fx.usdcny",subs:["fx.usdcny_mid","spread.usdcny_spot_mid"],
+   compare:{title:"30日人民币汇率对比",keys:["fx.usdcny","fx.usdcny_mid"]},
+   tip:"即期汇率相对中间价的偏离用于观察境内人民币市场压力；两项均来自万得EDB。"},
+  {title:"人民币外部压力",primary:"fx.dxy",subs:["spread.cn_us_10y"],
+   compare:{title:"30日外部压力对比",keys:["fx.dxy","spread.cn_us_10y"],mode:"index"},
+   tip:"美元走强或中美利差扩大，通常增加人民币贬值和跨境资金压力。"}]},
  {id:"global_rates",title:"4 · 海外利率与美元流动性",cards:[
-  {title:"美国利率环境",primary:"bond.us_10y",subs:["bond.us_3y","rate.effr","spread.us_10y_3y","spread.us_3y_effr"],tip:"10Y-3Y观察期限结构，3Y-EFFR观察市场对未来政策利率的定价。"}]},
+  {title:"美国利率环境",primary:"bond.us_10y",subs:["bond.us_3y","rate.effr","spread.us_10y_3y","spread.us_3y_effr"],
+   compare:{title:"30日美国利率对比",keys:["bond.us_10y","bond.us_3y","rate.effr","spread.us_10y_3y","spread.us_3y_effr"]},
+   tip:"10Y-3Y观察期限结构，3Y-EFFR观察市场对未来政策利率的定价。"}]},
  {id:"commodities",title:"5 · 大宗商品与避险信号",cards:[
-  {title:"黄金与避险",primary:"comm.gold_sge",subs:["comm.gold_xau"],tip:"黄金走强通常反映避险需求、实际利率变化或去美元配置需求。"},
-  {title:"原油与通胀",primary:"comm.crude_brent",subs:["comm.crude_wti"],tip:"Brent与WTI共同反映国际能源价格和输入性通胀压力。"}]},
+  {title:"黄金与避险",primary:"comm.gold_sge",subs:["comm.gold_xau"],
+   compare:{title:"30日黄金走势对比",keys:["comm.gold_sge","comm.gold_xau"],mode:"index"},
+   tip:"黄金走强通常反映避险需求、实际利率变化或去美元配置需求。"},
+  {title:"原油与通胀",primary:"comm.crude_brent",subs:["comm.crude_wti"],
+   compare:{title:"30日国际油价对比",keys:["comm.crude_brent","comm.crude_wti"]},
+   tip:"Brent与WTI共同反映国际能源价格和输入性通胀压力。"}]},
  {id:"allocation",title:"6 · 权益情绪与现金管理",cards:[
   {title:"权益市场情绪",primary:"eq.csi300",subs:[],tip:"沪深300用于观察境内核心权益资产的风险偏好。"},
   {title:"现金类资产表现",primary:"cash.money_fund_index",subs:[],tip:"中证货币基金指数用于观察货币基金整体表现，不等同于单只产品7日年化收益率。"}]}
@@ -676,6 +710,28 @@ function render(byKey, latest, updatedAt, isCache){
   applyDailyView(currentDailyView);
 }
 function seriesAttr(k,m){return "data-s='"+esc(JSON.stringify(m.series||[]))+"' data-n=\""+esc(meta(k).name)+"\" data-u=\""+esc(unit(k))+"\" data-d=\""+meta(k).dec+"\" data-src=\""+esc(m.source||'')+"\"";}
+function compareHTML(c,byKey){
+  if(!c.compare||!c.compare.keys||c.compare.keys.length<2)return '';
+  const keys=c.compare.keys;
+  const colors=['#557a95','#b6813d','#568b62','#a8201a','#755c91','#3e8b8b'];
+  let buttons='',payload={};
+  keys.forEach((k,i)=>{
+    const m=byKey[k];if(!m)return;
+    payload[k]={name:meta(k).name,unit:unit(k),dec:meta(k).dec,series:m.series||[],color:colors[i],primary:k===c.primary};
+    const shortName=meta(k).name
+      .replace('银行间拆借加权','拆借').replace('AAA中短票发行','')
+      .replace('AAA同业存单发行','').replace('中短票AAA ','')
+      .replace('国债','').replace('美元指数','').replace('伦敦金现货','伦敦金');
+    buttons+='<button type="button" class="dq-series-btn'+(k===c.primary?' active':'')+
+      '" data-key="'+esc(k)+'" style="--series-color:'+colors[i%colors.length]+'">'+esc(shortName)+'</button>';
+  });
+  return '<button type="button" class="dq-compare-toggle">'+esc(c.compare.title||'30日指标对比')+'</button>'+
+    '<div class="dq-compare" data-mode="'+esc(c.compare.mode||'raw')+'" data-series=\''+esc(JSON.stringify(payload))+'\'>'+
+    '<div class="dq-compare-head"><span class="dq-compare-label">选择指标（可多选）</span><div class="dq-compare-series">'+buttons+'</div></div>'+
+    '<div class="dq-compare-body"></div><div class="dq-compare-note">'+
+    (c.compare.mode==='index'?'不同单位按首个共同交易日=100标准化；':'默认显示主指标；')+
+    '点击其他指标加入或移出对比</div></div>';
+}
 function cardHTML(c,byKey,latest){
   const tip=esc(c.tip);
   if(!c.primary){const ph=esc(c.placeholder||'待接入');
@@ -701,7 +757,7 @@ function cardHTML(c,byKey,latest){
     '<div class="dq-main dq-metric" '+seriesAttr(pk,m)+'><div class="dq-val">'+fmt(m.value,pk)+'<span class="dq-unit">'+unit(pk)+'</span></div>'+
     '<div class="dq-main-right">'+deltaHTML(m.value,m.prev,pk)+sparkSVG(m.series||[])+'</div></div>'+
     '<div class="dq-primary-name">'+esc(meta(pk).name)+' <span class="dq-click-hint">点击看30日</span></div>'+
-    '<div class="dq-subs">'+subs+'</div>'+subToggle+
+    '<div class="dq-subs">'+subs+'</div>'+subToggle+compareHTML(c,byKey)+
     '<div class="dq-expand"><div class="dq-exp-title"></div><div class="dq-exp-body"></div>'+source+'</div>'+
     '<details class="dq-why"><summary>为什么关注</summary><div class="dq-why-body">'+tip+'</div></details></div>';
 }
@@ -730,6 +786,49 @@ function drawChart(body,series,name,uni,dec){
     tip.innerHTML='<b>'+series[bi][0]+'</b> · '+name+' '+series[bi][1].toFixed(dec)+uni;tip.style.left=ev.clientX+'px';tip.style.top=(ev.clientY-12)+'px';tip.style.display='block';});
   hit.addEventListener('pointerleave',function(){cur.style.display='none';dot.style.display='none';tip.style.display='none';});
 }
+function drawMultiChart(body,payload,selected,mode='raw'){
+  const lines=selected.map(k=>({key:k,...payload[k]})).filter(x=>x&&x.series&&x.series.length>1);
+  if(!lines.length){body.innerHTML='<div class="dq-exp-empty">请至少选择一个指标</div>';return;}
+  const commonDates=lines.map(x=>new Set(x.series.map(p=>p[0]))).reduce((a,b)=>new Set([...a].filter(d=>b.has(d))));
+  if(mode==='index'){
+    const baseDate=[...commonDates].sort()[0];
+    if(!baseDate){body.innerHTML='<div class="dq-exp-empty">所选指标暂无共同交易日</div>';return;}
+    lines.forEach(x=>{const base=x.series.find(p=>p[0]===baseDate);const bv=base?Number(base[1]):null;
+      x.plotSeries=x.series.map(p=>[p[0],bv?Number(p[1])/bv*100:null]);});
+  }else lines.forEach(x=>x.plotSeries=x.series);
+  const dateSet=new Set();lines.forEach(x=>x.plotSeries.forEach(p=>dateSet.add(p[0])));
+  const dates=[...dateSet].sort(),dateIndex=new Map(dates.map((d,i)=>[d,i]));
+  const vals=[];lines.forEach(x=>x.plotSeries.forEach(p=>{if(p[1]!=null)vals.push(Number(p[1]));}));
+  if(dates.length<2||!vals.length){body.innerHTML='<div class="dq-exp-empty">数据不足以绘制指标对比</div>';return;}
+  const W=320,H=145,x0=10,x1=312,y0=18,y1=108,lo=Math.min(...vals),hi=Math.max(...vals),rng=(hi-lo)||1;
+  const xFor=d=>x0+dateIndex.get(d)*(x1-x0)/(dates.length-1),yFor=v=>y1-(v-lo)/rng*(y1-y0);
+  let paths='',dots='';
+  lines.forEach(x=>{
+    const pts=x.plotSeries.filter(p=>dateIndex.has(p[0])&&p[1]!=null).map(p=>[xFor(p[0]),yFor(Number(p[1]))]);
+    paths+='<polyline fill="none" stroke="'+x.color+'" stroke-width="'+(x.primary?'2.2':'1.5')+
+      '" points="'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'"/>';
+    const last=pts[pts.length-1];if(last)dots+='<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="2.4" fill="'+x.color+'"/>';
+  });
+  const d0=dates[0].slice(5),dN=dates[dates.length-1].slice(5);
+  const axisUnit=mode==='index'?'':(new Set(lines.map(x=>x.unit)).size===1?lines[0].unit:'');
+  body.innerHTML='<svg class="dq-compare-chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
+    '<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y0+'" stroke="#e5dfd4"/>'+
+    '<line x1="'+x0+'" y1="'+y1+'" x2="'+x1+'" y2="'+y1+'" stroke="#e5dfd4"/>'+
+    '<text x="'+x0+'" y="11" class="dq-ax">'+hi.toFixed(mode==='index'?1:Math.max(...lines.map(x=>x.dec)))+axisUnit+'</text>'+
+    '<text x="'+x0+'" y="'+(H-5)+'" class="dq-ax">'+d0+'</text><text x="'+x1+'" y="'+(H-5)+'" class="dq-ax" text-anchor="end">'+dN+'</text>'+
+    paths+dots+
+    '<line class="dq-cur" x1="0" y1="'+y0+'" x2="0" y2="'+y1+'" stroke="#aaa49a" stroke-width="1" stroke-dasharray="3,3" style="display:none"/>'+
+    '<rect class="dq-hit" x="'+x0+'" y="'+y0+'" width="'+(x1-x0)+'" height="'+(y1-y0)+'" fill="transparent" style="cursor:crosshair"/></svg>';
+  const svg=body.querySelector('svg'),hit=body.querySelector('.dq-hit'),cur=body.querySelector('.dq-cur'),tip=document.getElementById('dq-tip2');
+  const show=function(ev){const br=svg.getBoundingClientRect(),mx=(ev.clientX-br.left)/br.width*W;
+    const idx=Math.max(0,Math.min(dates.length-1,Math.round((mx-x0)/(x1-x0)*(dates.length-1)))),date=dates[idx],x=xFor(date);
+    cur.setAttribute('x1',x);cur.setAttribute('x2',x);cur.style.display='';
+    const parts=lines.map(s=>{const p=s.series.find(v=>v[0]===date);return p?'<span style="color:'+s.color+'">●</span> '+esc(s.name)+' '+Number(p[1]).toFixed(s.dec)+s.unit:'';}).filter(Boolean);
+    tip.innerHTML='<b>'+date+'</b><br>'+parts.join('<br>');tip.style.left=ev.clientX+'px';tip.style.top=(ev.clientY-12)+'px';tip.style.display='block';};
+  hit.addEventListener('pointermove',show);
+  hit.addEventListener('pointerdown',show);
+  hit.addEventListener('pointerleave',()=>{cur.style.display='none';tip.style.display='none';});
+}
 function bindExpand(){
   if(!document.getElementById('dq-tip2')){const t=document.createElement('div');t.id='dq-tip2';t.className='dq-tip2';document.body.appendChild(t);}
   document.getElementById('content').addEventListener('click',function(ev){
@@ -741,6 +840,25 @@ function bindExpand(){
     let series=[];try{series=JSON.parse(el.getAttribute('data-s')||'[]');}catch(e){}
     ttl.textContent=el.dataset.n+' · 近30日';drawChart(body,series,el.dataset.n,el.dataset.u||'',parseInt(el.dataset.d||'2',10));
     exp.classList.add('open');exp.dataset.cur=el.dataset.n;});
+  document.querySelectorAll('.dq-compare-toggle').forEach(toggle=>{
+    toggle.addEventListener('click',function(){
+      const panel=this.nextElementSibling;panel.classList.toggle('open');this.classList.toggle('open',panel.classList.contains('open'));
+      if(panel.classList.contains('open')){
+        let payload={};try{payload=JSON.parse(panel.getAttribute('data-series')||'{}');}catch(e){}
+        const selected=[...panel.querySelectorAll('.dq-series-btn.active')].map(x=>x.dataset.key);
+        drawMultiChart(panel.querySelector('.dq-compare-body'),payload,selected,panel.dataset.mode||'raw');
+      }
+    });
+  });
+  document.querySelectorAll('.dq-series-btn').forEach(btn=>{
+    btn.addEventListener('click',function(ev){
+      ev.stopPropagation();const panel=this.closest('.dq-compare'),active=panel.querySelectorAll('.dq-series-btn.active');
+      if(this.classList.contains('active')&&active.length===1)return;
+      this.classList.toggle('active');
+      let payload={};try{payload=JSON.parse(panel.getAttribute('data-series')||'{}');}catch(e){}
+      drawMultiChart(panel.querySelector('.dq-compare-body'),payload,[...panel.querySelectorAll('.dq-series-btn.active')].map(x=>x.dataset.key),panel.dataset.mode||'raw');
+    });
+  });
 }
 function applyDailyView(view){
   currentDailyView=view==='all'?'all':'core';
