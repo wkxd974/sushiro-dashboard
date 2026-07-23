@@ -281,6 +281,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-compare-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;}
 .dq-compare-label{font-size:10px;color:var(--muted);}
 .dq-compare-series{display:flex;flex-wrap:wrap;gap:5px;}
+.dq-range-switch{display:flex;gap:4px;margin:0 0 8px;}
+.dq-range-btn{appearance:none;border:1px solid #d8d1c4;border-radius:5px;background:#fff;color:var(--muted);
+  padding:5px 10px;font:600 10px/1.2 var(--sans);cursor:pointer;}
+.dq-range-btn.active{background:#24211e;border-color:#24211e;color:#fff;}
 .dq-series-btn{appearance:none;border:1px solid #d8d1c4;border-radius:999px;background:#fff;color:var(--muted);
   padding:4px 9px;font:600 10px/1.2 var(--sans);cursor:pointer;}
 .dq-series-btn.active{color:#fff;border-color:var(--series-color);background:var(--series-color);}
@@ -487,6 +491,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 const SUPABASE_URL = "https://fdjbromuixfgkedrdtuu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkamJyb211aXhmZ2tlZHJkdHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTM4NzQsImV4cCI6MjA5NjU2OTg3NH0.2tVSxUOdpiRO6F_GtyiAybJG5gqMU73b2CSm-Ow4hZs";   // ← 把 __ANON_KEY__ 整体替换成你的 anon key
 const SPARK_DAYS = 30;
+const HISTORY_CALENDAR_DAYS = 400;
 
 // ================= 配置(由 daily_module.py 导出, 与看板内嵌版一致) =================
 const METRIC_META = {"rate.DR007": {"name": "DR007", "unit": "%", "dec": 2}, "rate.R007": {"name": "R007", "unit": "%", "dec": 2}, "rate.shibor_on": {"name": "SHIBOR隔夜", "unit": "%", "dec": 2}, "rate.shibor_1w": {"name": "SHIBOR1周", "unit": "%", "dec": 2}, "bond.cn_10y": {"name": "中国国债10Y", "unit": "%", "dec": 4}, "bond.cn_2y": {"name": "中国国债2Y", "unit": "%", "dec": 4}, "bond.cn_gov_1y": {"name": "国债1Y", "unit": "%", "dec": 4}, "bond.cn_gov_3y": {"name": "国债3Y", "unit": "%", "dec": 4}, "bond.cn_gov_10y": {"name": "国债10Y", "unit": "%", "dec": 4}, "bond.credit_aaa_1y": {"name": "中短票AAA 1Y", "unit": "%", "dec": 4}, "bond.credit_aaa_3y": {"name": "中短票AAA 3Y", "unit": "%", "dec": 4}, "bond.credit_aaa_10y": {"name": "中短票AAA 10Y", "unit": "%", "dec": 4}, "bond.bank_aaa_1y": {"name": "银行普通债AAA 1Y", "unit": "%", "dec": 4}, "bond.bank_aaa_3y": {"name": "银行普通债AAA 3Y", "unit": "%", "dec": 4}, "bond.bank_aaa_10y": {"name": "银行普通债AAA 10Y", "unit": "%", "dec": 4}, "bond.us_10y": {"name": "美债10Y", "unit": "%", "dec": 2}, "bond.us_2y": {"name": "美债2Y", "unit": "%", "dec": 2}, "rate.effr": {"name": "EFFR", "unit": "%", "dec": 2}, "fx.usdcny": {"name": "在岸USD/CNY", "unit": "", "dec": 4}, "fx.usdcnh": {"name": "离岸USD/CNH", "unit": "", "dec": 4}, "fx.dxy": {"name": "美元指数DXY", "unit": "", "dec": 2}, "comm.gold_sge": {"name": "上金所Au99.99", "unit": "元/克", "dec": 2}, "comm.gold_xau": {"name": "伦敦金现货(XAU)", "unit": "美元/盎司", "dec": 2}, "comm.crude_brent": {"name": "布伦特原油(Brent)", "unit": "美元/桶", "dec": 2}, "comm.crude_wti": {"name": "WTI原油(NYMEX)", "unit": "美元/桶", "dec": 2}, "eq.csi300": {"name": "沪深300", "unit": "", "dec": 1}, "spread.cn_us_10y": {"name": "中美10Y利差", "unit": "%", "dec": 4}, "spread.credit_10y": {"name": "信用利差10Y", "unit": "%", "dec": 4}, "fx.cnh_cny_spread": {"name": "CNH-CNY价差", "unit": "", "dec": 4}};
@@ -650,7 +655,7 @@ function overviewHTML(byKey){
     '</div>';
 }
 function sparkSVG(series,w=120,h=30){
-  const pts=series.map(p=>p[1]).filter(v=>v!=null);
+  const pts=series.slice(-SPARK_DAYS).map(p=>p[1]).filter(v=>v!=null);
   if(pts.length<2)return '<svg class="dq-spark" width="'+w+'" height="'+h+'"></svg>';
   const lo=Math.min(...pts),hi=Math.max(...pts),rng=(hi-lo)||1,n=pts.length,co=[];
   for(let i=0;i<n;i++){const x=(i*(w-4)/(n-1)+2).toFixed(1);const y=(h-3-(pts[i]-lo)/rng*(h-6)).toFixed(1);co.push(x+','+y);}
@@ -725,8 +730,13 @@ function compareHTML(c,byKey){
     buttons+='<button type="button" class="dq-series-btn'+(k===c.primary?' active':'')+
       '" data-key="'+esc(k)+'" style="--series-color:'+colors[i%colors.length]+'">'+esc(shortName)+'</button>';
   });
-  return '<button type="button" class="dq-compare-toggle">'+esc(c.compare.title||'30日指标对比')+'</button>'+
-    '<div class="dq-compare" data-mode="'+esc(c.compare.mode||'raw')+'" data-series=\''+esc(JSON.stringify(payload))+'\'>'+
+  const compareTitle=(c.compare.title||'指标对比').replace(/^30日/,'');
+  return '<button type="button" class="dq-compare-toggle">'+esc(compareTitle)+'</button>'+
+    '<div class="dq-compare" data-mode="'+esc(c.compare.mode||'raw')+'" data-range="30" data-series=\''+esc(JSON.stringify(payload))+'\'>'+
+    '<div class="dq-range-switch" aria-label="选择时间范围">'+
+      '<button type="button" class="dq-range-btn active" data-days="30">30日</button>'+
+      '<button type="button" class="dq-range-btn" data-days="90">90日</button>'+
+      '<button type="button" class="dq-range-btn" data-days="365">近1年</button></div>'+
     '<div class="dq-compare-head"><span class="dq-compare-label">选择指标（可多选）</span><div class="dq-compare-series">'+buttons+'</div></div>'+
     '<div class="dq-compare-body"></div><div class="dq-compare-note">'+
     (c.compare.mode==='index'?'不同单位按首个共同交易日=100标准化；':'默认显示主指标；')+
@@ -786,9 +796,14 @@ function drawChart(body,series,name,uni,dec){
     tip.innerHTML='<b>'+series[bi][0]+'</b> · '+name+' '+series[bi][1].toFixed(dec)+uni;tip.style.left=ev.clientX+'px';tip.style.top=(ev.clientY-12)+'px';tip.style.display='block';});
   hit.addEventListener('pointerleave',function(){cur.style.display='none';dot.style.display='none';tip.style.display='none';});
 }
-function drawMultiChart(body,payload,selected,mode='raw'){
+function drawMultiChart(body,payload,selected,mode='raw',rangeDays=30){
   const lines=selected.map(k=>({key:k,...payload[k]})).filter(x=>x&&x.series&&x.series.length>1);
   if(!lines.length){body.innerHTML='<div class="dq-exp-empty">请至少选择一个指标</div>';return;}
+  const newest=lines.flatMap(x=>x.series.map(p=>p[0])).sort().pop();
+  const cutoffDate=new Date(newest+'T00:00:00');
+  cutoffDate.setDate(cutoffDate.getDate()-Math.max(1,Number(rangeDays)-1));
+  const cutoff=cutoffDate.toISOString().slice(0,10);
+  lines.forEach(x=>x.series=x.series.filter(p=>p[0]>=cutoff&&p[0]<=newest));
   const commonDates=lines.map(x=>new Set(x.series.map(p=>p[0]))).reduce((a,b)=>new Set([...a].filter(d=>b.has(d))));
   if(mode==='index'){
     const baseDate=[...commonDates].sort()[0];
@@ -846,7 +861,7 @@ function bindExpand(){
       if(panel.classList.contains('open')){
         let payload={};try{payload=JSON.parse(panel.getAttribute('data-series')||'{}');}catch(e){}
         const selected=[...panel.querySelectorAll('.dq-series-btn.active')].map(x=>x.dataset.key);
-        drawMultiChart(panel.querySelector('.dq-compare-body'),payload,selected,panel.dataset.mode||'raw');
+        drawMultiChart(panel.querySelector('.dq-compare-body'),payload,selected,panel.dataset.mode||'raw',panel.dataset.range||30);
       }
     });
   });
@@ -856,7 +871,17 @@ function bindExpand(){
       if(this.classList.contains('active')&&active.length===1)return;
       this.classList.toggle('active');
       let payload={};try{payload=JSON.parse(panel.getAttribute('data-series')||'{}');}catch(e){}
-      drawMultiChart(panel.querySelector('.dq-compare-body'),payload,[...panel.querySelectorAll('.dq-series-btn.active')].map(x=>x.dataset.key),panel.dataset.mode||'raw');
+      drawMultiChart(panel.querySelector('.dq-compare-body'),payload,[...panel.querySelectorAll('.dq-series-btn.active')].map(x=>x.dataset.key),panel.dataset.mode||'raw',panel.dataset.range||30);
+    });
+  });
+  document.querySelectorAll('.dq-range-btn').forEach(btn=>{
+    btn.addEventListener('click',function(ev){
+      ev.stopPropagation();const panel=this.closest('.dq-compare');
+      panel.dataset.range=this.dataset.days;
+      panel.querySelectorAll('.dq-range-btn').forEach(x=>x.classList.toggle('active',x===this));
+      let payload={};try{payload=JSON.parse(panel.getAttribute('data-series')||'{}');}catch(e){}
+      const selected=[...panel.querySelectorAll('.dq-series-btn.active')].map(x=>x.dataset.key);
+      drawMultiChart(panel.querySelector('.dq-compare-body'),payload,selected,panel.dataset.mode||'raw',panel.dataset.range||30);
     });
   });
 }
@@ -947,9 +972,9 @@ async function load(){
       return;
     }
     const sb=supabase.createClient(SUPABASE_URL,anonKey);
-    // 取近 ~45 天(够画30日走势 + 算环比)
-    const since=new Date(Date.now()-60*864e5).toISOString().slice(0,10);
-    // Supabase/PostgREST 默认单次最多返回1000行。当前36个指标×约60天会超过
+    // 取近400个自然日，支持30日 / 90日 / 近1年走势切换，并预留节假日余量。
+    const since=new Date(Date.now()-HISTORY_CALENDAR_DAYS*864e5).toISOString().slice(0,10);
+    // Supabase/PostgREST 默认单次最多返回1000行。当前36个指标×一年会超过
     // 上限，若不分页，按日期升序的结果会在月初被截断，页面看起来长期停留
     // 在旧日期。按稳定的 date+key 顺序逐页取完全部记录。
     const data=[]; const pageSize=1000;
@@ -974,7 +999,7 @@ async function load(){
       if((r.source||'').includes('本轮使用API缓存'))isCache=true;
     }
     const byKey={};let latest='';
-    for(const k in groups){const s=groups[k].slice(-SPARK_DAYS);const last=s[s.length-1];
+    for(const k in groups){const s=groups[k];const last=s[s.length-1];
       byKey[k]={value:last[1],date:last[0],prev:s.length>1?s[s.length-2][1]:null,series:s,source:srcByKey[k]};
       if(last[0]>latest)latest=last[0];}
     render(byKey,latest,updatedAt,isCache);
