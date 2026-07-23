@@ -198,7 +198,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-alert-warn{background:#fbe3e0;color:#c0392b;}
 .dq-loading{padding:40px;text-align:center;color:var(--muted);}
 .dq-err{padding:16px;background:#fbe3e0;color:#c0392b;border-radius:8px;font-size:13px;}
-.dq-group{margin-bottom:22px;}
+.dq-group-nav{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 22px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.dq-nav-btn{appearance:none;background:var(--bg-card);color:#292622;border:1px solid #ded7c8;border-radius:999px;padding:10px 17px;font-size:13px;font-weight:600;line-height:1;cursor:pointer;box-shadow:0 1px 0 rgba(34,32,29,.03);transition:border-color .15s,background .15s,transform .15s;}
+.dq-nav-btn:hover{border-color:#9b9487;background:#faf8f3;transform:translateY(-1px);}
+.dq-nav-btn span{margin-left:5px;font-size:15px;}
+.dq-group{margin-bottom:28px;scroll-margin-top:96px;}
 .dq-group-head{font-weight:700;font-size:14px;margin:0 0 10px;padding-left:8px;border-left:3px solid var(--hdl-red);}
 .dq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
 .dq-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:13px 15px;}
@@ -233,6 +237,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-ax{font-family:var(--mono);font-size:7px;fill:var(--dq-flat);}
 .dq-spark{display:block;}
 .dq-section-title{font-weight:700;font-size:13px;margin:26px 0 8px;}
+.dq-detail-panel{margin-top:26px;border-top:1px solid var(--border);}
+.dq-detail-summary{display:flex;align-items:center;justify-content:space-between;padding:16px 2px 12px;cursor:pointer;font-weight:700;font-size:13px;list-style:none;user-select:none;}
+.dq-detail-summary::-webkit-details-marker{display:none;}
+.dq-detail-summary::after{content:'展开全部 ▾';color:var(--muted);font-size:11px;font-weight:500;}
+.dq-detail-panel[open] .dq-detail-summary::after{content:'收起 ▴';}
+.dq-detail-body{overflow-x:auto;padding-bottom:8px;}
 .dq-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
 .dq-table th,.dq-table td{border-bottom:1px solid var(--border);padding:6px 8px;text-align:left;}
 .dq-table .num{text-align:right;font-family:var(--mono);}
@@ -311,7 +321,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div class="sb-item nav-soon">
 <span class="sb-item-dot"></span>
 <span class="sb-item-text">政策追踪</span>
-
 <span class="sb-item-soonmark">即将上线</span></div>
 </div>
 <div class="sb-group">
@@ -323,7 +332,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div class="sb-item" onclick="location.href='topics.html'">
 <span class="sb-item-dot"></span>
 <span class="sb-item-text">专题分析</span>
-<span class="sb-item-badge live">3份</span>
+<span class="sb-item-badge live">6份</span>
 </div>
 </div>
 <div class="sb-group">
@@ -339,7 +348,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 
 <div class="wrap">
   <h1 class="page-title">每日资金面</h1>
-  <div class="page-sub">8★ 资金面/汇率/避险/净值监测 · 数据源:AkShare/FRED · 经 Supabase 实时读取</div>
+  <div class="page-sub">资金价格、债券信用、汇率、海外利率、商品与配置 · 变动值均与上一条有效观测比较 · 经 Supabase 实时读取</div>
   <div id="calendar-card"></div>
   <div id="content"><div class="dq-loading">正在加载数据…</div></div>
 
@@ -359,6 +368,74 @@ const SPARK_DAYS = 30;
 const METRIC_META = {"rate.DR007": {"name": "DR007", "unit": "%", "dec": 2}, "rate.R007": {"name": "R007", "unit": "%", "dec": 2}, "rate.shibor_on": {"name": "SHIBOR隔夜", "unit": "%", "dec": 2}, "rate.shibor_1w": {"name": "SHIBOR1周", "unit": "%", "dec": 2}, "bond.cn_10y": {"name": "中国国债10Y", "unit": "%", "dec": 4}, "bond.cn_2y": {"name": "中国国债2Y", "unit": "%", "dec": 4}, "bond.cn_gov_1y": {"name": "国债1Y", "unit": "%", "dec": 4}, "bond.cn_gov_3y": {"name": "国债3Y", "unit": "%", "dec": 4}, "bond.cn_gov_10y": {"name": "国债10Y", "unit": "%", "dec": 4}, "bond.credit_aaa_1y": {"name": "中短票AAA 1Y", "unit": "%", "dec": 4}, "bond.credit_aaa_3y": {"name": "中短票AAA 3Y", "unit": "%", "dec": 4}, "bond.credit_aaa_10y": {"name": "中短票AAA 10Y", "unit": "%", "dec": 4}, "bond.bank_aaa_1y": {"name": "银行普通债AAA 1Y", "unit": "%", "dec": 4}, "bond.bank_aaa_3y": {"name": "银行普通债AAA 3Y", "unit": "%", "dec": 4}, "bond.bank_aaa_10y": {"name": "银行普通债AAA 10Y", "unit": "%", "dec": 4}, "bond.us_10y": {"name": "美债10Y", "unit": "%", "dec": 2}, "bond.us_2y": {"name": "美债2Y", "unit": "%", "dec": 2}, "rate.effr": {"name": "EFFR", "unit": "%", "dec": 2}, "fx.usdcny": {"name": "在岸USD/CNY", "unit": "", "dec": 4}, "fx.usdcnh": {"name": "离岸USD/CNH", "unit": "", "dec": 4}, "fx.dxy": {"name": "美元指数DXY", "unit": "", "dec": 2}, "comm.gold_sge": {"name": "上金所Au99.99", "unit": "元/克", "dec": 2}, "comm.gold_xau": {"name": "伦敦金现货(XAU)", "unit": "美元/盎司", "dec": 2}, "comm.crude_brent": {"name": "布伦特原油(Brent)", "unit": "美元/桶", "dec": 2}, "comm.crude_wti": {"name": "WTI原油(NYMEX)", "unit": "美元/桶", "dec": 2}, "eq.csi300": {"name": "沪深300", "unit": "", "dec": 1}, "spread.cn_us_10y": {"name": "中美10Y利差", "unit": "%", "dec": 4}, "spread.credit_10y": {"name": "信用利差10Y", "unit": "%", "dec": 4}, "fx.cnh_cny_spread": {"name": "CNH-CNY价差", "unit": "", "dec": 4}};
 const GROUPS = [{"id": "fund", "title": "资金面 / 配置时点", "cards": [{"title": "银行间资金面", "primary": "rate.DR007", "subs": ["rate.R007", "rate.shibor_on", "rate.shibor_1w"], "tip": "资金紧(跳升)→存单/票据利率走高，是配同业存单、做票据融资的好时点。", "placeholder": null}, {"title": "10年国债 / 收益率曲线", "primary": "bond.cn_gov_10y", "subs": ["bond.cn_gov_1y", "bond.cn_gov_3y", "bond.cn_2y"], "tip": "快速下行=债牛(存量受益、新配收益低)；快速上行=债市回调，警惕理财净值。", "placeholder": null}, {"title": "信用利差 + 信用债收益(中短票AAA)", "primary": "spread.credit_10y", "subs": ["bond.credit_aaa_1y", "bond.credit_aaa_3y", "bond.credit_aaa_10y"], "tip": "利差走阔=信用风险升，避雷；AAA 1/3/10Y 为信用债收益率曲线，点击看30日走势。", "placeholder": null}, {"title": "银行普通债AAA (≈同业存单替代)", "primary": "bond.bank_aaa_1y", "subs": ["bond.bank_aaa_3y", "bond.bank_aaa_10y"], "tip": "同业存单(NCD)发行利率暂无免费源，用银行普通债AAA曲线近似银行融资成本；1Y最贴近NCD久期。", "placeholder": null}, {"title": "★ 票据贴现 / 转贴现", "primary": null, "subs": [], "tip": "贴现率低点(常在月初/月末)=票据融资降成本的时点。", "placeholder": "待接入 · 上海票交所暂无稳定接口"}]}, {"id": "fx", "title": "汇率 / 跨境窗口", "cards": [{"title": "在岸 / 离岸人民币", "primary": "fx.usdcny", "subs": ["fx.usdcnh", "fx.cnh_cny_spread"], "tip": "价差异常拉大=换汇/跨境融资套利窗口；人民币升值期境外资产要锁汇。", "placeholder": null}, {"title": "美元指数 / 中美利差", "primary": "fx.dxy", "subs": ["spread.cn_us_10y"], "tip": "DXY走强/利差走阔=人民币贬值压力 + 资本外流。", "placeholder": null}]}, {"id": "risk", "title": "避险信号", "cards": [{"title": "美债 2/10 + EFFR", "primary": "bond.us_10y", "subs": ["bond.us_2y", "rate.effr"], "tip": "2/10倒挂=衰退信号，降risk；美债收益率高=境外固收吸引力强。", "placeholder": null}, {"title": "黄金 (上金所 + 伦敦金)", "primary": "comm.gold_sge", "subs": ["comm.gold_xau"], "tip": "去美元 + 实际利率下行=黄金做资产分散的逻辑。上金所人民币计价、伦敦金美元计价。XAU/USD 是场外(OTC)现货、全球做市商 23 小时连续报价，无统一收盘价；不同数据商按各自时点取数，同日价格会有 <0.1% 抖动，不影响解读。上金所为交易所品种，收盘价唯一稳定。", "placeholder": null}, {"title": "原油 (布伦特 + WTI)", "primary": "comm.crude_brent", "subs": ["comm.crude_wti"], "tip": "原油涨=通胀压力上行，影响利率与避险情绪；国际基准油价。", "placeholder": null}]}, {"id": "nav", "title": "净值 / 现金管理", "cards": [{"title": "★ 持仓债基 / 银行理财净值", "primary": null, "subs": [], "tip": "净值快速回撤=赎回潮/踩踏早信号；也是看自己有没有在浮亏。", "placeholder": "待接入 · 公司共享看板暂不纳入个人持仓"}, {"title": "沪深300 / 货基", "primary": "eq.csi300", "subs": [], "tip": "权益情绪参考；货基7日年化是现金类配置的参考。", "placeholder": null}]}];
 const ALERT_THRESHOLDS = {"rate.DR007": 0.2, "bond.cn_10y": 0.05, "spread.credit_10y": 0.05, "fx.cnh_cny_spread": 0.005};
+const WIND_CODE_BY_KEY={
+  "rate.interbank_1d":"M0041663","rate.interbank_7d":"M0041664",
+  "rate.shibor_on":"M0017138","rate.shibor_1w":"M0017139",
+  "bill.direct_6m_national":"O2676743",
+  "bill.rediscount_6m_national":"P2820206",
+  "bill.rediscount_6m_city":"C6273235","rate.pboc_rediscount":"M0043828",
+  "bond.cn_gov_1y":"M1001646","bond.cn_gov_2y":"M1001647",
+  "bond.cn_gov_3y":"M1001648","bond.cn_gov_10y":"M1001654",
+  "bond.mtn_aaa_issue_1y":"M1002306","bond.mtn_aaa_issue_5y":"M1002309",
+  "bond.mtn_aaa_issue_10y":"M1002312",
+  "ncd.aaa_issue_3m":"C2702470","ncd.aaa_issue_6m":"T4009952",
+  "ncd.aaa_issue_1y":"T6250321",
+  "fx.usdcny":"M0067855","fx.usdcny_mid":"M0000185","fx.dxy":"M0000271",
+  "bond.us_10y":"M1001791","bond.us_3y":"M1001788","rate.effr":"G0001699",
+  "comm.gold_sge":"S0035819","comm.gold_xau":"S0031645",
+  "comm.crude_brent":"S0260035","comm.crude_wti":"S0180938",
+  "eq.csi300":"M0020209","cash.money_fund_index":"M0062639"
+};
+
+// 2026-07-23: 每日资金面仅使用本机 Macro API 中的万得 EDB 指标。
+Object.assign(METRIC_META,{
+  "rate.interbank_1d":{name:"银行间拆借加权1D",unit:"%",dec:2},
+  "rate.interbank_7d":{name:"银行间拆借加权7D",unit:"%",dec:2},
+  "bond.cn_gov_2y":{name:"国债2Y",unit:"%",dec:4},
+  "bond.mtn_aaa_issue_1y":{name:"AAA中短票发行1Y",unit:"%",dec:4},
+  "bond.mtn_aaa_issue_5y":{name:"AAA中短票发行5Y",unit:"%",dec:4},
+  "bond.mtn_aaa_issue_10y":{name:"AAA中短票发行10Y",unit:"%",dec:4},
+  "ncd.aaa_issue_3m":{name:"AAA同业存单发行3M",unit:"%",dec:4},
+  "ncd.aaa_issue_6m":{name:"AAA同业存单发行6M",unit:"%",dec:4},
+  "ncd.aaa_issue_1y":{name:"AAA同业存单发行1Y",unit:"%",dec:4},
+  "fx.usdcny_mid":{name:"USD/CNY中间价",unit:"",dec:4},
+  "spread.usdcny_spot_mid":{name:"即期-中间价",unit:"",dec:4},
+  "bond.us_3y":{name:"美债3Y",unit:"%",dec:2},
+  "bill.direct_6m_national":{name:"6M国股银票直贴",unit:"%",dec:2},
+  "bill.rediscount_6m_national":{name:"6M国股银票转贴",unit:"%",dec:2},
+  "bill.rediscount_6m_city":{name:"6M城商银票转贴",unit:"%",dec:2},
+  "rate.pboc_rediscount":{name:"人民银行再贴现利率",unit:"%",dec:2},
+  "spread.bill_direct_rediscount":{name:"6M国股直贴-转贴利差",unit:"%",dec:2},
+  "spread.credit_10y":{name:"AAA中短票10Y发行利差",unit:"%",dec:4},
+  "spread.us_10y_3y":{name:"美债10Y-3Y利差",unit:"%",dec:4},
+  "spread.us_3y_effr":{name:"美债3Y-EFFR利差",unit:"%",dec:4},
+  "cash.money_fund_index":{name:"中证货币基金指数",unit:"点",dec:2}
+});
+Object.assign(ALERT_THRESHOLDS,{
+  "rate.interbank_1d":0.20,
+  "bond.cn_gov_10y":0.05,
+  "spread.usdcny_spot_mid":0.0050
+});
+GROUPS.splice(0,GROUPS.length,
+ {id:"liquidity",title:"1 · 境内资金面与融资成本",cards:[
+  {title:"银行间资金价格",primary:"rate.interbank_1d",subs:["rate.interbank_7d","rate.shibor_on","rate.shibor_1w"],tip:"观察银行间1天、7天拆借加权利率与SHIBOR；利率跳升通常意味着资金边际收紧。"},
+  {title:"票据融资成本 · 直贴/转贴",primary:"bill.direct_6m_national",subs:["bill.rediscount_6m_national","bill.rediscount_6m_city","spread.bill_direct_rediscount","rate.pboc_rediscount"],tip:"6M国股直贴最接近企业票据融资成本；转贴反映银行间票据价格，再贴现率为政策锚。"}]},
+ {id:"cn_bond",title:"2 · 境内债券与信用环境",cards:[
+  {title:"国债收益率曲线",primary:"bond.cn_gov_10y",subs:["bond.cn_gov_1y","bond.cn_gov_2y","bond.cn_gov_3y"],tip:"长端快速下行代表债牛和增长预期走弱；快速上行需警惕固收净值回撤。"},
+  {title:"信用债与信用利差",primary:"spread.credit_10y",subs:["bond.mtn_aaa_issue_1y","bond.mtn_aaa_issue_5y","bond.mtn_aaa_issue_10y"],tip:"信用利差走阔代表风险补偿上升；AAA中短票发行利率反映不同期限信用融资成本。"},
+  {title:"银行融资成本",primary:"ncd.aaa_issue_1y",subs:["ncd.aaa_issue_3m","ncd.aaa_issue_6m"],tip:"AAA同业存单发行利率直接反映银行短中期融资成本，替代原银行普通债近似指标。"}]},
+ {id:"fx",title:"3 · 人民币汇率与跨境压力",cards:[
+  {title:"人民币即期与中间价",primary:"fx.usdcny",subs:["fx.usdcny_mid","spread.usdcny_spot_mid"],tip:"即期汇率相对中间价的偏离用于观察境内人民币市场压力；两项均来自万得EDB。"},
+  {title:"人民币外部压力",primary:"fx.dxy",subs:["spread.cn_us_10y"],tip:"美元走强或中美利差扩大，通常增加人民币贬值和跨境资金压力。"}]},
+ {id:"global_rates",title:"4 · 海外利率与美元流动性",cards:[
+  {title:"美国利率环境",primary:"bond.us_10y",subs:["bond.us_3y","rate.effr","spread.us_10y_3y","spread.us_3y_effr"],tip:"10Y-3Y观察期限结构，3Y-EFFR观察市场对未来政策利率的定价。"}]},
+ {id:"commodities",title:"5 · 大宗商品与避险信号",cards:[
+  {title:"黄金与避险",primary:"comm.gold_sge",subs:["comm.gold_xau"],tip:"黄金走强通常反映避险需求、实际利率变化或去美元配置需求。"},
+  {title:"原油与通胀",primary:"comm.crude_brent",subs:["comm.crude_wti"],tip:"Brent与WTI共同反映国际能源价格和输入性通胀压力。"}]},
+ {id:"allocation",title:"6 · 权益情绪与现金管理",cards:[
+  {title:"权益市场情绪",primary:"eq.csi300",subs:[],tip:"沪深300用于观察境内核心权益资产的风险偏好。"},
+  {title:"现金类资产表现",primary:"cash.money_fund_index",subs:[],tip:"中证货币基金指数用于观察货币基金整体表现，不等同于单只产品7日年化收益率。"}]}
+);
 
 // ================= 工具 =================
 function meta(k){return METRIC_META[k]||{name:k,unit:"",dec:2};}
@@ -392,20 +469,27 @@ function render(byKey, latest){
   const alert=hits.length?'<div class="dq-alert dq-alert-warn">⚠ 触发告警:'+esc(hits.join(' · '))+'</div>'
     :'<div class="dq-alert dq-alert-ok">✓ 今日无指标突破阈值,资金面平稳</div>';
 
-  let html='<div class="dq-asof">数据截至: '+esc(latest)+'</div>'+alert;
+  let nav='<div class="dq-group-nav">';
+  for(const g of GROUPS){const label=g.title.includes('·')?g.title.split('·').slice(1).join('·').trim():g.title;
+    nav+='<button class="dq-nav-btn" type="button" onclick="document.getElementById(\'dq-group-'+g.id+'\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">'+esc(label)+' <span aria-hidden="true">↓</span></button>';}
+  nav+='</div>';
+  let html='<div class="dq-asof">数据截至: '+esc(latest)+'</div>'+alert+nav;
   for(const g of GROUPS){
     let cards='';
     for(const c of g.cards) cards+=cardHTML(c,byKey,latest);
-    html+='<div class="dq-group"><div class="dq-group-head">'+esc(g.title)+'</div><div class="dq-grid">'+cards+'</div></div>';
+    html+='<div class="dq-group" id="dq-group-'+esc(g.id)+'"><div class="dq-group-head">'+esc(g.title)+'</div><div class="dq-grid">'+cards+'</div></div>';
   }
   // 全表
   let rows='';
   Object.keys(byKey).sort().forEach(k=>{const m=byKey[k];
-    rows+='<tr><td>'+esc(meta(k).name)+'</td><td class="dq-mono">'+esc(k)+'</td>'+
+    const windCode=WIND_CODE_BY_KEY[k]||'派生计算';
+    rows+='<tr><td>'+esc(meta(k).name)+'</td><td class="dq-mono">'+esc(windCode)+'</td>'+
       '<td class="num">'+fmt(m.value,k)+unit(k)+'</td><td class="num">'+deltaHTML(m.value,m.prev,k)+'</td>'+
-      '<td>'+esc(m.date)+'</td><td class="dq-src-cell">'+esc(m.source||'')+'</td></tr>';});
-  const detailHtml='<div class="dq-section-title">全指标明细</div><table class="dq-table"><thead><tr><th>指标</th><th>key</th>'+
-    '<th class="num">最新值</th><th class="num">日环比</th><th>数据日期</th><th>数据来源(发布机构)</th></tr></thead><tbody>'+rows+'</tbody></table>';
+      '<td>'+esc(m.date)+'</td></tr>';});
+  const detailHtml='<details class="dq-detail-panel"><summary class="dq-detail-summary">全指标明细</summary>'+
+    '<div class="dq-detail-body"><table class="dq-table"><thead><tr><th>指标</th><th>万得指标代码</th>'+
+    '<th class="num">最新值</th><th class="num">较上次</th><th>数据日期</th></tr></thead><tbody>'+rows+
+    '</tbody></table></div></details>';
   document.getElementById('content').innerHTML=html;
   const dt=document.getElementById('detail'); if(dt) dt.innerHTML=detailHtml;
   bindExpand();
@@ -422,7 +506,7 @@ function cardHTML(c,byKey,latest){
   let subs='';
   for(const sk of (c.subs||[])){const sm=byKey[sk];const sn=esc(meta(sk).name);
     if(sm){let _extra='';
-      if(sk==='comm.gold_xau'){const cp=byKey['fx.usdcny_central'];
+      if(sk==='comm.gold_xau'){const cp=byKey['fx.usdcny_mid'];
         if(cp&&cp.value){const rmbg=sm.value*cp.value/31.1035;
           _extra='<div class="dq-conv">\u2248 '+rmbg.toFixed(2)+' 元/克 · 按中间价('+cp.value.toFixed(4)+')折</div>';}}
       subs+='<div class="dq-sub dq-metric" '+seriesAttr(sk,sm)+'><span class="dq-sub-n">'+sn+'</span><span class="dq-sub-v">'+fmt(sm.value,sk)+unit(sk)+' '+deltaHTML(sm.value,sm.prev,sk)+'</span></div>'+_extra;}
@@ -490,15 +574,21 @@ async function load(){
     }
     const sb=supabase.createClient(SUPABASE_URL,anonKey);
     // 取近 ~45 天(够画30日走势 + 算环比)
-    // 修复(2026-07-03): Supabase REST 单次最多返 1000 行; 窗口内行数超限时,
-    // 升序取会把「最新日期」截掉(曾导致前端停在 06-29)。改为分页拉全量。
     const since=new Date(Date.now()-60*864e5).toISOString().slice(0,10);
-    const PAGE=1000;let data=[];
-    for(let page=0;;page++){
-      const {data:chunk,error}=await sb.from('daily_metrics').select('date,key,name,value,source').gte('date',since).order('date',{ascending:true}).range(page*PAGE,(page+1)*PAGE-1);
+    // Supabase/PostgREST 默认单次最多返回1000行。当前36个指标×约60天会超过
+    // 上限，若不分页，按日期升序的结果会在月初被截断，页面看起来长期停留
+    // 在旧日期。按稳定的 date+key 顺序逐页取完全部记录。
+    const data=[]; const pageSize=1000;
+    for(let from=0;;from+=pageSize){
+      const {data:page,error}=await sb.from('daily_metrics')
+        .select('date,key,name,value,source')
+        .gte('date',since)
+        .order('date',{ascending:true})
+        .order('key',{ascending:true})
+        .range(from,from+pageSize-1);
       if(error)throw error;
-      data=data.concat(chunk||[]);
-      if(!chunk||chunk.length<PAGE)break;
+      data.push(...(page||[]));
+      if(!page||page.length<pageSize)break;
     }
     if(!data||!data.length){document.getElementById('content').innerHTML='<div class="dq-err">daily_metrics 暂无数据。请先在本地跑 push_daily_to_supabase.py 推送。</div>';return;}
     // 组织: byKey[key] = {value,date,prev,series:[[date,value]...]}
