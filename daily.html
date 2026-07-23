@@ -208,6 +208,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-alert-danger{background:#fbe3e0;color:#b53227;border-color:#edbbb5;}
 .dq-alert-link{appearance:none;border:0;background:transparent;color:inherit;font:inherit;padding:2px 4px;
   text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;cursor:pointer;}
+.page-title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;}
+.page-title-row .page-title{margin-bottom:0;}
+.page-data-date{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;padding-bottom:4px;}
 .dq-viewbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;}
 .dq-viewhint{font-size:11px;color:var(--muted);}
 .dq-view-switch{display:inline-flex;padding:3px;background:#ebe6db;border-radius:8px;flex:0 0 auto;}
@@ -294,6 +297,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
   padding:4px 9px;font:600 10px/1.2 var(--sans);cursor:pointer;}
 .dq-series-btn.active{color:#fff;border-color:var(--series-color);background:var(--series-color);}
 .dq-compare-chart{width:100%;height:142px;display:block;}
+.dq-compare-loading{padding:28px 8px;text-align:center;color:var(--muted);font-size:11px;}
 .dq-compare-insight{margin-top:7px;padding:8px 10px;border-left:3px solid #b6813d;background:#fff;
   color:#4d4942;font-size:11px;line-height:1.55;}
 .dq-compare-insight strong{color:#24211e;}
@@ -305,6 +309,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-detail-summary::after{content:'展开全部 ▾';color:var(--muted);font-size:11px;font-weight:500;}
 .dq-detail-panel[open] .dq-detail-summary::after{content:'收起 ▴';}
 .dq-detail-body{overflow-x:auto;padding-bottom:8px;}
+.dq-tech-panel{margin-top:8px;border-top:1px solid var(--border);}
+.dq-tech-summary{padding:12px 2px;cursor:pointer;color:var(--muted);font-size:11px;list-style:none;user-select:none;}
+.dq-tech-summary::-webkit-details-marker{display:none;}
+.dq-tech-summary::after{content:'展开 ▾';float:right;}
+.dq-tech-panel[open] .dq-tech-summary::after{content:'收起 ▴';}
+.dq-tech-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 18px;padding:2px 2px 14px;
+  color:var(--muted);font-size:11px;}
 .dq-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
 .dq-table th,.dq-table td{border-bottom:1px solid var(--border);padding:6px 8px;text-align:left;}
 .dq-table .num{text-align:right;font-family:var(--mono);}
@@ -369,6 +380,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
   body.mobile-nav-open .mobile-nav-mask{display:block;}
   body.mobile-nav-open{overflow:hidden;}
   .page-title{font-size:25px;margin-bottom:6px;}
+  .page-title-row{align-items:flex-start;}
+  .page-title-row .page-title{margin-bottom:6px;}
+  .page-data-date{font-size:10px;padding-top:7px;}
   .page-sub{font-size:12px;line-height:1.55;margin-bottom:13px;}
   .dq-runtime{display:grid;grid-template-columns:1fr;gap:6px;padding:11px 12px;}
   .dq-viewbar{align-items:flex-start;}
@@ -397,6 +411,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
   .cal-full{max-height:52vh;overflow-y:auto;}
   .dq-detail-summary{padding-top:14px;}
   .dq-detail-body{overflow:visible;}
+  .dq-tech-body{grid-template-columns:1fr;}
   .dq-table,.dq-table tbody,.dq-table tr,.dq-table td{display:block;width:100%;}
   .dq-table thead{display:none;}
   .dq-table tr{background:#fff;border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-bottom:9px;}
@@ -483,8 +498,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 </div>
 <div class="mobile-nav-mask" aria-hidden="true"></div>
 <div class="wrap">
-  <h1 class="page-title">每日资金面</h1>
-  <div class="page-sub">资金价格、债券信用、汇率、海外利率、商品与配置 · 变动值均与上一条有效观测比较 · 经 Supabase 实时读取</div>
+  <div class="page-title-row"><h1 class="page-title">每日资金面</h1><div class="page-data-date" id="page-data-date">数据加载中</div></div>
+  <div class="page-sub">资金价格、债券信用、汇率、海外利率、商品与配置 · 变动值均与上一条有效观测比较</div>
   <div id="calendar-card"></div>
   <div id="content"><div class="dq-loading">正在加载数据…</div></div>
 
@@ -500,6 +515,9 @@ const SUPABASE_URL = "https://fdjbromuixfgkedrdtuu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkamJyb211aXhmZ2tlZHJkdHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTM4NzQsImV4cCI6MjA5NjU2OTg3NH0.2tVSxUOdpiRO6F_GtyiAybJG5gqMU73b2CSm-Ow4hZs";   // ← 把 __ANON_KEY__ 整体替换成你的 anon key
 const SPARK_DAYS = 30;
 const HISTORY_CALENDAR_DAYS = 400;
+const INITIAL_CALENDAR_DAYS = 65;
+let dailySb = null;
+let dailyLatestDate = '';
 
 // ================= 配置(由 daily_module.py 导出, 与看板内嵌版一致) =================
 const METRIC_META = {"rate.DR007": {"name": "DR007", "unit": "%", "dec": 2}, "rate.R007": {"name": "R007", "unit": "%", "dec": 2}, "rate.shibor_on": {"name": "SHIBOR隔夜", "unit": "%", "dec": 2}, "rate.shibor_1w": {"name": "SHIBOR1周", "unit": "%", "dec": 2}, "bond.cn_10y": {"name": "中国国债10Y", "unit": "%", "dec": 4}, "bond.cn_2y": {"name": "中国国债2Y", "unit": "%", "dec": 4}, "bond.cn_gov_1y": {"name": "国债1Y", "unit": "%", "dec": 4}, "bond.cn_gov_3y": {"name": "国债3Y", "unit": "%", "dec": 4}, "bond.cn_gov_10y": {"name": "国债10Y", "unit": "%", "dec": 4}, "bond.credit_aaa_1y": {"name": "中短票AAA 1Y", "unit": "%", "dec": 4}, "bond.credit_aaa_3y": {"name": "中短票AAA 3Y", "unit": "%", "dec": 4}, "bond.credit_aaa_10y": {"name": "中短票AAA 10Y", "unit": "%", "dec": 4}, "bond.bank_aaa_1y": {"name": "银行普通债AAA 1Y", "unit": "%", "dec": 4}, "bond.bank_aaa_3y": {"name": "银行普通债AAA 3Y", "unit": "%", "dec": 4}, "bond.bank_aaa_10y": {"name": "银行普通债AAA 10Y", "unit": "%", "dec": 4}, "bond.us_10y": {"name": "美债10Y", "unit": "%", "dec": 2}, "bond.us_2y": {"name": "美债2Y", "unit": "%", "dec": 2}, "rate.effr": {"name": "EFFR", "unit": "%", "dec": 2}, "fx.usdcny": {"name": "在岸USD/CNY", "unit": "", "dec": 4}, "fx.usdcnh": {"name": "离岸USD/CNH", "unit": "", "dec": 4}, "fx.dxy": {"name": "美元指数DXY", "unit": "", "dec": 2}, "comm.gold_sge": {"name": "上金所Au99.99", "unit": "元/克", "dec": 2}, "comm.gold_xau": {"name": "伦敦金现货(XAU)", "unit": "美元/盎司", "dec": 2}, "comm.crude_brent": {"name": "布伦特原油(Brent)", "unit": "美元/桶", "dec": 2}, "comm.crude_wti": {"name": "WTI原油(NYMEX)", "unit": "美元/桶", "dec": 2}, "eq.csi300": {"name": "沪深300", "unit": "", "dec": 1}, "spread.cn_us_10y": {"name": "中美10Y利差", "unit": "%", "dec": 4}, "spread.credit_10y": {"name": "信用利差10Y", "unit": "%", "dec": 4}, "fx.cnh_cny_spread": {"name": "CNH-CNY价差", "unit": "", "dec": 4}};
@@ -732,15 +750,12 @@ function render(byKey, latest, updatedAt, isCache){
   for(const g of GROUPS){const label=g.title.includes('·')?g.title.split('·').slice(1).join('·').trim():g.title;
     nav+='<button class="dq-nav-btn" data-group="'+esc(g.id)+'" type="button" onclick="document.getElementById(\'dq-group-'+g.id+'\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">'+esc(label)+' <span aria-hidden="true">↓</span></button>';}
   nav+='</div>';
-  const statusClass=isCache?'dq-runtime-badge dq-runtime-cache':'dq-runtime-badge';
-  const statusText=isCache?'API异常，本轮使用最近成功缓存':'万得 EDB API 数据正常';
   const updatedText=updatedAt?new Date(updatedAt).toLocaleString('zh-CN',{hour12:false}):'—';
-  const runtime='<div class="dq-runtime"><span class="'+statusClass+'">'+esc(statusText)+'</span>'+
-    '<span>质量门禁：已通过</span><span class="dq-runtime-time">最后成功更新：'+esc(updatedText)+'</span></div>';
+  const runtime=isCache?'<div class="dq-alert dq-alert-watch">数据更新延迟，当前展示最近一次成功数据。</div>':'';
   const viewbar='<div class="dq-viewbar"><div class="dq-viewhint">核心视图聚焦管理层日常关注的10项信号</div>'+
     '<div class="dq-view-switch"><button class="dq-view-btn active" data-view="core" type="button">核心视图</button>'+
     '<button class="dq-view-btn" data-view="all" type="button">全部指标</button></div></div>';
-  let html=runtime+'<div class="dq-asof">数据截至: '+esc(latest)+'</div>'+overviewHTML(byKey)+viewbar+alert+nav;
+  let html=runtime+overviewHTML(byKey)+viewbar+alert+nav;
   for(const g of GROUPS){
     let cards='';
     for(const c of g.cards) cards+=cardHTML(c,byKey,latest);
@@ -756,8 +771,14 @@ function render(byKey, latest, updatedAt, isCache){
   const detailHtml='<details class="dq-detail-panel"><summary class="dq-detail-summary">全指标明细</summary>'+
     '<div class="dq-detail-body"><table class="dq-table"><thead><tr><th>指标</th><th>万得指标代码</th>'+
     '<th class="num">最新值</th><th class="num">较上次</th><th>数据日期</th></tr></thead><tbody>'+rows+
-    '</tbody></table></div></details>';
+    '</tbody></table></div></details>'+
+    '<details class="dq-tech-panel"><summary class="dq-tech-summary">数据更新说明</summary><div class="dq-tech-body">'+
+      '<div>数据来源：万得宏观数据（EDB）</div><div>数据日期：'+esc(latest)+'</div>'+
+      '<div>最近成功更新：'+esc(updatedText)+'</div><div>质量检查：已通过</div>'+
+      '<div>云端读取：正常</div><div>缓存状态：'+(isCache?'本轮使用最近成功缓存':'实时数据')+'</div>'+
+    '</div></details>';
   document.getElementById('content').innerHTML=html;
+  const pageDate=document.getElementById('page-data-date');if(pageDate)pageDate.textContent='数据更新至 '+latest;
   const dt=document.getElementById('detail'); if(dt) dt.innerHTML=detailHtml;
   bindExpand();
   bindResponsiveUI(latest);
@@ -783,7 +804,7 @@ function compareHTML(c,byKey){
   });
   const compareTitle=(c.compare.title||'指标对比').replace(/^30日/,'');
   return '<button type="button" class="dq-compare-toggle">'+esc(compareTitle)+'</button>'+
-    '<div class="dq-compare" data-mode="'+esc(c.compare.mode||'raw')+'" data-range="30" data-series=\''+esc(JSON.stringify(payload))+'\'>'+
+    '<div class="dq-compare" data-mode="'+esc(c.compare.mode||'raw')+'" data-range="30" data-loaded-days="'+INITIAL_CALENDAR_DAYS+'" data-series=\''+esc(JSON.stringify(payload))+'\'>'+
     '<div class="dq-range-switch" aria-label="选择时间范围">'+
       '<button type="button" class="dq-range-btn active" data-days="30">30日</button>'+
       '<button type="button" class="dq-range-btn" data-days="90">90日</button>'+
@@ -942,6 +963,43 @@ function drawMultiChart(body,payload,selected,mode='raw',rangeDays=30){
   hit.addEventListener('pointerdown',show);
   hit.addEventListener('pointerleave',()=>{cur.style.display='none';tip.style.display='none';});
 }
+async function fetchDailyRows(since,keys){
+  const fields='date,key,value,source,updated_at',pageSize=1000;
+  const query=(from,to,withCount)=>{
+    let q=dailySb.from('daily_metrics').select(fields,withCount?{count:'exact'}:undefined).gte('date',since);
+    if(keys&&keys.length)q=q.in('key',keys);
+    return q.order('date',{ascending:true}).order('key',{ascending:true}).range(from,to);
+  };
+  const first=await query(0,pageSize-1,true);
+  if(first.error)throw first.error;
+  const rows=[...(first.data||[])],total=Number(first.count||rows.length),pending=[];
+  for(let from=pageSize;from<total;from+=pageSize)
+    pending.push(query(from,Math.min(from+pageSize-1,total-1),false));
+  const pages=await Promise.all(pending);
+  for(const result of pages){if(result.error)throw result.error;rows.push(...(result.data||[]));}
+  return rows;
+}
+async function ensureCompareHistory(panel,rangeDays){
+  const wanted=Math.min(HISTORY_CALENDAR_DAYS,Math.max(30,Number(rangeDays)||30));
+  const loaded=Number(panel.dataset.loadedDays||INITIAL_CALENDAR_DAYS);
+  let payload={};try{payload=JSON.parse(panel.getAttribute('data-series')||'{}');}catch(e){}
+  if(wanted<=loaded)return payload;
+  const body=panel.querySelector('.dq-compare-body');
+  body.innerHTML='<div class="dq-compare-loading">正在加载'+(wanted>=365?'近1年':wanted+'日')+'历史走势…</div>';
+  const end=dailyLatestDate||new Date().toISOString().slice(0,10),cutoffDate=new Date(end+'T00:00:00');
+  cutoffDate.setDate(cutoffDate.getDate()-wanted-5);
+  try{
+    const rows=await fetchDailyRows(cutoffDate.toISOString().slice(0,10),Object.keys(payload));
+    const grouped={};rows.forEach(r=>(grouped[r.key]=grouped[r.key]||[]).push([r.date,r.value]));
+    Object.keys(payload).forEach(k=>{if(grouped[k]&&grouped[k].length)payload[k].series=grouped[k];});
+    panel.setAttribute('data-series',JSON.stringify(payload));
+    panel.dataset.loadedDays=String(wanted);
+    return payload;
+  }catch(err){
+    body.innerHTML='<div class="dq-exp-empty">历史数据加载失败，请稍后重试</div>';
+    throw err;
+  }
+}
 function bindExpand(){
   if(!document.getElementById('dq-tip2')){const t=document.createElement('div');t.id='dq-tip2';t.className='dq-tip2';document.body.appendChild(t);}
   document.getElementById('content').addEventListener('click',function(ev){
@@ -973,11 +1031,11 @@ function bindExpand(){
     });
   });
   document.querySelectorAll('.dq-range-btn').forEach(btn=>{
-    btn.addEventListener('click',function(ev){
+    btn.addEventListener('click',async function(ev){
       ev.stopPropagation();const panel=this.closest('.dq-compare');
       panel.dataset.range=this.dataset.days;
       panel.querySelectorAll('.dq-range-btn').forEach(x=>x.classList.toggle('active',x===this));
-      let payload={};try{payload=JSON.parse(panel.getAttribute('data-series')||'{}');}catch(e){}
+      let payload={};try{payload=await ensureCompareHistory(panel,this.dataset.days);}catch(e){return;}
       const selected=[...panel.querySelectorAll('.dq-series-btn.active')].map(x=>x.dataset.key);
       drawMultiChart(panel.querySelector('.dq-compare-body'),payload,selected,panel.dataset.mode||'raw',panel.dataset.range||30);
     });
@@ -1088,34 +1146,11 @@ async function load(){
       document.getElementById('content').innerHTML='<div class="dq-err">daily.html 里的 anon key 未填写(仍是占位符 __ANON_KEY__)。请在文件中替换为真实 anon key 后重新部署。</div>';
       return;
     }
-    const sb=supabase.createClient(SUPABASE_URL,anonKey);
-    // 取近400个自然日，支持30日 / 90日 / 近1年走势切换，并预留节假日余量。
-    const since=new Date(Date.now()-HISTORY_CALENDAR_DAYS*864e5).toISOString().slice(0,10);
-    // Supabase/PostgREST 默认单次最多返回1000行。首批同时取得精确总数，
-    // 其余分页并行读取；既避免截断，也避免一年历史串行10次请求拖慢首屏。
-    const data=[]; const pageSize=1000;
-    const first=await sb.from('daily_metrics')
-      .select('date,key,name,value,source,updated_at',{count:'exact'})
-      .gte('date',since)
-      .order('date',{ascending:true})
-      .order('key',{ascending:true})
-      .range(0,pageSize-1);
-    if(first.error)throw first.error;
-    data.push(...(first.data||[]));
-    const total=Number(first.count||data.length),pending=[];
-    for(let from=pageSize;from<total;from+=pageSize){
-      pending.push(sb.from('daily_metrics')
-        .select('date,key,name,value,source,updated_at')
-        .gte('date',since)
-        .order('date',{ascending:true})
-        .order('key',{ascending:true})
-        .range(from,Math.min(from+pageSize-1,total-1)));
-    }
-    const pages=await Promise.all(pending);
-    for(const result of pages){
-      if(result.error)throw result.error;
-      data.push(...(result.data||[]));
-    }
+    dailySb=supabase.createClient(SUPABASE_URL,anonKey);
+    // 首屏只取近65个自然日：足够计算最新/上次值、异常提醒、sparkline和30日图。
+    // 90日与近1年历史由对应卡片在用户点击后按需读取并缓存。
+    const since=new Date(Date.now()-INITIAL_CALENDAR_DAYS*864e5).toISOString().slice(0,10);
+    const data=await fetchDailyRows(since);
     if(!data||!data.length){document.getElementById('content').innerHTML='<div class="dq-err">daily_metrics 暂无数据。请先在本地跑 push_daily_to_supabase.py 推送。</div>';return;}
     // 组织: byKey[key] = {value,date,prev,series:[[date,value]...]}
     const groups={},srcByKey={};let updatedAt='';let isCache=false;
@@ -1129,6 +1164,7 @@ async function load(){
     for(const k in groups){const s=groups[k];const last=s[s.length-1];
       byKey[k]={value:last[1],date:last[0],prev:s.length>1?s[s.length-2][1]:null,series:s,source:srcByKey[k]};
       if(last[0]>latest)latest=last[0];}
+    dailyLatestDate=latest;
     render(byKey,latest,updatedAt,isCache);
   }catch(e){
     const msg=(e&&(e.message||e.hint||''))+'';
