@@ -1091,20 +1091,30 @@ async function load(){
     const sb=supabase.createClient(SUPABASE_URL,anonKey);
     // 取近400个自然日，支持30日 / 90日 / 近1年走势切换，并预留节假日余量。
     const since=new Date(Date.now()-HISTORY_CALENDAR_DAYS*864e5).toISOString().slice(0,10);
-    // Supabase/PostgREST 默认单次最多返回1000行。当前36个指标×一年会超过
-    // 上限，若不分页，按日期升序的结果会在月初被截断，页面看起来长期停留
-    // 在旧日期。按稳定的 date+key 顺序逐页取完全部记录。
+    // Supabase/PostgREST 默认单次最多返回1000行。首批同时取得精确总数，
+    // 其余分页并行读取；既避免截断，也避免一年历史串行10次请求拖慢首屏。
     const data=[]; const pageSize=1000;
-    for(let from=0;;from+=pageSize){
-      const {data:page,error}=await sb.from('daily_metrics')
+    const first=await sb.from('daily_metrics')
+      .select('date,key,name,value,source,updated_at',{count:'exact'})
+      .gte('date',since)
+      .order('date',{ascending:true})
+      .order('key',{ascending:true})
+      .range(0,pageSize-1);
+    if(first.error)throw first.error;
+    data.push(...(first.data||[]));
+    const total=Number(first.count||data.length),pending=[];
+    for(let from=pageSize;from<total;from+=pageSize){
+      pending.push(sb.from('daily_metrics')
         .select('date,key,name,value,source,updated_at')
         .gte('date',since)
         .order('date',{ascending:true})
         .order('key',{ascending:true})
-        .range(from,from+pageSize-1);
-      if(error)throw error;
-      data.push(...(page||[]));
-      if(!page||page.length<pageSize)break;
+        .range(from,Math.min(from+pageSize-1,total-1)));
+    }
+    const pages=await Promise.all(pending);
+    for(const result of pages){
+      if(result.error)throw result.error;
+      data.push(...(result.data||[]));
     }
     if(!data||!data.length){document.getElementById('content').innerHTML='<div class="dq-err">daily_metrics 暂无数据。请先在本地跑 push_daily_to_supabase.py 推送。</div>';return;}
     // 组织: byKey[key] = {value,date,prev,series:[[date,value]...]}
