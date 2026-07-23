@@ -206,6 +206,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-alert-ok{background:#e8f3ec;color:#1e8449;}
 .dq-alert-watch{background:#fff5d9;color:#8a6100;border-color:#ead69a;}
 .dq-alert-danger{background:#fbe3e0;color:#b53227;border-color:#edbbb5;}
+.dq-alert-link{appearance:none;border:0;background:transparent;color:inherit;font:inherit;padding:2px 4px;
+  text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;cursor:pointer;}
 .dq-viewbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;}
 .dq-viewhint{font-size:11px;color:var(--muted);}
 .dq-view-switch{display:inline-flex;padding:3px;background:#ebe6db;border-radius:8px;flex:0 0 auto;}
@@ -216,6 +218,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-err{padding:16px;background:#fbe3e0;color:#c0392b;border-radius:8px;font-size:13px;}
 .dq-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 16px;}
 .dq-overview-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-width:0;}
+.dq-overview-action{appearance:none;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;transition:border-color .15s,transform .15s;}
+.dq-overview-action:hover{border-color:#b6813d;transform:translateY(-1px);}
 .dq-overview-label{font-size:11px;color:var(--muted);margin-bottom:5px;}
 .dq-overview-value{font-size:14px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .dq-overview-note{font-size:10px;color:var(--muted);margin-top:3px;}
@@ -229,6 +233,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .dq-group-head{font-weight:700;font-size:14px;margin:0 0 10px;padding-left:8px;border-left:3px solid var(--hdl-red);}
 .dq-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
 .dq-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:15px 16px;min-width:0;}
+.dq-card.dq-alert-target{border-color:#b6813d;box-shadow:0 0 0 3px rgba(182,129,61,.16);}
 .dq-card-ph{opacity:0.72;border-style:dashed;}
 .dq-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px;}
 .dq-card-title{font-size:12px;color:var(--muted);font-weight:650;}
@@ -289,6 +294,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
   padding:4px 9px;font:600 10px/1.2 var(--sans);cursor:pointer;}
 .dq-series-btn.active{color:#fff;border-color:var(--series-color);background:var(--series-color);}
 .dq-compare-chart{width:100%;height:142px;display:block;}
+.dq-compare-insight{margin-top:7px;padding:8px 10px;border-left:3px solid #b6813d;background:#fff;
+  color:#4d4942;font-size:11px;line-height:1.55;}
+.dq-compare-insight strong{color:#24211e;}
 .dq-compare-note{font-size:10px;color:var(--dq-flat);margin-top:3px;}
 .dq-section-title{font-weight:700;font-size:13px;margin:26px 0 8px;}
 .dq-detail-panel{margin-top:26px;border-top:1px solid var(--border);}
@@ -495,7 +503,7 @@ const HISTORY_CALENDAR_DAYS = 400;
 
 // ================= 配置(由 daily_module.py 导出, 与看板内嵌版一致) =================
 const METRIC_META = {"rate.DR007": {"name": "DR007", "unit": "%", "dec": 2}, "rate.R007": {"name": "R007", "unit": "%", "dec": 2}, "rate.shibor_on": {"name": "SHIBOR隔夜", "unit": "%", "dec": 2}, "rate.shibor_1w": {"name": "SHIBOR1周", "unit": "%", "dec": 2}, "bond.cn_10y": {"name": "中国国债10Y", "unit": "%", "dec": 4}, "bond.cn_2y": {"name": "中国国债2Y", "unit": "%", "dec": 4}, "bond.cn_gov_1y": {"name": "国债1Y", "unit": "%", "dec": 4}, "bond.cn_gov_3y": {"name": "国债3Y", "unit": "%", "dec": 4}, "bond.cn_gov_10y": {"name": "国债10Y", "unit": "%", "dec": 4}, "bond.credit_aaa_1y": {"name": "中短票AAA 1Y", "unit": "%", "dec": 4}, "bond.credit_aaa_3y": {"name": "中短票AAA 3Y", "unit": "%", "dec": 4}, "bond.credit_aaa_10y": {"name": "中短票AAA 10Y", "unit": "%", "dec": 4}, "bond.bank_aaa_1y": {"name": "银行普通债AAA 1Y", "unit": "%", "dec": 4}, "bond.bank_aaa_3y": {"name": "银行普通债AAA 3Y", "unit": "%", "dec": 4}, "bond.bank_aaa_10y": {"name": "银行普通债AAA 10Y", "unit": "%", "dec": 4}, "bond.us_10y": {"name": "美债10Y", "unit": "%", "dec": 2}, "bond.us_2y": {"name": "美债2Y", "unit": "%", "dec": 2}, "rate.effr": {"name": "EFFR", "unit": "%", "dec": 2}, "fx.usdcny": {"name": "在岸USD/CNY", "unit": "", "dec": 4}, "fx.usdcnh": {"name": "离岸USD/CNH", "unit": "", "dec": 4}, "fx.dxy": {"name": "美元指数DXY", "unit": "", "dec": 2}, "comm.gold_sge": {"name": "上金所Au99.99", "unit": "元/克", "dec": 2}, "comm.gold_xau": {"name": "伦敦金现货(XAU)", "unit": "美元/盎司", "dec": 2}, "comm.crude_brent": {"name": "布伦特原油(Brent)", "unit": "美元/桶", "dec": 2}, "comm.crude_wti": {"name": "WTI原油(NYMEX)", "unit": "美元/桶", "dec": 2}, "eq.csi300": {"name": "沪深300", "unit": "", "dec": 1}, "spread.cn_us_10y": {"name": "中美10Y利差", "unit": "%", "dec": 4}, "spread.credit_10y": {"name": "信用利差10Y", "unit": "%", "dec": 4}, "fx.cnh_cny_spread": {"name": "CNH-CNY价差", "unit": "", "dec": 4}};
-const ALERT_THRESHOLDS = {};
+const ALERT_RULES = {};
 const WIND_CODE_BY_KEY={
   "rate.interbank_1d":"M0041663","rate.interbank_7d":"M0041664",
   "rate.shibor_on":"M0017138","rate.shibor_1w":"M0017139",
@@ -539,10 +547,28 @@ Object.assign(METRIC_META,{
   "spread.us_3y_effr":{name:"美债3Y-EFFR利差",unit:"%",dec:4},
   "cash.money_fund_index":{name:"中证货币基金指数",unit:"点",dec:2}
 });
-Object.assign(ALERT_THRESHOLDS,{
-  "rate.interbank_1d":0.20,
-  "bond.cn_gov_10y":0.05,
-  "spread.usdcny_spot_mid":0.0050
+Object.assign(ALERT_RULES,{
+  "rate.interbank_1d":{watch:15,danger:30},"rate.interbank_7d":{watch:15,danger:30},
+  "rate.shibor_on":{watch:8,danger:15},"rate.shibor_1w":{watch:8,danger:15},
+  "bill.direct_6m_national":{watch:10,danger:20},"bill.rediscount_6m_national":{watch:10,danger:20},
+  "bill.rediscount_6m_city":{watch:10,danger:20},"rate.pboc_rediscount":{watch:5,danger:10},
+  "spread.bill_direct_rediscount":{watch:10,danger:20},
+  "bond.cn_gov_1y":{watch:5,danger:10},"bond.cn_gov_2y":{watch:5,danger:10},
+  "bond.cn_gov_3y":{watch:5,danger:10},"bond.cn_gov_10y":{watch:5,danger:10},
+  "spread.credit_10y":{watch:15,danger:30},
+  "bond.mtn_aaa_issue_1y":{watch:15,danger:30},"bond.mtn_aaa_issue_5y":{watch:15,danger:30},
+  "bond.mtn_aaa_issue_10y":{watch:15,danger:30},
+  "ncd.aaa_issue_3m":{watch:8,danger:15},"ncd.aaa_issue_6m":{watch:8,danger:15},
+  "ncd.aaa_issue_1y":{watch:8,danger:15},
+  "fx.usdcny":{watch:50,danger:100},"fx.usdcny_mid":{watch:30,danger:60},
+  "spread.usdcny_spot_mid":{watch:40,danger:80},"fx.dxy":{watch:.8,danger:1.5},
+  "spread.cn_us_10y":{watch:8,danger:15},
+  "bond.us_10y":{watch:8,danger:15},"bond.us_3y":{watch:8,danger:15},
+  "rate.effr":{watch:5,danger:10},"spread.us_10y_3y":{watch:8,danger:15},
+  "spread.us_3y_effr":{watch:8,danger:15},
+  "comm.gold_sge":{watch:2,danger:4},"comm.gold_xau":{watch:2,danger:4},
+  "comm.crude_brent":{watch:3,danger:6},"comm.crude_wti":{watch:3,danger:6},
+  "eq.csi300":{watch:2,danger:4},"cash.money_fund_index":{watch:.2,danger:.5}
 });
 const GROUPS=[
  {id:"liquidity",title:"1 · 境内资金面与融资成本",cards:[
@@ -627,31 +653,54 @@ function overviewChange(byKey,key,label){
   if(info.flat)return label+'较上次持平';
   return label+'较上次 '+(info.raw>0?'+':'-')+info.text;
 }
+function alertMagnitude(m,k){
+  if(!m||m.prev==null)return null;
+  const raw=Math.abs(m.value-m.prev);
+  const rateLike=meta(k).unit==='%'&&(
+    k.startsWith('rate.')||k.startsWith('bond.')||k.startsWith('bill.')||
+    k.startsWith('ncd.')||(k.startsWith('spread.')&&k!=='spread.usdcny_spot_mid')
+  );
+  if(rateLike)return raw*100;
+  if(k==='fx.usdcny'||k==='fx.usdcny_mid'||k==='spread.usdcny_spot_mid')return raw*10000;
+  if(k.startsWith('comm.')||k.startsWith('eq.')||k.startsWith('cash.')||k==='fx.dxy')
+    return m.prev===0?0:raw/Math.abs(m.prev)*100;
+  return raw;
+}
+function alertLevel(m,k){
+  const rule=ALERT_RULES[k],mag=alertMagnitude(m,k);
+  if(!rule||mag==null)return '';
+  if(mag>=rule.danger)return 'danger';
+  if(mag>=rule.watch)return 'watch';
+  return '';
+}
 function overviewHTML(byKey){
   const liq=latestDelta(byKey,'rate.interbank_7d');
   const bond=latestDelta(byKey,'bond.cn_gov_10y');
   const fx=latestDelta(byKey,'spread.usdcny_spot_mid');
-  let warnCount=0,warnFirst='';
-  for(const k in ALERT_THRESHOLDS){
+  let warnCount=0,warnFirst='',warnFirstKey='';
+  for(const k in ALERT_RULES){
     const m=byKey[k];
-    if(m&&m.prev!=null&&Math.abs(m.value-m.prev)>ALERT_THRESHOLDS[k]){
+    if(alertLevel(m,k)){
       warnCount++;
       if(!warnFirst){
         const info=deltaSpec(m.value,m.prev,k);
         warnFirst=meta(k).name+' '+(info.raw>0?'+':'-')+info.text;
+        warnFirstKey=k;
       }
     }
   }
   const liqText=liq==null?'数据待补':(liq>0.05?'边际偏紧':liq<-0.05?'边际偏松':'总体平稳');
   const bondText=bond==null?'数据待补':(bond>0.02?'收益率上行':bond<-0.02?'收益率下行':'窄幅波动');
   const fxText=fx==null?'数据待补':(Math.abs(fx)>0.02?'压力需关注':'压力正常');
-  const item=(label,value,note)=>'<div class="dq-overview-card"><div class="dq-overview-label">'+label+
-    '</div><div class="dq-overview-value">'+value+'</div><div class="dq-overview-note">'+note+'</div></div>';
+  const item=(label,value,note,key)=>{
+    const tag=key?'button':'div',action=key?' dq-overview-action':'',attr=key?' type="button" data-alert-key="'+esc(key)+'"':'';
+    return '<'+tag+' class="dq-overview-card'+action+'"'+attr+'><div class="dq-overview-label">'+label+
+      '</div><div class="dq-overview-value">'+value+'</div><div class="dq-overview-note">'+note+'</div></'+tag+'>';};
   return '<div class="dq-overview">'+
     item('资金面',liqText,overviewChange(byKey,'rate.interbank_7d','7D拆借'))+
     item('债券环境',bondText,overviewChange(byKey,'bond.cn_gov_10y','国债10Y'))+
     item('人民币汇率',fxText,overviewChange(byKey,'spread.usdcny_spot_mid','即期－中间价'))+
-    item('异常提醒',warnCount?warnCount+' 项需关注':'暂无异常',warnFirst||'基于页面阈值')+
+    item('异常提醒',warnCount?warnCount+' 项需关注':'暂无异常',warnFirst||'基于页面阈值',warnFirstKey)+
     '</div>';
 }
 function sparkSVG(series,w=120,h=30){
@@ -669,14 +718,15 @@ function sparkSVG(series,w=120,h=30){
 function render(byKey, latest, updatedAt, isCache){
   // 告警条
   let watchHits=[],dangerHits=[];
-  for(const k in ALERT_THRESHOLDS){const m=byKey[k];if(!m||m.prev==null)continue;
-    const d=Math.abs(m.value-m.prev),label=meta(k).name+' '+deltaSpec(m.value,m.prev,k).text;
-    if(d>ALERT_THRESHOLDS[k]*2)dangerHits.push(label);
-    else if(d>ALERT_THRESHOLDS[k])watchHits.push(label);
+  for(const k in ALERT_RULES){const m=byKey[k];if(!m||m.prev==null)continue;
+    const level=alertLevel(m,k),label=meta(k).name+' '+deltaSpec(m.value,m.prev,k).text;
+    if(level==='danger')dangerHits.push({key:k,label});
+    else if(level==='watch')watchHits.push({key:k,label});
   }
+  const alertLinks=hits=>hits.map(x=>'<button type="button" class="dq-alert-link" data-alert-key="'+esc(x.key)+'">'+esc(x.label)+'</button>').join(' · ');
   let alert='';
-  if(dangerHits.length)alert='<div class="dq-alert dq-alert-danger">● 异常波动：'+esc(dangerHits.join(' · '))+'</div>';
-  else if(watchHits.length)alert='<div class="dq-alert dq-alert-watch">● 关注：'+esc(watchHits.join(' · '))+'</div>';
+  if(dangerHits.length)alert+='<div class="dq-alert dq-alert-danger">● 异常波动：'+alertLinks(dangerHits)+'</div>';
+  if(watchHits.length)alert+='<div class="dq-alert dq-alert-watch">● 关注：'+alertLinks(watchHits)+'</div>';
 
   let nav='<div class="dq-group-nav">';
   for(const g of GROUPS){const label=g.title.includes('·')?g.title.split('·').slice(1).join('·').trim():g.title;
@@ -713,8 +763,9 @@ function render(byKey, latest, updatedAt, isCache){
   bindResponsiveUI(latest);
   bindViewSwitch();
   applyDailyView(currentDailyView);
+  bindAlertNavigation();
 }
-function seriesAttr(k,m){return "data-s='"+esc(JSON.stringify(m.series||[]))+"' data-n=\""+esc(meta(k).name)+"\" data-u=\""+esc(unit(k))+"\" data-d=\""+meta(k).dec+"\" data-src=\""+esc(m.source||'')+"\"";}
+function seriesAttr(k,m){return "data-k=\""+esc(k)+"\" data-s='"+esc(JSON.stringify(m.series||[]))+"' data-n=\""+esc(meta(k).name)+"\" data-u=\""+esc(unit(k))+"\" data-d=\""+meta(k).dec+"\" data-src=\""+esc(m.source||'')+"\"";}
 function compareHTML(c,byKey){
   if(!c.compare||!c.compare.keys||c.compare.keys.length<2)return '';
   const keys=c.compare.keys;
@@ -738,7 +789,7 @@ function compareHTML(c,byKey){
       '<button type="button" class="dq-range-btn" data-days="90">90日</button>'+
       '<button type="button" class="dq-range-btn" data-days="365">近1年</button></div>'+
     '<div class="dq-compare-head"><span class="dq-compare-label">选择指标（可多选）</span><div class="dq-compare-series">'+buttons+'</div></div>'+
-    '<div class="dq-compare-body"></div><div class="dq-compare-note">'+
+    '<div class="dq-compare-body"></div><div class="dq-compare-insight"></div><div class="dq-compare-note">'+
     (c.compare.mode==='index'?'不同单位按首个共同交易日=100标准化；':'默认显示主指标；')+
     '点击其他指标加入或移出对比</div></div>';
 }
@@ -762,7 +813,8 @@ function cardHTML(c,byKey,latest){
     else subs+='<div class="dq-sub'+extraClass+'"><span class="dq-sub-n">'+sn+'</span><span class="dq-sub-v dq-todo">待补</span></div>';}
   const subToggle=(c.subs||[]).length>2?'<button class="dq-sub-toggle" type="button">展开其余 '+((c.subs||[]).length-2)+' 项 ▾</button>':'';
   const source=m.source?'<div class="dq-src">来源 · '+esc(m.source)+'</div>':'';
-  return '<div class="dq-card" data-core="'+(isCore?'1':'0')+'"><div class="dq-card-head"><div class="dq-card-title">'+esc(c.title)+'</div>'+
+  const cardKeys=[pk,...(c.subs||[])].join(' ');
+  return '<div class="dq-card" data-core="'+(isCore?'1':'0')+'" data-keys="'+esc(cardKeys)+'"><div class="dq-card-head"><div class="dq-card-title">'+esc(c.title)+'</div>'+
     '<div class="dq-card-date">'+dateText+'</div></div>'+
     '<div class="dq-main dq-metric" '+seriesAttr(pk,m)+'><div class="dq-val">'+fmt(m.value,pk)+'<span class="dq-unit">'+unit(pk)+'</span></div>'+
     '<div class="dq-main-right">'+deltaHTML(m.value,m.prev,pk)+sparkSVG(m.series||[])+'</div></div>'+
@@ -796,6 +848,51 @@ function drawChart(body,series,name,uni,dec){
     tip.innerHTML='<b>'+series[bi][0]+'</b> · '+name+' '+series[bi][1].toFixed(dec)+uni;tip.style.left=ev.clientX+'px';tip.style.top=(ev.clientY-12)+'px';tip.style.display='block';});
   hit.addEventListener('pointerleave',function(){cur.style.display='none';dot.style.display='none';tip.style.display='none';});
 }
+function compareMoveText(line,startValue,endValue){
+  const info=deltaSpec(endValue,startValue,line.key);
+  const startText=fmt(startValue,line.key)+unit(line.key),endText=fmt(endValue,line.key)+unit(line.key);
+  if(info.flat)return line.name+'由'+startText+'至'+endText+'（持平）';
+  const marketLike=line.key.startsWith('comm.')||line.key.startsWith('eq.')||line.key.startsWith('cash.');
+  const verb=info.raw>0?(marketLike?'涨至':'升至'):(marketLike?'跌至':'降至');
+  return line.name+'由'+startText+verb+endText+'（'+(info.raw>0?'+':'-')+info.text+'）';
+}
+function updateCompareInsight(body,lines,mode,rangeDays,commonDates){
+  const insight=body.parentElement.querySelector('.dq-compare-insight');
+  if(!insight)return;
+  const rangeLabel=Number(rangeDays)>=365?'近1年':rangeDays+'日';
+  if(!lines.length){insight.textContent='请选择指标后生成变化结论。';return;}
+  const common=[...commonDates].sort();
+  const startDate=common[0],endDate=common[common.length-1];
+  if(!startDate||!endDate||startDate===endDate){insight.textContent='有效可比数据不足，暂不生成结论。';return;}
+  const stats=lines.map(line=>{
+    const start=line.series.find(p=>p[0]===startDate),end=line.series.find(p=>p[0]===endDate);
+    if(!start||!end||start[1]==null||end[1]==null)return null;
+    const raw=Number(end[1])-Number(start[1]);
+    const pct=Number(start[1])===0?null:raw/Math.abs(Number(start[1]))*100;
+    return {line,start:Number(start[1]),end:Number(end[1]),raw,pct};
+  }).filter(Boolean);
+  if(!stats.length){insight.textContent='有效可比数据不足，暂不生成结论。';return;}
+  if(mode==='index'&&stats.length>1){
+    const ranked=stats.filter(x=>x.pct!=null).sort((a,b)=>b.pct-a.pct);
+    if(ranked.length<2){insight.textContent='有效可比数据不足，暂不生成结论。';return;}
+    const best=ranked[0],worst=ranked[ranked.length-1],gap=best.pct-worst.pct;
+    const indexedText=s=>s.line.name+'由'+fmt(s.start,s.line.key)+unit(s.line.key)+
+      (s.pct>=0?'涨至':'跌至')+fmt(s.end,s.line.key)+unit(s.line.key)+
+      '（'+(s.pct>=0?'+':'-')+Math.abs(s.pct).toFixed(2)+'%）';
+    insight.innerHTML='<strong>'+rangeLabel+'：</strong>'+esc(indexedText(best))+
+      '，'+esc(indexedText(worst))+'；前者相对更强 '+gap.toFixed(2)+' 个百分点。';
+    return;
+  }
+  if(stats.length===1){
+    const s=stats[0];
+    insight.innerHTML='<strong>'+rangeLabel+'：</strong>'+esc(compareMoveText(s.line,s.start,s.end))+'。';
+    return;
+  }
+  const ranked=stats.slice().sort((a,b)=>Math.abs(b.raw)-Math.abs(a.raw));
+  const lead=ranked[0],second=ranked[1];
+  insight.innerHTML='<strong>'+rangeLabel+'：</strong>'+esc(compareMoveText(lead.line,lead.start,lead.end))+
+    '，'+esc(compareMoveText(second.line,second.start,second.end))+'；'+esc(lead.line.name)+'变动幅度最大。';
+}
 function drawMultiChart(body,payload,selected,mode='raw',rangeDays=30){
   const lines=selected.map(k=>({key:k,...payload[k]})).filter(x=>x&&x.series&&x.series.length>1);
   if(!lines.length){body.innerHTML='<div class="dq-exp-empty">请至少选择一个指标</div>';return;}
@@ -811,6 +908,7 @@ function drawMultiChart(body,payload,selected,mode='raw',rangeDays=30){
     lines.forEach(x=>{const base=x.series.find(p=>p[0]===baseDate);const bv=base?Number(base[1]):null;
       x.plotSeries=x.series.map(p=>[p[0],bv?Number(p[1])/bv*100:null]);});
   }else lines.forEach(x=>x.plotSeries=x.series);
+  updateCompareInsight(body,lines,mode,rangeDays,commonDates);
   const dateSet=new Set();lines.forEach(x=>x.plotSeries.forEach(p=>dateSet.add(p[0])));
   const dates=[...dateSet].sort(),dateIndex=new Map(dates.map((d,i)=>[d,i]));
   const vals=[];lines.forEach(x=>x.plotSeries.forEach(p=>{if(p[1]!=null)vals.push(Number(p[1]));}));
@@ -882,6 +980,25 @@ function bindExpand(){
       let payload={};try{payload=JSON.parse(panel.getAttribute('data-series')||'{}');}catch(e){}
       const selected=[...panel.querySelectorAll('.dq-series-btn.active')].map(x=>x.dataset.key);
       drawMultiChart(panel.querySelector('.dq-compare-body'),payload,selected,panel.dataset.mode||'raw',panel.dataset.range||30);
+    });
+  });
+}
+function bindAlertNavigation(){
+  document.querySelectorAll('[data-alert-key]').forEach(link=>{
+    link.addEventListener('click',function(){
+      const key=this.dataset.alertKey;
+      const card=[...document.querySelectorAll('.dq-card[data-keys]')]
+        .find(x=>(x.dataset.keys||'').split(' ').includes(key));
+      if(!card)return;
+      if(card.style.display==='none'||card.closest('.dq-group')?.style.display==='none')applyDailyView('all');
+      card.classList.add('show-all-subs','dq-alert-target');
+      const metric=[...card.querySelectorAll('.dq-metric')].find(x=>x.dataset.k===key);
+      if(metric){
+        const exp=card.querySelector('.dq-expand');
+        if(!exp.classList.contains('open')||exp.dataset.cur!==metric.dataset.n)metric.click();
+      }
+      card.scrollIntoView({behavior:'smooth',block:'center'});
+      window.setTimeout(()=>card.classList.remove('dq-alert-target'),2600);
     });
   });
 }
