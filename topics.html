@@ -1203,7 +1203,7 @@ body{
 </div>
 <div class="sb-group">
 <div class="sb-group-head">海底捞经营透视</div>
-<div class="sb-item" onclick="location.href='https://sushiro-internal.pages.dev/home'">
+<div class="sb-item" onclick="location.href='https://sushiro-internal.pages.dev/compare'">
 <span class="sb-item-dot"></span>
 <span class="sb-item-text">海底捞 vs 社零餐饮</span>
 </div>
@@ -1218,7 +1218,7 @@ body{
 <div class="sb-item" onclick="location.href='https://sushiro-internal.pages.dev/peer'">
 <span class="sb-item-dot"></span>
 <span class="sb-item-text">内部经营追踪</span>
-<span class="sb-item-badge live">29省</span>
+<span class="sb-item-badge live">31省</span>
 </div>
 </div>
 </aside>
@@ -1226,15 +1226,46 @@ body{
 <div class="page" id="page-topics" style="display:block">
 <div class="page-head">
 <div class="page-title">专题分析索引</div>
-<div class="page-sub">专题分析索引 · 累计 6 份 · 自动扫描专题目录生成</div>
+<div class="page-sub">专题判断与经营影响归档 · 累计 6 份</div>
 </div>
 <!-- 专题索引主体: V3.6 数据驱动 (替换 V2 演示硬编码) -->
 <style>
 /* V3.6 索引页样式 (新增, V2 原版没有) */
 .topic-summary-bar {
   display:flex; justify-content:space-between; align-items:center;
-  margin:18px 0 22px; flex-wrap:wrap; gap:14px;
+  margin:12px 0 18px; flex-wrap:wrap; gap:14px;
 }
+.topic-featured {
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:22px; align-items:center;
+  margin:18px 0 14px; padding:20px 22px; border:1px solid var(--line);
+  border-left:4px solid var(--hdl-red); border-radius:9px; background:var(--bg-card);
+  cursor:pointer; box-shadow:0 4px 14px rgba(42,36,30,.05);
+}
+.topic-featured-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.topic-featured.monthly { border-left-color:#315f82; }
+.topic-featured.special.red { border-left-color:#d04848; }
+.topic-featured.special.yellow { border-left-color:#d8a93b; }
+.topic-featured.special.green { border-left-color:#3e9a52; }
+.topic-history-links { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+.topic-history-link {
+  padding:3px 8px; border:1px solid var(--line); border-radius:10px;
+  font-size:10px; color:var(--muted); background:var(--bg-page);
+}
+.topic-featured:hover { border-color:#cbbfb0; transform:translateY(-1px); }
+.topic-featured-kicker { font:600 10px var(--mono); color:var(--hdl-red); letter-spacing:.08em; }
+.topic-featured-title { margin:7px 0 6px; font:700 21px/1.35 var(--serif); color:var(--ink); }
+.topic-featured-summary { max-width:900px; font:13px/1.65 var(--serif); color:var(--ink-2); }
+.topic-featured-side { min-width:120px; text-align:right; }
+.topic-featured-date { font:12px var(--mono); color:var(--muted); }
+.topic-featured-cta { margin-top:12px; font-size:12px; color:var(--hdl-red); font-weight:600; }
+.topic-tool-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.topic-search {
+  width:min(360px,100%); box-sizing:border-box; padding:8px 12px;
+  border:1px solid var(--line); border-radius:8px; background:var(--bg-card);
+  color:var(--ink); font-size:12px; outline:none;
+}
+.topic-search:focus { border-color:var(--ink-2); box-shadow:0 0 0 2px rgba(42,36,30,.06); }
+.topic-search-status { font-size:10px; color:var(--muted); }
 .topic-chip-row { display:flex; gap:8px; flex-wrap:wrap; }
 .topic-chip {
   padding:6px 14px; background:var(--bg-card); border:1px solid var(--line);
@@ -1245,7 +1276,7 @@ body{
 .topic-chip.active { background:var(--ink); color:#fff; border-color:var(--ink); }
 .topic-light-row { display:flex; gap:14px; align-items:center; }
 .topic-light-pill {
-  font-size:12px; color:var(--muted); display:inline-flex; align-items:center; gap:6px;
+  font-size:11px; color:var(--muted); display:inline-flex; align-items:center; gap:6px;
   font-family:var(--mono);
 }
 .topic-light-dot { width:9px; height:9px; border-radius:50%; }
@@ -1258,122 +1289,171 @@ body{
   font-size:10.5px; padding:1px 7px; background:var(--bg-card-2);
   color:var(--muted); border-radius:8px; border:1px solid var(--line);
 }
+.topic-row-signal { margin-left:7px; font-size:10px; color:var(--muted); }
+.topic-group-section { margin-top:18px; }
+.topic-group-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:8px; }
+.topic-group-title { font:700 18px var(--serif); color:var(--ink); }
+.topic-group-desc { font-size:10px; color:var(--muted); }
+.topic-empty-filter { display:none; padding:30px; text-align:center; color:var(--muted); }
+@media(max-width:720px) {
+  .topic-featured-grid { grid-template-columns:1fr; }
+  .topic-featured { grid-template-columns:1fr; padding:16px; }
+  .topic-featured-side { text-align:left; }
+  .topic-featured-title { font-size:18px; }
+  .topic-summary-bar { align-items:flex-start; }
+  .topic-light-row { width:100%; overflow-x:auto; padding-bottom:2px; }
+}
 </style>
+<div class="topic-featured-grid"><div class="topic-featured monthly" onclick="showTopic('FB-2026-07-17-001')">
+<div>
+<div class="topic-featured-kicker">最新宏观月度解读</div>
+<div class="topic-featured-title">宏观经济月度解读 · 2026年6月数据</div>
+<div class="topic-featured-summary">别把中国餐饮止跌或美国餐饮销售正增长误读成需求全面转强；中国限上餐饮仅+0.1%，美国餐饮销售6月环比仅+0.1%，两地都更适合按客流和单店效率管理，而不是上修趋势增速。</div>
+<div class="topic-history-links"><span class="topic-history-link" onclick="event.stopPropagation();showTopic('FB-2026-06-17-001')">2026-05</span><span class="topic-history-link" onclick="event.stopPropagation();showTopic('FB-2026-05-29-001')">2026-04</span></div>
+</div>
+<div class="topic-featured-side">
+<div class="topic-featured-date">2026-07-17</div>
+<div class="topic-featured-cta">阅读本月解读 →</div>
+</div>
+</div><div class="topic-featured special yellow" onclick="showTopic('FB-2026-07-20-001')">
+<div>
+<div class="topic-featured-kicker">最新专项研究 · 持续关注</div>
+<div class="topic-featured-title">扩大消费“十五五”规划 · 海底捞经营影响分析</div>
+<div class="topic-featured-summary">别把扩大消费政策直接等同于加速开店；对海底捞，更确定的近期影响是人工成本压力，而消费场景、加盟、AI和绿色经营都必须先通过单店客流、总部控制能力和净财务回报验证。</div>
+</div>
+<div class="topic-featured-side">
+<div class="topic-featured-date">2026-07-20</div>
+<div class="topic-featured-cta">阅读专项 →</div>
+</div>
+</div></div>
 <div class="topic-summary-bar">
+<div class="topic-tool-row">
+<input class="topic-search" id="topic-search" oninput="topicSearch(this.value)" placeholder="搜索标题、核心判断或标签" type="search"/>
+<span class="topic-search-status" id="topic-search-status">展示 6 篇</span>
+</div>
 <div class="topic-chip-row">
 <div class="topic-chip active" data-filter="all" onclick="topicFilter('all')">全部 · 6</div>
-<div class="topic-chip policy" data-filter="政策专题" onclick="topicFilter('政策专题')">政策专题 · 1</div>
-<div class="topic-chip data" data-filter="数据专题" onclick="topicFilter('数据专题')">数据专题 · 4</div>
-<div class="topic-chip industry" data-filter="行业专题" onclick="topicFilter('行业专题')">行业专题 · 0</div>
+<div class="topic-chip data" data-filter="月度解读" onclick="topicFilter('月度解读')">宏观月度解读 · 3</div>
+<div class="topic-chip policy" data-filter="专项研究" onclick="topicFilter('专项研究')">专项研究 · 3</div>
 </div>
 <div class="topic-light-row">
-<span class="topic-light-pill"><span class="topic-light-dot r"></span>红色 · 1</span>
-<span class="topic-light-pill"><span class="topic-light-dot y"></span>黄色 · 4</span>
-<span class="topic-light-pill"><span class="topic-light-dot g"></span>绿色 · 1</span>
+<span class="topic-light-pill"><span class="topic-light-dot r"></span>重点风险 · 1</span>
+<span class="topic-light-pill"><span class="topic-light-dot y"></span>持续关注 · 4</span>
+<span class="topic-light-pill"><span class="topic-light-dot g"></span>正向观察 · 1</span>
 </div>
 </div>
+<section class="topic-group-section" data-group="月度解读">
+<div class="topic-group-head"><div><div class="topic-group-title">宏观月度解读</div>
+<div class="topic-group-desc">统计局月度数据发布后的固定解读，按月份连续归档</div></div></div>
 <div class="topic-list">
-<div class="topic-row" data-type="政策专题" onclick="showTopic('FB-2026-07-20-001')">
-<div class="topic-row-left">
-<div class="topic-row-date">07.20</div>
-<div class="topic-row-light y"></div>
-</div>
-<div class="topic-row-mid">
-<span class="topic-row-type policy">政策专题</span>
-<div class="topic-row-title">扩大消费“十五五”规划 · 海底捞经营影响分析</div>
-<div class="topic-row-summary">别把扩大消费政策直接等同于加速开店；对海底捞，更确定的近期影响是人工成本压力，而消费场景、加盟、AI和绿色经营都必须先通过单店客流、总部控制能力和净财务回报验证。</div>
-<div class="topic-row-tags"><span class="topic-row-tag">扩大消费</span> <span class="topic-row-tag">十五五规划</span> <span class="topic-row-tag">海底捞</span> <span class="topic-row-tag">人工成本</span> <span class="topic-row-tag">新店立项</span> <span class="topic-row-tag">加盟</span> <span class="topic-row-tag">AI</span> <span class="topic-row-tag">绿色经营</span></div>
-</div>
-<div class="topic-row-right">
-<div class="topic-row-id">FB-2026-07-20-001</div>
-<div class="topic-row-cta">阅读全文 →</div>
-</div>
-</div>
-<div class="topic-row" data-type="数据专题" onclick="showTopic('FB-2026-07-17-001')">
+<div class="topic-row" data-search="宏观经济月度解读 · 2026年6月数据 别把中国餐饮止跌或美国餐饮销售正增长误读成需求全面转强；中国限上餐饮仅+0.1%，美国餐饮销售6月环比仅+0.1%，两地都更适合按客流和单店效率管理，而不是上修趋势增速。 数据专题 月度解读 宏观月度 社零 餐饮 cpi ppi pmi 美联储 美国cpi 海底捞" data-type="月度解读" onclick="showTopic('FB-2026-07-17-001')">
 <div class="topic-row-left">
 <div class="topic-row-date">07.17</div>
 <div class="topic-row-light y"></div>
 </div>
 <div class="topic-row-mid">
-<span class="topic-row-type data">数据专题</span>
+<span class="topic-row-type data">宏观月度</span>
+<span class="topic-row-signal">固定月度更新</span>
 <div class="topic-row-title">宏观经济月度解读 · 2026年6月数据</div>
 <div class="topic-row-summary">别把中国餐饮止跌或美国餐饮销售正增长误读成需求全面转强；中国限上餐饮仅+0.1%，美国餐饮销售6月环比仅+0.1%，两地都更适合按客流和单店效率管理，而不是上修趋势增速。</div>
-<div class="topic-row-tags"><span class="topic-row-tag">社零</span> <span class="topic-row-tag">餐饮</span> <span class="topic-row-tag">CPI</span> <span class="topic-row-tag">PPI</span> <span class="topic-row-tag">PMI</span> <span class="topic-row-tag">美联储</span> <span class="topic-row-tag">美国CPI</span> <span class="topic-row-tag">海底捞</span></div>
+<div class="topic-row-tags"><span class="topic-row-tag">社零</span> <span class="topic-row-tag">餐饮</span> <span class="topic-row-tag">CPI</span><span class="topic-row-tag">+5</span></div>
 </div>
 <div class="topic-row-right">
-<div class="topic-row-id">FB-2026-07-17-001</div>
-<div class="topic-row-cta">阅读全文 →</div>
+<div class="topic-row-id">2026-07-17</div>
+<div class="topic-row-cta">阅读全文</div>
 </div>
 </div>
-<div class="topic-row" data-type="数据专题 · 成本风险" onclick="showTopic('FB-2026-06-23-001')">
-<div class="topic-row-left">
-<div class="topic-row-date">06.23</div>
-<div class="topic-row-light r"></div>
-</div>
-<div class="topic-row-mid">
-<span class="topic-row-type data">数据专题 · 成本风险</span>
-<div class="topic-row-title">牛羊肉成本上行影响</div>
-<div class="topic-row-summary">牛羊肉这块最重的肉成本，已被"供给去化 + 进口封顶"双锁，进入一轮确定性高、持续 1–2 年的上行；不是单月波动，是中期成本中枢上移，必须现在就对冲，不能被动承受。</div>
-<div class="topic-row-tags"><span class="topic-row-tag">牛羊肉</span> <span class="topic-row-tag">食材成本</span> <span class="topic-row-tag">进口关税</span> <span class="topic-row-tag">供给去化</span> <span class="topic-row-tag">净利率</span> <span class="topic-row-tag">对冲</span></div>
-</div>
-<div class="topic-row-right">
-<div class="topic-row-id">FB-2026-06-23-001</div>
-<div class="topic-row-cta">阅读全文 →</div>
-</div>
-</div>
-<div class="topic-row" data-type="数据专题" onclick="showTopic('FB-2026-06-17-001')">
+<div class="topic-row" data-search='宏观经济月度解读 · 2026年5月数据 别再笼统说"食材在降价、成本有红利"——降价的是猪肉和蔬菜，而海底捞主力荤菜牛羊肉正在涨价且被三年期进口关税锁住；表面持平、内里转弱，是弱复苏不是反转。 数据专题 月度解读 宏观月度 社零 餐饮 cpi ppi 牛羊肉 成本 经营含义' data-type="月度解读" onclick="showTopic('FB-2026-06-17-001')">
 <div class="topic-row-left">
 <div class="topic-row-date">06.17</div>
 <div class="topic-row-light y"></div>
 </div>
 <div class="topic-row-mid">
-<span class="topic-row-type data">数据专题</span>
+<span class="topic-row-type data">宏观月度</span>
+<span class="topic-row-signal">固定月度更新</span>
 <div class="topic-row-title">宏观经济月度解读 · 2026年5月数据</div>
 <div class="topic-row-summary">别再笼统说"食材在降价、成本有红利"——降价的是猪肉和蔬菜，而海底捞主力荤菜牛羊肉正在涨价且被三年期进口关税锁住；表面持平、内里转弱，是弱复苏不是反转。</div>
-<div class="topic-row-tags"><span class="topic-row-tag">社零</span> <span class="topic-row-tag">餐饮</span> <span class="topic-row-tag">CPI</span> <span class="topic-row-tag">PPI</span> <span class="topic-row-tag">牛羊肉</span> <span class="topic-row-tag">成本</span> <span class="topic-row-tag">经营含义</span></div>
+<div class="topic-row-tags"><span class="topic-row-tag">社零</span> <span class="topic-row-tag">餐饮</span> <span class="topic-row-tag">CPI</span><span class="topic-row-tag">+4</span></div>
 </div>
 <div class="topic-row-right">
-<div class="topic-row-id">FB-2026-06-17-001</div>
-<div class="topic-row-cta">阅读全文 →</div>
+<div class="topic-row-id">2026-06-17</div>
+<div class="topic-row-cta">阅读全文</div>
 </div>
 </div>
-<div class="topic-row" data-type="数据专题" onclick="showTopic('FB-2026-05-29-001')">
+<div class="topic-row" data-search='宏观经济月度解读 · 2026年4月数据 餐饮仍是消费里少数正增长的赛道，但增量在快速收窄；cpi下行、ppi转正，形成"收入放缓、毛利可扩"的窗口期。 数据专题 月度解读 宏观月度 社零 餐饮 cpi ppi gdp 经营含义' data-type="月度解读" onclick="showTopic('FB-2026-05-29-001')">
 <div class="topic-row-left">
 <div class="topic-row-date">05.29</div>
 <div class="topic-row-light y"></div>
 </div>
 <div class="topic-row-mid">
-<span class="topic-row-type data">数据专题</span>
+<span class="topic-row-type data">宏观月度</span>
+<span class="topic-row-signal">固定月度更新</span>
 <div class="topic-row-title">宏观经济月度解读 · 2026年4月数据</div>
 <div class="topic-row-summary">餐饮仍是消费里少数正增长的赛道，但增量在快速收窄；CPI下行、PPI转正，形成"收入放缓、毛利可扩"的窗口期。</div>
-<div class="topic-row-tags"><span class="topic-row-tag">社零</span> <span class="topic-row-tag">餐饮</span> <span class="topic-row-tag">CPI</span> <span class="topic-row-tag">PPI</span> <span class="topic-row-tag">GDP</span> <span class="topic-row-tag">经营含义</span></div>
+<div class="topic-row-tags"><span class="topic-row-tag">社零</span> <span class="topic-row-tag">餐饮</span> <span class="topic-row-tag">CPI</span><span class="topic-row-tag">+3</span></div>
 </div>
 <div class="topic-row-right">
-<div class="topic-row-id">FB-2026-05-29-001</div>
-<div class="topic-row-cta">阅读全文 →</div>
+<div class="topic-row-id">2026-05-29</div>
+<div class="topic-row-cta">阅读全文</div>
+</div>
+</div></div>
+</section><section class="topic-group-section" data-group="专项研究">
+<div class="topic-group-head"><div><div class="topic-group-title">专项研究</div>
+<div class="topic-group-desc">由政策变化、成本风险、行业事件或经营问题触发</div></div></div>
+<div class="topic-list">
+<div class="topic-row" data-search="扩大消费“十五五”规划 · 海底捞经营影响分析 别把扩大消费政策直接等同于加速开店；对海底捞，更确定的近期影响是人工成本压力，而消费场景、加盟、ai和绿色经营都必须先通过单店客流、总部控制能力和净财务回报验证。 政策专题 专项研究 政策影响 扩大消费 十五五规划 海底捞 人工成本 新店立项 加盟 ai 绿色经营" data-type="专项研究" onclick="showTopic('FB-2026-07-20-001')">
+<div class="topic-row-left">
+<div class="topic-row-date">07.20</div>
+<div class="topic-row-light y"></div>
+</div>
+<div class="topic-row-mid">
+<span class="topic-row-type policy">政策影响</span>
+<span class="topic-row-signal">持续关注</span>
+<div class="topic-row-title">扩大消费“十五五”规划 · 海底捞经营影响分析</div>
+<div class="topic-row-summary">别把扩大消费政策直接等同于加速开店；对海底捞，更确定的近期影响是人工成本压力，而消费场景、加盟、AI和绿色经营都必须先通过单店客流、总部控制能力和净财务回报验证。</div>
+<div class="topic-row-tags"><span class="topic-row-tag">扩大消费</span> <span class="topic-row-tag">十五五规划</span> <span class="topic-row-tag">海底捞</span><span class="topic-row-tag">+5</span></div>
+</div>
+<div class="topic-row-right">
+<div class="topic-row-id">2026-07-20</div>
+<div class="topic-row-cta">阅读全文</div>
 </div>
 </div>
-<div class="topic-row" data-type="数据专题" onclick="showTopic('FB-2026-05-29-002')">
+<div class="topic-row" data-search='牛羊肉成本上行影响 牛羊肉这块最重的肉成本，已被"供给去化 + 进口封顶"双锁，进入一轮确定性高、持续 1–2 年的上行；不是单月波动，是中期成本中枢上移，必须现在就对冲，不能被动承受。 数据专题 · 成本风险 专项研究 成本风险 牛羊肉 食材成本 进口关税 供给去化 净利率 对冲' data-type="专项研究" onclick="showTopic('FB-2026-06-23-001')">
+<div class="topic-row-left">
+<div class="topic-row-date">06.23</div>
+<div class="topic-row-light r"></div>
+</div>
+<div class="topic-row-mid">
+<span class="topic-row-type data">成本风险</span>
+<span class="topic-row-signal">重点风险</span>
+<div class="topic-row-title">牛羊肉成本上行影响</div>
+<div class="topic-row-summary">牛羊肉这块最重的肉成本，已被"供给去化 + 进口封顶"双锁，进入一轮确定性高、持续 1–2 年的上行；不是单月波动，是中期成本中枢上移，必须现在就对冲，不能被动承受。</div>
+<div class="topic-row-tags"><span class="topic-row-tag">牛羊肉</span> <span class="topic-row-tag">食材成本</span> <span class="topic-row-tag">进口关税</span><span class="topic-row-tag">+3</span></div>
+</div>
+<div class="topic-row-right">
+<div class="topic-row-id">2026-06-23</div>
+<div class="topic-row-cta">阅读全文</div>
+</div>
+</div>
+<div class="topic-row" data-search="2026q1 gdp +5.0% 增长拆解 · 谁在拉动 服务业撑大盘（贡献63.2%）+ 装备制造/高技术制造挑大梁，电子是单一最强行业（21.4%）。 数据专题 专项研究 宏观结构 gdp 产业拆解 装备制造 高技术制造 电子 中美对比" data-type="专项研究" onclick="showTopic('FB-2026-05-29-002')">
 <div class="topic-row-left">
 <div class="topic-row-date">05.29</div>
 <div class="topic-row-light g"></div>
 </div>
 <div class="topic-row-mid">
-<span class="topic-row-type data">数据专题</span>
+<span class="topic-row-type data">宏观结构</span>
+<span class="topic-row-signal">正向观察</span>
 <div class="topic-row-title">2026Q1 GDP +5.0% 增长拆解 · 谁在拉动</div>
 <div class="topic-row-summary">服务业撑大盘（贡献63.2%）+ 装备制造/高技术制造挑大梁，电子是单一最强行业（21.4%）。</div>
-<div class="topic-row-tags"><span class="topic-row-tag">GDP</span> <span class="topic-row-tag">产业拆解</span> <span class="topic-row-tag">装备制造</span> <span class="topic-row-tag">高技术制造</span> <span class="topic-row-tag">电子</span> <span class="topic-row-tag">中美对比</span></div>
+<div class="topic-row-tags"><span class="topic-row-tag">GDP</span> <span class="topic-row-tag">产业拆解</span> <span class="topic-row-tag">装备制造</span><span class="topic-row-tag">+3</span></div>
 </div>
 <div class="topic-row-right">
-<div class="topic-row-id">FB-2026-05-29-002</div>
-<div class="topic-row-cta">阅读全文 →</div>
+<div class="topic-row-id">2026-05-29</div>
+<div class="topic-row-cta">阅读全文</div>
 </div>
-</div>
-</div>
-<div class="notice info" style="margin-top:24px">
-<span class="notice-icon">i</span>
-<div>本索引基于 <code style="background:var(--bg-card);padding:1px 6px;border-radius:3px;font-family:var(--mono);">/Users/haidilao4/商分宏观/宏观数据追踪分析/专题分析</code> 目录扫描自动生成. 累计 6 份专题. 新增专题: 在该目录放入含 YAML front matter 的 .md 文件即可, 下次跑 build 自动收录.</div>
-</div>
+</div></div>
+</section>
+<div class="topic-empty-filter" id="topic-empty-filter">没有符合条件的专题</div>
 </div>
 <div class="page" id="page-topic-detail" style="display:none">
 <style>
@@ -1413,6 +1493,27 @@ body{
       font-family:var(--mono); color:var(--muted); white-space:nowrap;
     }
     .topic-article-info-table dd { margin:0; }
+    .topic-decision-panel {
+      display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px;
+      margin:16px 0 4px;
+    }
+    .topic-decision-item {
+      padding:12px 14px; border:1px solid var(--line); border-radius:7px;
+      background:var(--bg-card);
+    }
+    .topic-decision-item.wide { grid-column:1/-1; }
+    .topic-decision-label {
+      margin-bottom:5px; font:600 10px var(--mono); color:var(--muted); letter-spacing:.04em;
+    }
+    .topic-decision-value { font:13px/1.6 var(--serif); color:var(--ink); }
+    .topic-decision-panel.monthly .topic-decision-item.wide { border-left:3px solid #315f82; }
+    .topic-decision-panel.special .topic-decision-item.wide { border-left:3px solid var(--hdl-red); }
+    .topic-month-nav { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .topic-month-nav button {
+      padding:5px 9px; border:1px solid var(--line); border-radius:6px;
+      background:var(--bg-page); color:var(--ink-2); font-size:10px; cursor:pointer;
+    }
+    .topic-month-nav button:hover { border-color:var(--ink-2); }
     
     /* 正文 */
     .topic-article-body {
@@ -1537,10 +1638,15 @@ body{
       .topic-article-wrap { grid-template-columns:1fr; }
       .topic-toc { position:static; max-height:none; margin-bottom:24px; }
     }
+    @media (max-width:680px) {
+      .topic-decision-panel { grid-template-columns:1fr; }
+      .topic-decision-item.wide { grid-column:auto; }
+      .topic-article-title { font-size:23px; }
+    }
   </style>
 <article class="topic-article" id="topic-article-FB-2026-07-20-001">
 <div class="topic-article-toolbar">
-<span class="topic-back-link" onclick="showPage('topics')">← 返回专题索引</span>
+<span class="topic-back-link" onclick="returnToTopicIndex()">← 返回专题索引</span>
 <span style="color:var(--muted);font-family:var(--mono);">FB-2026-07-20-001</span>
 </div>
 <div class="topic-article-header">
@@ -1551,7 +1657,24 @@ body{
 </div>
 <h1 class="topic-article-title">扩大消费“十五五”规划 · 海底捞经营影响分析</h1>
 <div class="topic-article-sub">全量版 · 政策原文与内部经营数据融合</div>
-<div class="topic-article-oneliner">别把扩大消费政策直接等同于加速开店；对海底捞，更确定的近期影响是人工成本压力，而消费场景、加盟、AI和绿色经营都必须先通过单店客流、总部控制能力和净财务回报验证。</div>
+<div class="topic-decision-panel special">
+<div class="topic-decision-item wide">
+<div class="topic-decision-label">专项核心结论</div>
+<div class="topic-decision-value">别把扩大消费政策直接等同于加速开店；对海底捞，更确定的近期影响是人工成本压力，而消费场景、加盟、AI和绿色经营都必须先通过单店客流、总部控制能力和净财务回报验证。</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">关注等级</div>
+<div class="topic-decision-value">持续关注</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">专项类型</div>
+<div class="topic-decision-value">政策影响</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">关键主题</div>
+<div class="topic-decision-value">扩大消费、十五五规划、海底捞、人工成本、新店立项</div>
+</div>
+</div>
 <dl class="topic-article-info-table"><dt>撰稿</dt><dd>撰写部门：商分部</dd><dt>版本与日期</dt><dd>v1 · 2026-07-20</dd><dt>专题编号</dt><dd>FB-2026-07-20-001</dd></dl>
 </div>
 <div class="topic-article-wrap">
@@ -1996,7 +2119,7 @@ body{
 </article>
 <article class="topic-article" id="topic-article-FB-2026-07-17-001">
 <div class="topic-article-toolbar">
-<span class="topic-back-link" onclick="showPage('topics')">← 返回专题索引</span>
+<span class="topic-back-link" onclick="returnToTopicIndex()">← 返回专题索引</span>
 <span style="color:var(--muted);font-family:var(--mono);">FB-2026-07-17-001</span>
 </div>
 <div class="topic-article-header">
@@ -2007,7 +2130,24 @@ body{
 </div>
 <h1 class="topic-article-title">宏观经济月度解读 · 2026年6月数据</h1>
 <div class="topic-article-sub">全量版 · 中美6月零售与价格剪刀差更新</div>
-<div class="topic-article-oneliner">别把中国餐饮止跌或美国餐饮销售正增长误读成需求全面转强；中国限上餐饮仅+0.1%，美国餐饮销售6月环比仅+0.1%，两地都更适合按客流和单店效率管理，而不是上修趋势增速。</div>
+<div class="topic-decision-panel monthly">
+<div class="topic-decision-item wide">
+<div class="topic-decision-label">本月核心判断</div>
+<div class="topic-decision-value">别把中国餐饮止跌或美国餐饮销售正增长误读成需求全面转强；中国限上餐饮仅+0.1%，美国餐饮销售6月环比仅+0.1%，两地都更适合按客流和单店效率管理，而不是上修趋势增速。</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">数据期次</div>
+<div class="topic-decision-value">2026-06</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">更新机制</div>
+<div class="topic-decision-value">统计局月度数据发布后更新</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">重点观察</div>
+<div class="topic-decision-value">社零、餐饮、CPI、PPI、PMI</div>
+</div>
+</div><div class="topic-month-nav"><button onclick="showTopic('FB-2026-06-17-001')">← 上期 2026-05</button></div>
 <dl class="topic-article-info-table"><dt>撰稿</dt><dd>撰写部门：商分部</dd><dt>版本与日期</dt><dd>v3 · 2026-07-17</dd><dt>专题编号</dt><dd>FB-2026-07-17-001</dd></dl>
 </div>
 <div class="topic-article-wrap">
@@ -2222,7 +2362,7 @@ body{
 </article>
 <article class="topic-article" id="topic-article-FB-2026-06-23-001">
 <div class="topic-article-toolbar">
-<span class="topic-back-link" onclick="showPage('topics')">← 返回专题索引</span>
+<span class="topic-back-link" onclick="returnToTopicIndex()">← 返回专题索引</span>
 <span style="color:var(--muted);font-family:var(--mono);">FB-2026-06-23-001</span>
 </div>
 <div class="topic-article-header">
@@ -2233,7 +2373,24 @@ body{
 </div>
 <h1 class="topic-article-title">牛羊肉成本上行影响</h1>
 <div class="topic-article-sub">从"供给深度去化"到 55% 关税，再到食材成本与净利——附数据溯源与口径校正</div>
-<div class="topic-article-oneliner">牛羊肉这块最重的肉成本，已被"供给去化 + 进口封顶"双锁，进入一轮确定性高、持续 1–2 年的上行；不是单月波动，是中期成本中枢上移，必须现在就对冲，不能被动承受。</div>
+<div class="topic-decision-panel special">
+<div class="topic-decision-item wide">
+<div class="topic-decision-label">专项核心结论</div>
+<div class="topic-decision-value">牛羊肉这块最重的肉成本，已被"供给去化 + 进口封顶"双锁，进入一轮确定性高、持续 1–2 年的上行；不是单月波动，是中期成本中枢上移，必须现在就对冲，不能被动承受。</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">关注等级</div>
+<div class="topic-decision-value">重点风险</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">专项类型</div>
+<div class="topic-decision-value">成本风险</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">关键主题</div>
+<div class="topic-decision-value">牛羊肉、食材成本、进口关税、供给去化、净利率</div>
+</div>
+</div>
 <dl class="topic-article-info-table"><dt>撰稿</dt><dd>商分组</dd><dt>版本与日期</dt><dd>v2（内嵌图表自包含版 · 新增价格全景图） · 2026-06-23</dd><dt>专题编号</dt><dd>FB-2026-06-23-001</dd></dl>
 </div>
 <div class="topic-article-wrap">
@@ -2612,7 +2769,7 @@ body{
 </ul>
 <div class="topic-article-related">
 <div class="topic-article-related-title">相关图表 / 数据</div>
-<div class="topic-article-related-list"><span class="topic-article-related-link" onclick="showPage('FB-2026-06-17-001')">宏观经济月度解读 · 2026年5月</span></div>
+<div class="topic-article-related-list"><span class="topic-article-related-link" onclick="showTopic('FB-2026-06-17-001')">宏观经济月度解读 · 2026年5月</span></div>
 </div>
 </div>
 <aside class="topic-toc"><div class="topic-toc-title">本篇目录</div><div class="toc">
@@ -2647,7 +2804,7 @@ body{
 </article>
 <article class="topic-article" id="topic-article-FB-2026-06-17-001">
 <div class="topic-article-toolbar">
-<span class="topic-back-link" onclick="showPage('topics')">← 返回专题索引</span>
+<span class="topic-back-link" onclick="returnToTopicIndex()">← 返回专题索引</span>
 <span style="color:var(--muted);font-family:var(--mono);">FB-2026-06-17-001</span>
 </div>
 <div class="topic-article-header">
@@ -2658,7 +2815,24 @@ body{
 </div>
 <h1 class="topic-article-title">宏观经济月度解读 · 2026年5月数据</h1>
 <div class="topic-article-sub">5月宏观数据与海底捞经营预警（管理层一页纸）</div>
-<div class="topic-article-oneliner">别再笼统说"食材在降价、成本有红利"——降价的是猪肉和蔬菜，而海底捞主力荤菜牛羊肉正在涨价且被三年期进口关税锁住；表面持平、内里转弱，是弱复苏不是反转。</div>
+<div class="topic-decision-panel monthly">
+<div class="topic-decision-item wide">
+<div class="topic-decision-label">本月核心判断</div>
+<div class="topic-decision-value">别再笼统说"食材在降价、成本有红利"——降价的是猪肉和蔬菜，而海底捞主力荤菜牛羊肉正在涨价且被三年期进口关税锁住；表面持平、内里转弱，是弱复苏不是反转。</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">数据期次</div>
+<div class="topic-decision-value">2026-05</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">更新机制</div>
+<div class="topic-decision-value">统计局月度数据发布后更新</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">重点观察</div>
+<div class="topic-decision-value">社零、餐饮、CPI、PPI、牛羊肉</div>
+</div>
+</div><div class="topic-month-nav"><button onclick="showTopic('FB-2026-05-29-001')">← 上期 2026-04</button><button onclick="showTopic('FB-2026-07-17-001')">下期 2026-06 →</button></div>
 <dl class="topic-article-info-table"><dt>撰稿</dt><dd>商分宏观组</dd><dt>版本与日期</dt><dd>v1 · 2026-06-17</dd><dt>专题编号</dt><dd>FB-2026-06-17-001</dd></dl>
 </div>
 <div class="topic-article-wrap">
@@ -2869,7 +3043,7 @@ body{
 </article>
 <article class="topic-article" id="topic-article-FB-2026-05-29-001">
 <div class="topic-article-toolbar">
-<span class="topic-back-link" onclick="showPage('topics')">← 返回专题索引</span>
+<span class="topic-back-link" onclick="returnToTopicIndex()">← 返回专题索引</span>
 <span style="color:var(--muted);font-family:var(--mono);">FB-2026-05-29-001</span>
 </div>
 <div class="topic-article-header">
@@ -2880,7 +3054,24 @@ body{
 </div>
 <h1 class="topic-article-title">宏观经济月度解读 · 2026年4月数据</h1>
 <div class="topic-article-sub">宏观月度/季度指标跟踪与餐饮经营含义</div>
-<div class="topic-article-oneliner">餐饮仍是消费里少数正增长的赛道，但增量在快速收窄；CPI下行、PPI转正，形成"收入放缓、毛利可扩"的窗口期。</div>
+<div class="topic-decision-panel monthly">
+<div class="topic-decision-item wide">
+<div class="topic-decision-label">本月核心判断</div>
+<div class="topic-decision-value">餐饮仍是消费里少数正增长的赛道，但增量在快速收窄；CPI下行、PPI转正，形成"收入放缓、毛利可扩"的窗口期。</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">数据期次</div>
+<div class="topic-decision-value">2026-04</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">更新机制</div>
+<div class="topic-decision-value">统计局月度数据发布后更新</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">重点观察</div>
+<div class="topic-decision-value">社零、餐饮、CPI、PPI、GDP</div>
+</div>
+</div><div class="topic-month-nav"><button onclick="showTopic('FB-2026-06-17-001')">下期 2026-05 →</button></div>
 <dl class="topic-article-info-table"><dt>撰稿</dt><dd>商分宏观组</dd><dt>版本与日期</dt><dd>v1 · 2026-05-29</dd><dt>专题编号</dt><dd>FB-2026-05-29-001</dd></dl>
 </div>
 <div class="topic-article-wrap">
@@ -2978,7 +3169,7 @@ body{
 </article>
 <article class="topic-article" id="topic-article-FB-2026-05-29-002">
 <div class="topic-article-toolbar">
-<span class="topic-back-link" onclick="showPage('topics')">← 返回专题索引</span>
+<span class="topic-back-link" onclick="returnToTopicIndex()">← 返回专题索引</span>
 <span style="color:var(--muted);font-family:var(--mono);">FB-2026-05-29-002</span>
 </div>
 <div class="topic-article-header">
@@ -2989,7 +3180,24 @@ body{
 </div>
 <h1 class="topic-article-title">2026Q1 GDP +5.0% 增长拆解 · 谁在拉动</h1>
 <div class="topic-article-sub">三次产业 → 拉动力分层 → 工业行业 → 龙头企业</div>
-<div class="topic-article-oneliner">服务业撑大盘（贡献63.2%）+ 装备制造/高技术制造挑大梁，电子是单一最强行业（21.4%）。</div>
+<div class="topic-decision-panel special">
+<div class="topic-decision-item wide">
+<div class="topic-decision-label">专项核心结论</div>
+<div class="topic-decision-value">服务业撑大盘（贡献63.2%）+ 装备制造/高技术制造挑大梁，电子是单一最强行业（21.4%）。</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">关注等级</div>
+<div class="topic-decision-value">正向观察</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">专项类型</div>
+<div class="topic-decision-value">宏观结构</div>
+</div>
+<div class="topic-decision-item">
+<div class="topic-decision-label">关键主题</div>
+<div class="topic-decision-value">GDP、产业拆解、装备制造、高技术制造、电子</div>
+</div>
+</div>
 <dl class="topic-article-info-table"><dt>撰稿</dt><dd>商分宏观组</dd><dt>版本与日期</dt><dd>v1 · 2026-05-29</dd><dt>专题编号</dt><dd>FB-2026-05-29-002</dd></dl>
 </div>
 <div class="topic-article-wrap">
@@ -3320,9 +3528,24 @@ body{
 </div>
 </article>
 <script>
-  // 切换专题 article 显示 + 切换到 topic-detail page
+  // 专题路由：URL 可直达；返回索引保留筛选条件和滚动位置。
   if (typeof window.showTopic === 'undefined') {
-    window.showTopic = function(topicId) {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window._topicIndexScrollY = 0;
+    window._scrollTopicToTop = function() {
+      window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+      requestAnimationFrame(function() {
+        window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+      });
+      setTimeout(function() {
+        window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+      }, 80);
+    };
+    window.showTopic = function(topicId, fromHistory) {
+      var indexPage = document.getElementById('page-topics');
+      if (!fromHistory && indexPage && indexPage.style.display !== 'none') {
+        window._topicIndexScrollY = window.scrollY || 0;
+      }
       // 先切到 page-topic-detail
       if (typeof window.showPage === 'function') {
         window.showPage('topic-detail');
@@ -3336,25 +3559,73 @@ body{
       var target = document.getElementById('topic-article-' + topicId);
       if (target) {
         target.classList.add('active');
-        // 滚到页面顶部
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        if (!fromHistory && history && history.pushState) {
+          history.pushState({topicId: topicId}, '', '#topic=' + encodeURIComponent(topicId));
+        }
+        // 切换文章后强制回到详情顶部，避免浏览器恢复上一篇的滚动位置。
+        window._scrollTopicToTop();
       }
     };
+    window.returnToTopicIndex = function(fromHistory) {
+      if (typeof window.showPage === 'function') window.showPage('topics');
+      if (!fromHistory && history && history.pushState) {
+        history.pushState({topicsIndex:true}, '', location.pathname + location.search);
+      }
+      setTimeout(function() {
+        window.scrollTo({top: window._topicIndexScrollY || 0, behavior:'auto'});
+      }, 120);
+    };
+    window.addEventListener('popstate', function() {
+      var match = location.hash.match(/^#topic=(.+)$/);
+      if (match) window.showTopic(decodeURIComponent(match[1]), true);
+      else window.returnToTopicIndex(true);
+    });
+    window.addEventListener('DOMContentLoaded', function() {
+      var match = location.hash.match(/^#topic=(.+)$/);
+      if (match) window.showTopic(decodeURIComponent(match[1]), true);
+    });
   }
   </script>
 </div>
 
 <script>
 if (typeof window.topicFilter === 'undefined') {
+  window._topicFilterType = 'all';
+  window._topicQuery = '';
+  window.applyTopicFilters = function() {
+    var shown = 0;
+    document.querySelectorAll('#page-topics .topic-row').forEach(function(row) {
+      var typeOK = window._topicFilterType === 'all' ||
+                   row.getAttribute('data-type') === window._topicFilterType;
+      var text = (row.getAttribute('data-search') || '').toLowerCase();
+      var queryOK = !window._topicQuery || text.indexOf(window._topicQuery) >= 0;
+      var visible = typeOK && queryOK;
+      row.style.display = visible ? '' : 'none';
+      if (visible) shown++;
+    });
+    document.querySelectorAll('#page-topics .topic-group-section').forEach(function(section) {
+      var anyVisible = Array.prototype.some.call(
+        section.querySelectorAll('.topic-row'),
+        function(row) { return row.style.display !== 'none'; }
+      );
+      section.style.display = anyVisible ? '' : 'none';
+    });
+    var status = document.getElementById('topic-search-status');
+    if (status) status.textContent = '展示 ' + shown + ' 篇';
+    var empty = document.getElementById('topic-empty-filter');
+    if (empty) empty.style.display = shown ? 'none' : 'block';
+  };
   window.topicFilter = function(filterType) {
+    window._topicFilterType = filterType;
     document.querySelectorAll('.topic-chip').forEach(function(c) {
       c.classList.remove('active');
       if (c.getAttribute('data-filter') === filterType) c.classList.add('active');
     });
-    document.querySelectorAll('#page-topics .topic-row').forEach(function(row) {
-      var rowType = row.getAttribute('data-type');
-      row.style.display = (filterType === 'all' || rowType === filterType) ? '' : 'none';
-    });
+    window.applyTopicFilters();
+  };
+  window.topicSearch = function(value) {
+    window._topicQuery = (value || '').trim().toLowerCase();
+    window.applyTopicFilters();
   };
 }
 </script>
