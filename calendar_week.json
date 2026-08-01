@@ -1,54 +1,6 @@
 {
-  "generated_at": "2026-07-31T08:30:02",
+  "generated_at": "2026-08-01T08:30:06",
   "days": [
-    {
-      "date": "2026-07-31",
-      "weekday": "五",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "7月官方综合PMI",
-          "datetime": "2026-07-31 09:30:00",
-          "hm": "09:30",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": 50.6,
-          "link": "",
-          "date": "2026-07-31"
-        },
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "7月官方非制造业PMI",
-          "datetime": "2026-07-31 09:30:00",
-          "hm": "09:30",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": 50.2,
-          "link": "",
-          "date": "2026-07-31"
-        },
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "7月官方制造业PMI",
-          "datetime": "2026-07-31 09:30:00",
-          "hm": "09:30",
-          "importance": 4,
-          "actual": null,
-          "forecast": null,
-          "previous": 50.3,
-          "link": "",
-          "date": "2026-07-31"
-        }
-      ]
-    },
     {
       "date": "2026-08-03",
       "weekday": "一",
@@ -102,7 +54,7 @@
           "hm": "20:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 2.7,
           "previous": 1.8,
           "link": "",
           "date": "2026-08-06"
@@ -116,7 +68,7 @@
           "hm": "20:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 0.7,
           "previous": 0.3,
           "link": "",
           "date": "2026-08-06"
@@ -129,15 +81,43 @@
       "events": [
         {
           "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2028年FOMC票委、圣路易联储主席穆萨莱姆就美国经济和货币政策发表讲话。",
+          "datetime": "2026-08-07 04:30:00",
+          "hm": "04:30",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-08-07"
+        },
+        {
+          "region": "美国",
           "indicator": "非农",
           "subtype": "主条",
           "event": "7月非农就业人口变动(万人)",
           "datetime": "2026-08-07 20:30:00",
           "hm": "20:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
-          "forecast": 9.0,
+          "forecast": 8.8,
           "previous": 5.7,
+          "link": "",
+          "date": "2026-08-07"
+        },
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2027年FOMC票委、里奇蒙联储主席巴尔金发表讲话。",
+          "datetime": "2026-08-07 22:00:00",
+          "hm": "22:00",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
           "link": "",
           "date": "2026-08-07"
         }
