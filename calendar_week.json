@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-08-05T08:30:11",
+  "generated_at": "2026-08-06T08:30:07",
   "days": [
-    {
-      "date": "2026-08-05",
-      "weekday": "三",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "7月RatingDog综合PMI",
-          "datetime": "2026-08-05 09:45:00",
-          "hm": "09:45",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": 53.6,
-          "link": "",
-          "date": "2026-08-05"
-        }
-      ]
-    },
     {
       "date": "2026-08-06",
       "weekday": "四",
