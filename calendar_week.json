@@ -1,54 +1,6 @@
 {
-  "generated_at": "2026-08-07T08:30:06",
+  "generated_at": "2026-08-08T08:30:05",
   "days": [
-    {
-      "date": "2026-08-07",
-      "weekday": "五",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "2028年FOMC票委、圣路易联储主席穆萨莱姆就美国经济和货币政策发表讲话。",
-          "datetime": "2026-08-07 04:30:00",
-          "hm": "04:30",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-08-07"
-        },
-        {
-          "region": "美国",
-          "indicator": "非农",
-          "subtype": "主条",
-          "event": "7月非农就业人口变动(万人)",
-          "datetime": "2026-08-07 20:30:00",
-          "hm": "20:30",
-          "importance": 4,
-          "actual": null,
-          "forecast": 8.0,
-          "previous": 5.7,
-          "link": "",
-          "date": "2026-08-07"
-        },
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "2027年FOMC票委、里奇蒙联储主席巴尔金发表讲话。",
-          "datetime": "2026-08-07 22:00:00",
-          "hm": "22:00",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-08-07"
-        }
-      ]
-    },
     {
       "date": "2026-08-09",
       "weekday": "日",
@@ -122,7 +74,7 @@
           "event": "7月核心CPI同比",
           "datetime": "2026-08-12 20:30:00",
           "hm": "20:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": 2.5,
           "previous": 2.6,
@@ -136,7 +88,7 @@
           "event": "7月CPI同比",
           "datetime": "2026-08-12 20:30:00",
           "hm": "20:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": 3.5,
           "previous": 3.5,
@@ -170,6 +122,26 @@
           "previous": -0.4,
           "link": "",
           "date": "2026-08-12"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-13",
+      "weekday": "四",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2027年FOMC票委、里奇蒙联储主席巴尔金就经济前景发表讲话。",
+          "datetime": "2026-08-13 20:40:00",
+          "hm": "20:40",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-08-13"
         }
       ]
     }
