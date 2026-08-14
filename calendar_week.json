@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-08-13T08:30:05",
+  "generated_at": "2026-08-14T08:30:03",
   "days": [
-    {
-      "date": "2026-08-13",
-      "weekday": "四",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "2027年FOMC票委、里奇蒙联储主席巴尔金就经济前景发表讲话。",
-          "datetime": "2026-08-13 20:40:00",
-          "hm": "20:40",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-08-13"
-        }
-      ]
-    },
     {
       "date": "2026-08-17",
       "weekday": "一",
