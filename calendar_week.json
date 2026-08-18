@@ -1,40 +1,6 @@
 {
-  "generated_at": "2026-08-17T08:30:06",
+  "generated_at": "2026-08-18T08:30:08",
   "days": [
-    {
-      "date": "2026-08-17",
-      "weekday": "一",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "社零",
-          "subtype": "同比累计",
-          "event": "1至7月社会消费品零售总额同比",
-          "datetime": "2026-08-17 15:00:00",
-          "hm": "15:00",
-          "importance": 3,
-          "actual": null,
-          "forecast": null,
-          "previous": 1.3,
-          "link": "",
-          "date": "2026-08-17"
-        },
-        {
-          "region": "中国",
-          "indicator": "社零",
-          "subtype": "同比",
-          "event": "7月社会消费品零售总额同比",
-          "datetime": "2026-08-17 15:00:00",
-          "hm": "15:00",
-          "importance": 4,
-          "actual": null,
-          "forecast": null,
-          "previous": 1.0,
-          "link": "",
-          "date": "2026-08-17"
-        }
-      ]
-    },
     {
       "date": "2026-08-20",
       "weekday": "四",
