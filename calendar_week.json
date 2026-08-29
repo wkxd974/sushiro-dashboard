@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-28T08:30:08",
+  "generated_at": "2026-08-29T08:30:07",
   "days": [
     {
       "date": "2026-08-31",
@@ -96,7 +96,7 @@
           "hm": "20:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 1.3,
           "previous": 1.3,
           "link": "",
           "date": "2026-09-03"
@@ -110,7 +110,7 @@
           "hm": "20:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 1.4,
           "previous": 1.4,
           "link": "",
           "date": "2026-09-03"
@@ -121,6 +121,20 @@
       "date": "2026-09-04",
       "weekday": "五",
       "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2026年FOMC票委、克利夫兰联储主席哈玛克在“联储社区”活动上致开幕词。",
+          "datetime": "2026-09-04 03:00:00",
+          "hm": "03:00",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-09-04"
+        },
         {
           "region": "美国",
           "indicator": "非农",
