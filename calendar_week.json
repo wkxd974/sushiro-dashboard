@@ -1,40 +1,6 @@
 {
-  "generated_at": "2026-09-04T08:30:08",
+  "generated_at": "2026-09-05T08:30:08",
   "days": [
-    {
-      "date": "2026-09-04",
-      "weekday": "五",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "2026年FOMC票委、克利夫兰联储主席哈玛克在“联储社区”活动上致开幕词。",
-          "datetime": "2026-09-04 03:00:00",
-          "hm": "03:00",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-09-04"
-        },
-        {
-          "region": "美国",
-          "indicator": "非农",
-          "subtype": "主条",
-          "event": "8月非农就业人口变动(万人)",
-          "datetime": "2026-09-04 20:30:00",
-          "hm": "20:30",
-          "importance": 4,
-          "actual": null,
-          "forecast": 5.5,
-          "previous": -2.3,
-          "link": "",
-          "date": "2026-09-04"
-        }
-      ]
-    },
     {
       "date": "2026-09-09",
       "weekday": "三",
@@ -46,7 +12,7 @@
           "event": "8月CPI同比",
           "datetime": "2026-09-09 09:30:00",
           "hm": "09:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": null,
           "previous": 0.5,
@@ -60,7 +26,7 @@
           "event": "8月PPI同比",
           "datetime": "2026-09-09 09:30:00",
           "hm": "09:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": null,
           "previous": 3.5,
@@ -108,9 +74,9 @@
           "event": "8月核心CPI同比",
           "datetime": "2026-09-11 20:30:00",
           "hm": "20:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
-          "forecast": null,
+          "forecast": 2.4,
           "previous": 2.5,
           "link": "",
           "date": "2026-09-11"
@@ -122,9 +88,9 @@
           "event": "8月CPI同比",
           "datetime": "2026-09-11 20:30:00",
           "hm": "20:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
-          "forecast": null,
+          "forecast": 3.4,
           "previous": 3.4,
           "link": "",
           "date": "2026-09-11"
@@ -138,7 +104,7 @@
           "hm": "20:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 0.2,
           "previous": 0.2,
           "link": "",
           "date": "2026-09-11"
@@ -152,7 +118,7 @@
           "hm": "20:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 0.4,
           "previous": 0.1,
           "link": "",
           "date": "2026-09-11"
