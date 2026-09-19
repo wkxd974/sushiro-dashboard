@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T08:30:09",
+  "generated_at": "2026-09-19T08:30:10",
   "days": [
     {
       "date": "2026-09-21",
@@ -32,6 +32,26 @@
           "previous": 3.0,
           "link": "",
           "date": "2026-09-21"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-22",
+      "weekday": "二",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "FOMC永久票委、纽约联储主席威廉姆斯在2026年美债市场会议发表演讲。",
+          "datetime": "2026-09-22 22:05:00",
+          "hm": "22:05",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-09-22"
         }
       ]
     }
