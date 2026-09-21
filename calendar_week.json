@@ -1,57 +1,63 @@
 {
-  "generated_at": "2026-09-20T08:30:14",
+  "generated_at": "2026-09-21T08:30:08",
   "days": [
     {
       "date": "2026-09-21",
       "weekday": "一",
       "events": [
         {
-          "region": "中国",
-          "indicator": "LPR",
-          "subtype": "5年",
-          "event": "9月五年期贷款市场报价利率(LPR)",
-          "datetime": "2026-09-21 09:00:00",
-          "hm": "09:00",
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "FOMC票委、芝加哥联储主席古尔斯比发表讲话",
+          "datetime": "2026-09-21 18:30:00",
+          "hm": "18:30",
           "importance": 3,
           "actual": null,
-          "forecast": 3.5,
-          "previous": 3.5,
-          "link": "",
-          "date": "2026-09-21"
-        },
-        {
-          "region": "中国",
-          "indicator": "LPR",
-          "subtype": "1年",
-          "event": "9月一年期贷款市场报价利率(LPR)",
-          "datetime": "2026-09-21 09:00:00",
-          "hm": "09:00",
-          "importance": 3,
-          "actual": null,
-          "forecast": 3.0,
-          "previous": 3.0,
+          "forecast": null,
+          "previous": null,
           "link": "",
           "date": "2026-09-21"
         }
       ]
     },
     {
-      "date": "2026-09-22",
-      "weekday": "二",
+      "date": "2026-09-25",
+      "weekday": "五",
       "events": [
         {
           "region": "美国",
           "indicator": "FOMC",
           "subtype": "主条",
-          "event": "FOMC永久票委、纽约联储主席威廉姆斯在2026年美债市场会议发表演讲。",
-          "datetime": "2026-09-22 22:05:00",
-          "hm": "22:05",
+          "event": "FOMC永久票委、纽约联储主席威廉姆斯发表讲话",
+          "datetime": "2026-09-25 17:15:00",
+          "hm": "17:15",
           "importance": 2,
           "actual": null,
           "forecast": null,
           "previous": null,
           "link": "",
-          "date": "2026-09-22"
+          "date": "2026-09-25"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-26",
+      "weekday": "六",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "FOMC票委、克利夫兰联储主席哈玛克发表讲话",
+          "datetime": "2026-09-26 02:00:00",
+          "hm": "02:00",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-09-26"
         }
       ]
     }
