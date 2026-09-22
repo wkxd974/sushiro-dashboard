@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-09-21T08:30:08",
+  "generated_at": "2026-09-22T08:30:07",
   "days": [
-    {
-      "date": "2026-09-21",
-      "weekday": "一",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "FOMC票委、芝加哥联储主席古尔斯比发表讲话",
-          "datetime": "2026-09-21 18:30:00",
-          "hm": "18:30",
-          "importance": 3,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-09-21"
-        }
-      ]
-    },
     {
       "date": "2026-09-25",
       "weekday": "五",
