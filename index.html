@@ -2020,7 +2020,9 @@ function renderSTrend(f){
   // Compute daily avg turnover rate from daily data
   var turnG={};d.forEach(function(r){
     if(!turnG[r.date])turnG[r.date]={sum:0,n:0};
-    if(r.daily_turnover_rate>0){turnG[r.date].sum+=r.daily_turnover_rate;turnG[r.date].n++;}
+    // Zero is a valid queue-based lower bound; missing/invalid rates are not zero.
+    var rate=r.daily_turnover_rate;
+    if(typeof rate==='number'&&Number.isFinite(rate)&&rate>=0){turnG[r.date].sum+=rate;turnG[r.date].n++;}
   });
   var turnTrendData=fullDates.map(function(ds){
     var o=turnG[ds];
