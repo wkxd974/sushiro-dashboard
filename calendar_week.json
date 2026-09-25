@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-24T08:30:11",
+  "generated_at": "2026-09-25T08:30:10",
   "days": [
     {
       "date": "2026-09-25",
@@ -114,6 +114,26 @@
           "previous": 52.1,
           "link": "",
           "date": "2026-09-30"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-02",
+      "weekday": "五",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "非农",
+          "subtype": "主条",
+          "event": "9月非农就业人口变动(万人)",
+          "datetime": "2026-10-02 20:30:00",
+          "hm": "20:30",
+          "importance": 3,
+          "actual": null,
+          "forecast": 10.7,
+          "previous": 16.2,
+          "link": "",
+          "date": "2026-10-02"
         }
       ]
     }
