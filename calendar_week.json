@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T08:30:07",
+  "generated_at": "2026-09-29T08:30:08",
   "days": [
     {
       "date": "2026-09-30",
@@ -180,7 +180,7 @@
           "hm": "20:30",
           "importance": 4,
           "actual": null,
-          "forecast": 10.7,
+          "forecast": 9.0,
           "previous": 16.2,
           "link": "",
           "date": "2026-10-02"
