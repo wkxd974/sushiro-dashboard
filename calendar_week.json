@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-29T08:30:08",
+  "generated_at": "2026-09-30T08:30:09",
   "days": [
     {
       "date": "2026-09-30",
@@ -184,6 +184,26 @@
           "previous": 16.2,
           "link": "",
           "date": "2026-10-02"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-07",
+      "weekday": "三",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2026年FOMC票委、达拉斯联储主席洛根发表讲话。",
+          "datetime": "2026-10-07 07:00:00",
+          "hm": "07:00",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-10-07"
         }
       ]
     }
