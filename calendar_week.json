@@ -1,54 +1,6 @@
 {
-  "generated_at": "2026-10-02T08:30:07",
+  "generated_at": "2026-10-03T08:30:07",
   "days": [
-    {
-      "date": "2026-10-02",
-      "weekday": "五",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "FOMC永久票委、纽约联储主席威廉姆斯在该联储举办的一场央行研讨会上主持讨论，美联储理事丽莎·库克将出席同一场讨论。",
-          "datetime": "2026-10-02 03:30:00",
-          "hm": "03:30",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-10-02"
-        },
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "2026年FOMC票委、达拉斯联储主席洛根发表讲话。",
-          "datetime": "2026-10-02 06:45:00",
-          "hm": "06:45",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-10-02"
-        },
-        {
-          "region": "美国",
-          "indicator": "非农",
-          "subtype": "主条",
-          "event": "9月非农就业人口变动(万人)",
-          "datetime": "2026-10-02 20:30:00",
-          "hm": "20:30",
-          "importance": 4,
-          "actual": null,
-          "forecast": 9.0,
-          "previous": 16.2,
-          "link": "",
-          "date": "2026-10-02"
-        }
-      ]
-    },
     {
       "date": "2026-10-07",
       "weekday": "三",
