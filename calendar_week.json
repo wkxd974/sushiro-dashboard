@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-03T08:30:07",
+  "generated_at": "2026-10-04T08:30:05",
   "days": [
     {
       "date": "2026-10-07",
@@ -25,6 +25,20 @@
       "date": "2026-10-09",
       "weekday": "五",
       "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2028年FOMC票委、圣路易联储主席穆萨莱姆发表讲话。",
+          "datetime": "2026-10-09 01:40:00",
+          "hm": "01:40",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-10-09"
+        },
         {
           "region": "中国",
           "indicator": "M2",
@@ -52,6 +66,26 @@
           "previous": 239100.0,
           "link": "",
           "date": "2026-10-09"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-10",
+      "weekday": "六",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2028年FOMC票委、波士顿联储主席柯林斯发表讲话。",
+          "datetime": "2026-10-10 04:00:00",
+          "hm": "04:00",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-10-10"
         }
       ]
     }
