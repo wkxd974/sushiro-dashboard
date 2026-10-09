@@ -3933,18 +3933,170 @@ window.addEventListener('resize', function() {
 // 密码错误 => GCM 认证失败 => 数学上无法解出任何数据
 // ============================================================
 var __bundlePromise__ = null;
+var __bundleTask__ = null;
+var __BUNDLE_DOWNLOAD_OPTIONS__ = { idleMs: 30000, totalMs: 120000, maxAttempts: 3, retryDelayMs: 1000 };
 
-function __fetchBundle__(force) {
-  if (__bundlePromise__ && !force) return __bundlePromise__;
-  var url = __BUNDLE_URL__.indexOf('http') === 0
-    ? __BUNDLE_URL__ + '?t=' + Date.now()   // 加时间戳绕过 CDN/浏览器缓存
-    : __BUNDLE_URL__;                        // data: URL（演示版）不加参数
-  __bundlePromise__ = fetch(url, { cache: 'no-store' }).then(function(r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.arrayBuffer();
+function __bundleDownloadError__(message, retryable) {
+  var error = new Error(message);
+  error.stage = 'download';
+  error.retryable = retryable;
+  return error;
+}
+
+function __reportBundleProgress__(task, progress) {
+  if (__bundleTask__ !== task) return;
+  task.progress = progress;
+  task.listeners.slice().forEach(function(listener) {
+    try { listener(progress); } catch (_) { /* UI callbacks must not break downloads. */ }
   });
-  __bundlePromise__.catch(function(){});     // 预下载阶段不弹错，提交时统一处理
+}
+
+function __bundleAttempt__(task, attempt) {
+  return new Promise(function(resolve, reject) {
+    var options = __BUNDLE_DOWNLOAD_OPTIONS__;
+    var controller = new AbortController(), reader = null, finished = false;
+    var idleTimer = null, totalTimer = null, loaded = 0, total = 0;
+    function report(phase, message) {
+      if (!finished) __reportBundleProgress__(task, {
+        phase: phase, attempt: attempt, maxAttempts: options.maxAttempts,
+        loaded: loaded, total: total, message: message || ''
+      });
+    }
+    function finish(error, result) {
+      if (finished) return;
+      finished = true;
+      clearTimeout(idleTimer); clearTimeout(totalTimer);
+      if (error) {
+        // Reject explicitly too: an unresponsive fetch/reader must not keep the gate busy.
+        controller.abort();
+        if (reader) { try { Promise.resolve(reader.cancel()).catch(function(){}); } catch (_) {} }
+        reject(error);
+      } else { resolve(result); }
+    }
+    function resetIdle() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function() {
+        finish(__bundleDownloadError__('连续 ' + Math.round(options.idleMs / 1000) + ' 秒未收到数据，连接可能不稳定', true));
+      }, options.idleMs);
+    }
+    resetIdle();
+    totalTimer = setTimeout(function() {
+      finish(__bundleDownloadError__('单次下载超过 ' + Math.round(options.totalMs / 1000) + ' 秒', true));
+    }, options.totalMs);
+    report('connecting');
+    var url = __BUNDLE_URL__.indexOf('http') === 0
+      ? __BUNDLE_URL__ + (__BUNDLE_URL__.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now() + '-' + attempt
+      : __BUNDLE_URL__;
+    (async function() {
+      try {
+        var response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+        if (finished) return;
+        if (!response.ok) throw __bundleDownloadError__('服务器返回 HTTP ' + response.status,
+          response.status === 408 || response.status === 429 || response.status >= 500);
+        var length = Number(response.headers.get('content-length'));
+        var encoding = response.headers.get('content-encoding');
+        // Encoded response lengths may differ from the decoded stream length.
+        total = (!encoding || encoding === 'identity') && Number.isSafeInteger(length) && length > 0 ? length : 0;
+        report('downloading');
+        var buffer;
+        if (response.body && typeof response.body.getReader === 'function') {
+          reader = response.body.getReader();
+          var chunks = [];
+          while (true) {
+            var part = await reader.read();
+            if (finished) return;
+            if (part.done) break;
+            if (part.value && part.value.byteLength) {
+              chunks.push(part.value); loaded += part.value.byteLength;
+              resetIdle(); report('downloading');
+            }
+          }
+          // Cross-origin responses can hide Content-Encoding. Only an explicit identity
+          // encoding makes a strict length comparison safe; AES-GCM verifies the package.
+          if (encoding === 'identity' && total && loaded !== total) throw __bundleDownloadError__('数据包传输不完整，请重新下载', true);
+          var bytes = new Uint8Array(loaded), offset = 0;
+          chunks.forEach(function(chunk) { bytes.set(chunk, offset); offset += chunk.byteLength; });
+          buffer = bytes.buffer;
+        } else {
+          // Legacy fallback still shares both timers; never invent byte progress.
+          buffer = await response.arrayBuffer();
+          if (finished) return;
+          loaded = buffer.byteLength;
+          if (encoding === 'identity' && total && loaded !== total) throw __bundleDownloadError__('数据包传输不完整，请重新下载', true);
+        }
+        if (!loaded) throw __bundleDownloadError__('收到的数据包为空', true);
+        total = loaded; report('complete'); finish(null, buffer);
+      } catch (error) {
+        if (finished) return;
+        finish(error && error.stage === 'download' ? error :
+          __bundleDownloadError__('网络下载失败：' + (error && error.message ? error.message : String(error)), !(error instanceof RangeError)));
+      } finally {
+        if (reader) { try { reader.releaseLock(); } catch (_) {} }
+      }
+    })();
+  });
+}
+
+async function __downloadBundle__(task) {
+  var options = __BUNDLE_DOWNLOAD_OPTIONS__;
+  for (var attempt = 1; attempt <= options.maxAttempts; attempt++) {
+    try { return await __bundleAttempt__(task, attempt); }
+    catch (error) {
+      if (!error.retryable || attempt === options.maxAttempts) throw error;
+      var retryInMs = options.retryDelayMs * attempt;
+      __reportBundleProgress__(task, {
+        phase: 'retrying', attempt: attempt, maxAttempts: options.maxAttempts,
+        loaded: 0, total: 0, retryInMs: retryInMs, message: error.message
+      });
+      await new Promise(function(resolve) { setTimeout(resolve, retryInMs); });
+    }
+  }
+}
+
+function __fetchBundle__(force, onProgress) {
+  var task = __bundleTask__;
+  // Pending forced refreshes also share a single transfer; completed ones may be refreshed.
+  if (!task || !__bundlePromise__ || (force && !task.pending)) {
+    task = { pending: true, progress: null, listeners: [] };
+    __bundleTask__ = task;
+    var active = task;
+    __bundlePromise__ = __downloadBundle__(task).then(function(buffer) {
+      active.pending = false; active.listeners = [];
+      return buffer;
+    }, function(error) {
+      __reportBundleProgress__(active, Object.assign({}, active.progress, { phase: 'error', message: error.message }));
+      active.pending = false; active.listeners = [];
+      if (__bundleTask__ === active) { __bundleTask__ = null; __bundlePromise__ = null; }
+      throw error;
+    });
+    __bundlePromise__.catch(function(){}); // Preload errors are shown when the user submits.
+  }
+  if (typeof onProgress === 'function') {
+    if (task.pending && task.listeners.indexOf(onProgress) === -1) task.listeners.push(onProgress);
+    if (task.progress) { try { onProgress(task.progress); } catch (_) {} }
+  }
   return __bundlePromise__;
+}
+
+function __bundleProgressText__(progress) {
+  var attempt = '第 ' + progress.attempt + '/' + progress.maxAttempts + ' 次';
+  if (progress.phase === 'connecting') return '正在连接数据服务器 · ' + attempt;
+  if (progress.phase === 'retrying') return progress.message + '；' + Math.ceil(progress.retryInMs / 1000) + ' 秒后自动重试（第 ' + (progress.attempt + 1) + '/' + progress.maxAttempts + ' 次）';
+  if (progress.phase === 'error') return progress.message;
+  var received = (progress.loaded / 1048576).toFixed(2);
+  var known = progress.total > 0 && progress.loaded <= progress.total;
+  var percent = known ? Math.min(progress.phase === 'complete' ? 100 : 99, Math.floor(progress.loaded * 100 / progress.total)) : 0;
+  return '已下载 ' + received + (known ? ' / ' + (progress.total / 1048576).toFixed(2) + ' MB（' + percent + '%）' : ' MB（总大小未知）') + ' · ' + attempt;
+}
+
+var __bundleRefreshPromise__ = null;
+
+function __finishBundleRefresh__(promise) {
+  return promise.then(function(value) {
+    __bundleRefreshPromise__ = null; return value;
+  }, function(error) {
+    __bundleRefreshPromise__ = null; throw error;
+  });
 }
 
 function __decrypt__(pwd, buf) {
@@ -3967,12 +4119,16 @@ function __decrypt__(pwd, buf) {
 // 解锁后手动/定时刷新：重新下载 + 用已验证密码重新解密
 function __refreshBundle__() {
   if (!window.__unlockedPwd__) return;
+  if (__bundleRefreshPromise__) return __bundleRefreshPromise__;
   var lbl = document.getElementById('srcLabel');
   if (lbl) lbl.innerHTML = '<span class="spin"></span> 更新数据包...';
-  __fetchBundle__(true)
+  __bundleRefreshPromise__ = __finishBundleRefresh__(__fetchBundle__(true, function(progress) {
+    if (lbl) lbl.textContent = __bundleProgressText__(progress);
+  })
     .then(function(buf) { return __decrypt__(window.__unlockedPwd__, buf); })
     .then(function(data) { __DATA__ = data; loadAllData(); })
-    .catch(function(e) { if (lbl) lbl.textContent = '更新失败: ' + (e && e.message ? e.message : e); });
+    .catch(function(e) { if (lbl) lbl.textContent = '更新失败: ' + (e && e.message ? e.message : e); }));
+  return __bundleRefreshPromise__;
 }
 
 function __initGate__() {
@@ -3990,14 +4146,17 @@ function __initGate__() {
     + '<div style="font-size:13px;color:#888;margin-bottom:20px">\u6570\u636E\u5DF2\u52A0\u5BC6\uFF0C\u8BF7\u8F93\u5165\u8BBF\u95EE\u5BC6\u7801</div>'
     + '<input id="pwdInput" type="password" placeholder="\u8BF7\u8F93\u5165\u5BC6\u7801" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;text-align:center">'
     + '<div id="pwdErr" style="visibility:hidden;color:#d9534f;font-size:12px;margin-top:9px">\u5BC6\u7801\u9519\u8BEF\uFF0C\u8BF7\u91CD\u8BD5</div>'
+    + '<div id="pwdDownload" style="display:none;margin-top:12px;text-align:left"><div id="pwdProgress" role="status" aria-live="polite" style="font-size:12px;line-height:1.6;color:#666;overflow-wrap:anywhere"></div><progress id="pwdProgressBar" max="100" aria-label="数据包下载进度" style="width:100%;height:8px;margin-top:6px;accent-color:#53687d"></progress></div>'
     + '<button id="pwdBtn" type="button" style="width:100%;margin-top:14px;padding:10px 0;border:none;background:linear-gradient(180deg,#2A2F3A,#1E2330);color:#fff;border-radius:8px;font-size:14px;cursor:pointer;letter-spacing:2px">\u8FDB\u5165\u770B\u677F</button>'
     + '</div>';
   document.body.appendChild(ov);
 
   var input = document.getElementById('pwdInput'), err = document.getElementById('pwdErr'),
       btn = document.getElementById('pwdBtn'), card = document.getElementById('pwdCard'), busy = false;
+  var downloadBox = document.getElementById('pwdDownload'), progressLabel = document.getElementById('pwdProgress'),
+      progressBar = document.getElementById('pwdProgressBar'), stage = 'idle';
 
-  if (!(window.crypto && crypto.subtle && typeof DecompressionStream !== 'undefined')) {
+  if (!(window.crypto && crypto.subtle && typeof DecompressionStream !== 'undefined' && typeof AbortController !== 'undefined')) {
     err.textContent = '\u6D4F\u89C8\u5668\u7248\u672C\u8FC7\u4F4E\uFF0C\u8BF7\u7528\u8F83\u65B0\u7684 Chrome / Edge / Safari \u8BBF\u95EE';
     err.style.visibility = 'visible';
     input.disabled = btn.disabled = true;
@@ -4006,9 +4165,21 @@ function __initGate__() {
 
   __fetchBundle__(); // 输密码的同时后台预下载数据包
 
+  function showProgress(progress) {
+    if (!busy || stage !== 'download') return;
+    downloadBox.style.display = 'block';
+    progressLabel.textContent = __bundleProgressText__(progress);
+    if (progress.total > 0 && progress.loaded <= progress.total && progress.phase !== 'retrying' && progress.phase !== 'connecting') {
+      progressBar.value = Math.min(progress.phase === 'complete' ? 100 : 99, progress.loaded * 100 / progress.total);
+    } else { progressBar.removeAttribute('value'); }
+    btn.textContent = progress.phase === 'retrying' ? '准备重试…' : '下载数据中…';
+  }
+
   function fail(msg) {
     busy = false;
-    btn.textContent = '\u8FDB\u5165\u770B\u677F';
+    btn.disabled = false;
+    btn.textContent = '重新尝试';
+    progressLabel.textContent = stage === 'download' ? '下载已停止，可重新尝试。' : '下载已完成，解锁未完成。';
     err.textContent = msg || '\u5BC6\u7801\u9519\u8BEF\uFF0C\u8BF7\u91CD\u8BD5';
     err.style.visibility = 'visible';
     input.value = '';
@@ -4021,12 +4192,21 @@ function __initGate__() {
     var pwd = input.value;
     if (!pwd) { input.focus(); return; }
     busy = true;
+    stage = 'download';
+    btn.disabled = true;
     err.style.visibility = 'hidden';
+    downloadBox.style.display = 'block';
+    progressLabel.textContent = '正在准备下载…';
+    progressBar.style.display = 'block';
+    progressBar.removeAttribute('value');
     btn.textContent = '\u4E0B\u8F7D\u6570\u636E\u4E2D\u2026';
-    __fetchBundle__().then(function(buf) {
+    __fetchBundle__(false, showProgress).then(function(buf) {
+      stage = 'decrypt';
       btn.textContent = '\u89E3\u5BC6\u4E2D\u2026';
+      progressLabel.textContent = '数据包已下载完成，正在本地解密…';
       return __decrypt__(pwd, buf);
     }).then(function(data) {
+      stage = 'render';
       __DATA__ = data;
       window.__unlockedPwd__ = pwd; // 供手动/定时刷新复用（仅存内存，不落盘）
       document.documentElement.className = document.documentElement.className.replace(' pwd-locked', '');
@@ -4037,8 +4217,12 @@ function __initGate__() {
       }, 320);
       loadAllData();
     }).catch(function(e) {
-      if (e && e.name === 'OperationError') { fail(); }
-      else { __bundlePromise__ = null; fail('\u6570\u636E\u5305\u4E0B\u8F7D\u5931\u8D25\uFF08' + (e && e.message ? e.message : e) + '\uFF09\uFF0C\u8BF7\u91CD\u8BD5'); }
+      var detail = e && e.message ? e.message : String(e);
+      if (stage === 'download') {
+        progressBar.removeAttribute('value'); progressBar.style.display = 'none';
+        fail('数据包下载未完成（' + detail + '）。请重新输入密码后点击“重新尝试”。');
+      } else if (stage === 'decrypt' && e && e.name === 'OperationError') { fail(); }
+      else { fail((stage === 'decrypt' ? '数据解密或解析失败' : '页面初始化失败') + '（' + detail + '），请重试'); }
     });
   }
 
