@@ -1,54 +1,6 @@
 {
-  "generated_at": "2026-10-09T08:30:07",
+  "generated_at": "2026-10-10T08:30:08",
   "days": [
-    {
-      "date": "2026-10-09",
-      "weekday": "五",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "2028年FOMC票委、圣路易联储主席穆萨莱姆发表讲话。",
-          "datetime": "2026-10-09 01:40:00",
-          "hm": "01:40",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-10-09"
-        },
-        {
-          "region": "中国",
-          "indicator": "M2",
-          "subtype": "同比",
-          "event": "9月M2货币供应同比",
-          "datetime": "2026-10-09 12:02:00",
-          "hm": "12:02",
-          "importance": 3,
-          "actual": null,
-          "forecast": null,
-          "previous": 7.5,
-          "link": "",
-          "date": "2026-10-09"
-        },
-        {
-          "region": "中国",
-          "indicator": "社融",
-          "subtype": "累计",
-          "event": "1至9月社会融资规模增量(亿人民币)",
-          "datetime": "2026-10-09 12:02:00",
-          "hm": "12:02",
-          "importance": 3,
-          "actual": null,
-          "forecast": null,
-          "previous": 239100.0,
-          "link": "",
-          "date": "2026-10-09"
-        }
-      ]
-    },
     {
       "date": "2026-10-10",
       "weekday": "六",
@@ -70,9 +22,43 @@
       ]
     },
     {
+      "date": "2026-10-13",
+      "weekday": "二",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2026年FOMC票委、克利夫兰联储主席哈玛克发表讲话。",
+          "datetime": "2026-10-13 00:10:00",
+          "hm": "00:10",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-10-13"
+        }
+      ]
+    },
+    {
       "date": "2026-10-14",
       "weekday": "三",
       "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2028年FOMC票委、波士顿联储主席柯林斯发表讲话。",
+          "datetime": "2026-10-14 04:00:00",
+          "hm": "04:00",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-10-14"
+        },
         {
           "region": "中国",
           "indicator": "CPI",
@@ -80,7 +66,7 @@
           "event": "9月CPI同比",
           "datetime": "2026-10-14 09:30:00",
           "hm": "09:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": null,
           "previous": 0.8,
@@ -122,7 +108,7 @@
           "event": "9月CPI同比",
           "datetime": "2026-10-14 20:30:00",
           "hm": "20:30",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": 3.6,
           "previous": 3.4,
@@ -156,6 +142,26 @@
           "previous": 0.4,
           "link": "",
           "date": "2026-10-14"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-16",
+      "weekday": "五",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "主条",
+          "event": "2026年FOMC票委、克利夫兰联储主席哈玛克发表讲话。",
+          "datetime": "2026-10-16 04:30:00",
+          "hm": "04:30",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-10-16"
         }
       ]
     }
