@@ -1696,9 +1696,11 @@ function drawLineChart(container,data,keys,colors,labels,opts){
   var v=mx-(mx-mn)*i/4;svg.appendChild(svgEl('text',{x:pad.l-6,y:y+3,'text-anchor':'end','font-size':9,fill:'#999'},opts.yFmt?opts.yFmt(v):opts.yInt?Math.round(v)+'':v.toFixed(1)));}
   var step=Math.max(1,Math.floor(data.length/10));
   data.forEach(function(d,i){if(i%step===0||i===data.length-1){svg.appendChild(svgEl('text',{x:pad.l+i*xStep,y:H-pad.b+14,'text-anchor':'middle','font-size':9,fill:'#999',transform:'rotate(-20,'+( pad.l+i*xStep)+','+(H-pad.b+14)+')'},d._label||''));}});
-  keys.forEach(function(k,ki){var pts=[];data.forEach(function(d,i){if(d[k]!=null&&!isNaN(d[k]))pts.push({x:pad.l+i*xStep,y:yS(+d[k]),v:+d[k],l:d._label||''});});
+  keys.forEach(function(k,ki){var pts=[];data.forEach(function(d,i){if(d[k]!=null&&!isNaN(d[k]))pts.push({i:i,x:pad.l+i*xStep,y:yS(+d[k]),v:+d[k],l:d._label||''});});
   if(!pts.length)return;
-  if(pts.length>=2){var pathD=pts.map(function(p,i){return(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+  // With connectNulls:false, restart the path after missing points while retaining
+  // their calendar positions on the x axis. Valid zero values remain plotted.
+  if(pts.length>=2){var pathD=pts.map(function(p,i){return(i===0||(opts.connectNulls===false&&p.i!==pts[i-1].i+1)?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
   svg.appendChild(svgEl('path',{d:pathD,fill:'none',stroke:colors[ki],'stroke-width':2}));}
   pts.forEach(function(p){var c=svgEl('circle',{cx:p.x,cy:p.y,r:10,fill:'transparent',style:'cursor:pointer'});
   c.addEventListener('mouseenter',function(e){showTip(e,labels[ki]+': '+(opts.tipFmt?opts.tipFmt(p.v):p.v.toFixed(1))+' ('+p.l+')');});
@@ -2054,17 +2056,17 @@ function renderSTrend(f){
     +'<div class="card"><h3>排号时段占比趋势</h3><div id="st3"></div></div>'
     +'<div class="card"><h3>日均翻台率下限趋势</h3><div id="st5"></div></div></div>'
     +'<div class="card"><h3>当月累计不含税收入</h3><div id="st4"></div></div>';
-  drawLineChart(document.getElementById('st1'),trend,['avgTables'],[S_COLORS[0]],['日均单店销售桌数'],{tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
-  drawLineChart(document.getElementById('st2'),trend,['avgRev'],[S_COLORS[1]],['日均单店不含税收入'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
-  drawLineChart(document.getElementById('st3'),trend,['queuePct'],[S_COLORS[2]],['排号时段占比'],{tipFmt:function(v){return v.toFixed(1)+'%';},yFmt:function(v){return v.toFixed(0)+'%';}});
-  drawLineChart(document.getElementById('st5'),turnTrendData,['avgTurn'],[S_COLORS[3]],['日均翻台率下限'],{tipFmt:function(v){return v.toFixed(2);},yFmt:function(v){return v.toFixed(1);}});
+  drawLineChart(document.getElementById('st1'),trend,['avgTables'],[S_COLORS[0]],['日均单店销售桌数'],{connectNulls:false,tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
+  drawLineChart(document.getElementById('st2'),trend,['avgRev'],[S_COLORS[1]],['日均单店不含税收入'],{connectNulls:false,tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
+  drawLineChart(document.getElementById('st3'),trend,['queuePct'],[S_COLORS[2]],['排号时段占比'],{connectNulls:false,tipFmt:function(v){return v.toFixed(1)+'%';},yFmt:function(v){return v.toFixed(0)+'%';}});
+  drawLineChart(document.getElementById('st5'),turnTrendData,['avgTurn'],[S_COLORS[3]],['日均翻台率下限'],{connectNulls:false,tipFmt:function(v){return v.toFixed(2);},yFmt:function(v){return v.toFixed(1);}});
   // 计算当月累计收入
   var cumTrend=[];var cumSum=0;
   trend.forEach(function(t){
     if(t._hasData&&t.totalRev!=null){cumSum+=t.totalRev;}
     cumTrend.push({_label:t._label,cumRev:t._hasData?cumSum:null,_hasData:t._hasData});
   });
-  drawLineChart(document.getElementById('st4'),cumTrend,['cumRev'],[S_COLORS[4]],['累计不含税收入'],{tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
+  drawLineChart(document.getElementById('st4'),cumTrend,['cumRev'],[S_COLORS[4]],['累计不含税收入'],{connectNulls:false,tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
 }
 
 function renderSExpand(f){
