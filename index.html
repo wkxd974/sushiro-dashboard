@@ -1827,6 +1827,27 @@ function sTab(t){
 
 function normCity(c){return(c||'').replace(/市$/,'');}
 function cityMatch(dataCity,filterCity){return filterCity==='全部'||normCity(dataCity)===normCity(filterCity);}
+// Date coverage is shared by all three daily-data tabs. A present day is not
+// a guarantee that every store has a record; zero-valued records still count.
+function sDateCoverage(f,rows){
+  var present={};
+  rows.forEach(function(r){if(r.date&&/^\d{4}-\d{2}-\d{2}$/.test(r.date))present[r.date]=true;});
+  var dates=Object.keys(present).sort();
+  var start=f.dateFrom||dates[0], end=f.dateTo||dates[dates.length-1];
+  var fullDates=[];
+  if(start&&end&&/^\d{4}-\d{2}-\d{2}$/.test(start)&&/^\d{4}-\d{2}-\d{2}$/.test(end)){
+    var cur=new Date(start+'T00:00:00Z'), last=new Date(end+'T00:00:00Z');
+    if(Number.isFinite(cur.getTime())&&Number.isFinite(last.getTime())&&
+       cur.toISOString().slice(0,10)===start&&last.toISOString().slice(0,10)===end){
+      while(cur<=last){fullDates.push(cur.toISOString().slice(0,10));cur.setUTCDate(cur.getUTCDate()+1);}
+    }
+  }
+  return{fullDates:fullDates,dataDates:fullDates.filter(function(d){return !!present[d];}),
+    missingDates:fullDates.filter(function(d){return !present[d];})};
+}
+function sDateCoverageTip(coverage){
+  return coverage.missingDates.length>0?'<div class="s-data-coverage-tip" role="status" style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">⚠ 所选范围 '+coverage.fullDates.length+' 天中，'+coverage.dataDates.length+' 天有数据，'+coverage.missingDates.length+' 天暂无数据（'+coverage.missingDates.map(function(d){return d.slice(5);}).join(', ')+'）</div>':'';
+}
 function sRender(){
   var f={month:document.getElementById('sfMonth').value,city:document.getElementById('sfCity').value,
     dateFrom:document.getElementById('sfDateFrom').value,dateTo:document.getElementById('sfDateTo').value};
@@ -1874,7 +1895,8 @@ function renderSCity(f){
   });
   document.getElementById('sDataCount').textContent='城市: '+d.length+' 个 ('+dd.length+' 条日数据)';
   var el=document.getElementById('sp-s_city');
-  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  var dataTip=sDateCoverageTip(sDateCoverage(f,dd));
+  if(!d.length){el.innerHTML=dataTip+'<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var n=d.length;
   var sumRev=d.reduce(function(s,r){return s+(r.total_sales_revenue||0);},0);
   var avgTurn=d.reduce(function(s,r){return s+(r.monthly_turnover_rate||0);},0)/n;
@@ -1895,7 +1917,7 @@ function renderSCity(f){
   }
   if(!totalStoresAuth) totalStoresAuth=dataStores; // fallback if store_base empty
 
-  el.innerHTML='<div class="kpi-row">'
+  el.innerHTML=dataTip+'<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">累计不含税收入下限</div><div class="kv">¥'+(sumRev/10000).toFixed(0)+'万</div><div class="ks">'+n+' 个城市合计</div></div>'
     +'<div class="kpi"><div class="kl">平均翻台率下限</div><div class="kv">'+avgTurn.toFixed(1)+'</div></div>'
     +'<div class="kpi"><div class="kl">平均排号时段占比<span class="metric-note">有排号记录的小时数 ÷ 营业总小时数</span></div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
@@ -1951,8 +1973,9 @@ function renderSStore(f){
   });
   document.getElementById('sDataCount').textContent='门店: '+d.length+' 家 ('+dd.length+' 条日数据)';
   var el=document.getElementById('sp-s_store');
-  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
-  el.innerHTML='<div class="g3"><div class="card"><h3>门店日均翻台率下限 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 所选日期范围内日均翻台率下限</div><div id="ss0"></div></div>'
+  var dataTip=sDateCoverageTip(sDateCoverage(f,dd));
+  if(!d.length){el.innerHTML=dataTip+'<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
+  el.innerHTML=dataTip+'<div class="g3"><div class="card"><h3>门店日均翻台率下限 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 所选日期范围内日均翻台率下限</div><div id="ss0"></div></div>'
     +'<div class="card"><h3>门店日均销售桌数 TOP20（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="ss1"></div></div>'
     +'<div class="card"><h3>门店日均不含税收入 TOP20（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="ss2"></div></div></div>'
     +'<div class="card"><h3>门店汇总明细</h3><div id="sStoreSearch" style="margin:8px 0"></div><div class="scroll-table"><table><thead><tr>'
@@ -2003,20 +2026,15 @@ function renderSTrend(f){
   });
   document.getElementById('sDataCount').textContent='趋势: '+d.length+' 条';
   var el=document.getElementById('sp-s_trend');
-  if(!d.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#999">所选日期范围内暂无数据（数据可能尚未入库）</div>';return;}
+  var coverage=sDateCoverage(f,d), dataTip=sDateCoverageTip(coverage);
+  if(!d.length){el.innerHTML=dataTip+'<div class="card" style="text-align:center;padding:40px;color:#999">所选日期范围内暂无数据（数据可能尚未入库）</div>';return;}
   var g={};d.forEach(function(r){
     if(!g[r.date])g[r.date]={_label:r.date.slice(5),rev:0,tables:0,qh:0,bh:0,n:0};
     g[r.date].rev+=(r.daily_sales_revenue||0);g[r.date].tables+=(r.daily_sales_tables||0);
     g[r.date].qh+=(r.queue_hours||0);g[r.date].bh+=(r.biz_hours||0);g[r.date].n++;
   });
-  // Build complete date range from filter dates
-  var allDates=Object.keys(g).sort();
-  var startD=f.dateFrom||allDates[0], endD=f.dateTo||allDates[allDates.length-1];
-  var fullDates=[];
-  (function(){var cur=new Date(startD+'T00:00:00');var end=new Date(endD+'T00:00:00');while(cur<=end){var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');fullDates.push(ds);cur.setDate(cur.getDate()+1);}})();
+  var fullDates=coverage.fullDates;
   var trend=fullDates.map(function(ds){var o=g[ds];if(o)return{_label:ds.slice(5),avgRev:o.n?o.rev/o.n:0,avgTables:o.n?o.tables/o.n:0,queuePct:o.bh?(o.qh/o.bh)*100:0,totalRev:o.rev,_hasData:true};return{_label:ds.slice(5),avgRev:null,avgTables:null,queuePct:null,totalRev:null,_hasData:false};});
-  var missingDates=fullDates.filter(function(ds){return !g[ds];});
-  var dataTip=missingDates.length>0?'<div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">⚠ 所选范围 '+fullDates.length+' 天中，'+allDates.length+' 天有数据，'+missingDates.length+' 天暂无数据（'+missingDates.map(function(d){return d.slice(5);}).join(', ')+'）</div>':'';
   // Compute daily avg turnover rate from daily data
   var turnG={};d.forEach(function(r){
     if(!turnG[r.date])turnG[r.date]={sum:0,n:0};
