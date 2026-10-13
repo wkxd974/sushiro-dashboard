@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-12T08:30:08",
+  "generated_at": "2026-10-13T08:30:09",
   "days": [
     {
       "date": "2026-10-13",
@@ -218,6 +218,40 @@
           "previous": 4.3,
           "link": "",
           "date": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-20",
+      "weekday": "二",
+      "events": [
+        {
+          "region": "中国",
+          "indicator": "LPR",
+          "subtype": "5年",
+          "event": "10月五年期贷款市场报价利率(LPR)",
+          "datetime": "2026-10-20 09:00:00",
+          "hm": "09:00",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-10-20"
+        },
+        {
+          "region": "中国",
+          "indicator": "LPR",
+          "subtype": "1年",
+          "event": "10月一年期贷款市场报价利率(LPR)",
+          "datetime": "2026-10-20 09:00:00",
+          "hm": "09:00",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": null,
+          "link": "",
+          "date": "2026-10-20"
         }
       ]
     }
