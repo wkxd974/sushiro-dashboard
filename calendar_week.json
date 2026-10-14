@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-10-13T08:30:09",
+  "generated_at": "2026-10-14T08:30:08",
   "days": [
-    {
-      "date": "2026-10-13",
-      "weekday": "二",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "2026年FOMC票委、克利夫兰联储主席哈玛克发表讲话。",
-          "datetime": "2026-10-13 00:10:00",
-          "hm": "00:10",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-10-13"
-        }
-      ]
-    },
     {
       "date": "2026-10-14",
       "weekday": "三",
