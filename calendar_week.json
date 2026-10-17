@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-10-16T08:30:08",
+  "generated_at": "2026-10-17T08:30:07",
   "days": [
-    {
-      "date": "2026-10-16",
-      "weekday": "五",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "主条",
-          "event": "2026年FOMC票委、克利夫兰联储主席哈玛克发表讲话。",
-          "datetime": "2026-10-16 04:30:00",
-          "hm": "04:30",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": null,
-          "link": "",
-          "date": "2026-10-16"
-        }
-      ]
-    },
     {
       "date": "2026-10-19",
       "weekday": "一",
@@ -32,7 +12,7 @@
           "event": "1至9月社会消费品零售总额同比",
           "datetime": "2026-10-19 10:00:00",
           "hm": "10:00",
-          "importance": 3,
+          "importance": 2,
           "actual": null,
           "forecast": null,
           "previous": 1.1,
@@ -46,7 +26,7 @@
           "event": "9月社会消费品零售总额同比",
           "datetime": "2026-10-19 10:00:00",
           "hm": "10:00",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": 0.5,
           "previous": 0.4,
@@ -88,7 +68,7 @@
           "event": "三季度GDP同比",
           "datetime": "2026-10-19 10:00:00",
           "hm": "10:00",
-          "importance": 3,
+          "importance": 4,
           "actual": null,
           "forecast": 4.4,
           "previous": 4.3,
