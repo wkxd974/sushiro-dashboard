@@ -1,4 +1,39 @@
 {
-  "generated_at": "2026-10-21T08:30:08",
-  "days": []
+  "generated_at": "2026-10-22T08:30:08",
+  "days": [
+    {
+      "date": "2026-10-29",
+      "weekday": "四",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "下限",
+          "event": "FOMC利率决策(下限)",
+          "datetime": "2026-10-29 02:00:00",
+          "hm": "02:00",
+          "importance": 3,
+          "actual": null,
+          "forecast": 3.75,
+          "previous": 3.75,
+          "link": "",
+          "date": "2026-10-29"
+        },
+        {
+          "region": "美国",
+          "indicator": "FOMC",
+          "subtype": "上限",
+          "event": "FOMC利率决策(上限)",
+          "datetime": "2026-10-29 02:00:00",
+          "hm": "02:00",
+          "importance": 3,
+          "actual": null,
+          "forecast": 4.0,
+          "previous": 4.0,
+          "link": "",
+          "date": "2026-10-29"
+        }
+      ]
+    }
+  ]
 }
