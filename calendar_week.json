@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-28T08:30:20",
+  "generated_at": "2026-10-29T08:30:13",
   "days": [
     {
       "date": "2026-10-29",
@@ -13,11 +13,12 @@
           "datetime": "2026-10-29 02:00:00",
           "hm": "02:00",
           "importance": 4,
-          "actual": null,
+          "actual": 3.75,
           "forecast": 3.75,
           "previous": 3.75,
           "link": "",
-          "date": "2026-10-29"
+          "date": "2026-10-29",
+          "surprise": "符合预期"
         },
         {
           "region": "美国",
@@ -27,11 +28,12 @@
           "datetime": "2026-10-29 02:00:00",
           "hm": "02:00",
           "importance": 4,
-          "actual": null,
+          "actual": 4.0,
           "forecast": 4.0,
           "previous": 4.0,
           "link": "",
-          "date": "2026-10-29"
+          "date": "2026-10-29",
+          "surprise": "符合预期"
         }
       ]
     },
@@ -120,6 +122,40 @@
           "previous": 52.4,
           "link": "",
           "date": "2026-11-04"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-05",
+      "weekday": "四",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "非农",
+          "subtype": "主条",
+          "event": "三季度非农单位劳动力成本初值",
+          "datetime": "2026-11-05 21:30:00",
+          "hm": "21:30",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": 1.2,
+          "link": "",
+          "date": "2026-11-05"
+        },
+        {
+          "region": "美国",
+          "indicator": "非农",
+          "subtype": "主条",
+          "event": "三季度非农生产力初值",
+          "datetime": "2026-11-05 21:30:00",
+          "hm": "21:30",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": 1.4,
+          "link": "",
+          "date": "2026-11-05"
         }
       ]
     }
