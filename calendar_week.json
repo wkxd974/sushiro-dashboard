@@ -1,42 +1,6 @@
 {
-  "generated_at": "2026-10-29T08:30:13",
+  "generated_at": "2026-10-30T08:30:08",
   "days": [
-    {
-      "date": "2026-10-29",
-      "weekday": "四",
-      "events": [
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "下限",
-          "event": "FOMC利率决策(下限)",
-          "datetime": "2026-10-29 02:00:00",
-          "hm": "02:00",
-          "importance": 4,
-          "actual": 3.75,
-          "forecast": 3.75,
-          "previous": 3.75,
-          "link": "",
-          "date": "2026-10-29",
-          "surprise": "符合预期"
-        },
-        {
-          "region": "美国",
-          "indicator": "FOMC",
-          "subtype": "上限",
-          "event": "FOMC利率决策(上限)",
-          "datetime": "2026-10-29 02:00:00",
-          "hm": "02:00",
-          "importance": 4,
-          "actual": 4.0,
-          "forecast": 4.0,
-          "previous": 4.0,
-          "link": "",
-          "date": "2026-10-29",
-          "surprise": "符合预期"
-        }
-      ]
-    },
     {
       "date": "2026-10-31",
       "weekday": "六",
@@ -156,6 +120,26 @@
           "previous": 1.4,
           "link": "",
           "date": "2026-11-05"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-06",
+      "weekday": "五",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "非农",
+          "subtype": "主条",
+          "event": "10月非农就业人口变动(万人)",
+          "datetime": "2026-11-06 21:30:00",
+          "hm": "21:30",
+          "importance": 4,
+          "actual": null,
+          "forecast": 6.5,
+          "previous": 2.9,
+          "link": "",
+          "date": "2026-11-06"
         }
       ]
     }
