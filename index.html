@@ -1514,7 +1514,7 @@ function loadAllData() {
   ]).then(function(results) {
     sushiroCityData = Array.isArray(results[0]) ? results[0] : [];
     sushiroStoreData = Array.isArray(results[1]) ? results[1] : [];
-    sushiroDailyData = Array.isArray(results[2]) ? results[2] : [];
+    sushiroDailyData = Array.isArray(results[2]) ? results[2].filter(function(r){return !sExcludedSourceDate(r.date);}) : [];
     banuCityData = Array.isArray(results[3]) ? results[3] : [];
     banuStoreData = Array.isArray(results[4]) ? results[4] : [];
     banuDailyData = Array.isArray(results[5]) ? results[5] : [];
@@ -1829,11 +1829,13 @@ function sTab(t){
 
 function normCity(c){return(c||'').replace(/市$/,'');}
 function cityMatch(dataCity,filterCity){return filterCity==='全部'||normCity(dataCity)===normCity(filterCity);}
+// Confirmed partial source day: never present the surviving morning data as a full day.
+function sExcludedSourceDate(date){return date==='2026-11-01';}
 // Date coverage is shared by all three daily-data tabs. A present day is not
 // a guarantee that every store has a record; zero-valued records still count.
 function sDateCoverage(f,rows){
   var present={};
-  rows.forEach(function(r){if(r.date&&/^\d{4}-\d{2}-\d{2}$/.test(r.date))present[r.date]=true;});
+  rows.forEach(function(r){if(r.date&&!sExcludedSourceDate(r.date)&&/^\d{4}-\d{2}-\d{2}$/.test(r.date))present[r.date]=true;});
   var dates=Object.keys(present).sort();
   var start=f.dateFrom||dates[0], end=f.dateTo||dates[dates.length-1];
   var fullDates=[];
@@ -1848,7 +1850,8 @@ function sDateCoverage(f,rows){
     missingDates:fullDates.filter(function(d){return !present[d];})};
 }
 function sDateCoverageTip(coverage){
-  return coverage.missingDates.length>0?'<div class="s-data-coverage-tip" role="status" style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">⚠ 所选范围 '+coverage.fullDates.length+' 天中，'+coverage.dataDates.length+' 天有数据，'+coverage.missingDates.length+' 天暂无数据（'+coverage.missingDates.map(function(d){return d.slice(5);}).join(', ')+'）</div>':'';
+  var incident=coverage.fullDates.indexOf('2026-11-01')>=0?'<div class="s-source-incident" style="margin-top:6px">说明：2026年11月1日寿司郎服务器故障，18:00–21:00排队数据缺失；当日不纳入完整日统计，折线保留断点。</div>':'';
+  return coverage.missingDates.length>0?'<div class="s-data-coverage-tip" role="status" style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#e65100">⚠ 所选范围 '+coverage.fullDates.length+' 天中，'+coverage.dataDates.length+' 天有数据，'+coverage.missingDates.length+' 天暂无数据（'+coverage.missingDates.map(function(d){return d.slice(5);}).join(', ')+'）'+incident+'</div>':'';
 }
 function sRender(){
   var f={month:document.getElementById('sfMonth').value,city:document.getElementById('sfCity').value,
@@ -1864,7 +1867,7 @@ function renderSCity(f){
   var dd=sushiroDailyData.filter(function(r){
     var mc=cityMatch(r.city,f.city);
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
-    return mc&&md;
+    return mc&&md&&!sExcludedSourceDate(r.date);
   });
   // Build city-level aggregates from daily data
   var cg={};dd.forEach(function(r){
@@ -1959,7 +1962,7 @@ function renderSStore(f){
   var dd=sushiroDailyData.filter(function(r){
     var mc=cityMatch(r.city,f.city);
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
-    return mc&&md;
+    return mc&&md&&!sExcludedSourceDate(r.date);
   });
   var sg={};dd.forEach(function(r){
     var key=r.store_id||r.store_name;if(!key)return;
@@ -2024,7 +2027,7 @@ function renderSTrend(f){
   var d=sushiroDailyData.filter(function(r){
     var mc=cityMatch(r.city,f.city);
     var md=(!f.dateFrom||r.date>=f.dateFrom)&&(!f.dateTo||r.date<=f.dateTo);
-    return mc&&md;
+    return mc&&md&&!sExcludedSourceDate(r.date);
   });
   document.getElementById('sDataCount').textContent='趋势: '+d.length+' 条';
   var el=document.getElementById('sp-s_trend');
