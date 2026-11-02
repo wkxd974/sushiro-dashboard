@@ -1801,7 +1801,8 @@ function syncDateRangeToMonth(){
   } else {
     var dates=_dailyDatesByMonth[m];
     if(dates && dates.length){
-      document.getElementById('sfDateFrom').value=dates[0];
+      // Keep the confirmed month-start outage visible when selecting November.
+      document.getElementById('sfDateFrom').value=m==='2026-11'?'2026-11-01':dates[0];
       document.getElementById('sfDateTo').value=dates[dates.length-1];
     } else {
       // No daily data for this month, set to month boundaries
