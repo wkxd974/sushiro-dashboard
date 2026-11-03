@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-11-02T08:30:13",
+  "generated_at": "2026-11-03T08:30:07",
   "days": [
-    {
-      "date": "2026-11-02",
-      "weekday": "一",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "10月RatingDog制造业PMI",
-          "datetime": "2026-11-02 09:45:00",
-          "hm": "09:45",
-          "importance": 3,
-          "actual": null,
-          "forecast": null,
-          "previous": 52.1,
-          "link": "",
-          "date": "2026-11-02"
-        }
-      ]
-    },
     {
       "date": "2026-11-04",
       "weekday": "三",
@@ -154,6 +134,68 @@
           "previous": 274600.0,
           "link": "",
           "date": "2026-11-09"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-10",
+      "weekday": "二",
+      "events": [
+        {
+          "region": "美国",
+          "indicator": "CPI",
+          "subtype": "核心同比",
+          "event": "10月核心CPI同比",
+          "datetime": "2026-11-10 21:30:00",
+          "hm": "21:30",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 2.6,
+          "link": "",
+          "date": "2026-11-10"
+        },
+        {
+          "region": "美国",
+          "indicator": "CPI",
+          "subtype": "同比",
+          "event": "10月CPI同比",
+          "datetime": "2026-11-10 21:30:00",
+          "hm": "21:30",
+          "importance": 3,
+          "actual": null,
+          "forecast": null,
+          "previous": 3.7,
+          "link": "",
+          "date": "2026-11-10"
+        },
+        {
+          "region": "美国",
+          "indicator": "CPI",
+          "subtype": "核心环比",
+          "event": "10月核心CPI环比",
+          "datetime": "2026-11-10 21:30:00",
+          "hm": "21:30",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": 0.3,
+          "link": "",
+          "date": "2026-11-10"
+        },
+        {
+          "region": "美国",
+          "indicator": "CPI",
+          "subtype": "环比",
+          "event": "10月CPI环比",
+          "datetime": "2026-11-10 21:30:00",
+          "hm": "21:30",
+          "importance": 2,
+          "actual": null,
+          "forecast": null,
+          "previous": 0.6,
+          "link": "",
+          "date": "2026-11-10"
         }
       ]
     }
