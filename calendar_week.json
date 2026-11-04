@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-03T08:30:07",
+  "generated_at": "2026-11-04T08:30:10",
   "days": [
     {
       "date": "2026-11-04",
@@ -34,7 +34,7 @@
           "hm": "21:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 0.4,
           "previous": 1.2,
           "link": "",
           "date": "2026-11-05"
@@ -48,7 +48,7 @@
           "hm": "21:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 2.7,
           "previous": 1.4,
           "link": "",
           "date": "2026-11-05"
@@ -178,7 +178,7 @@
           "hm": "21:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 0.2,
           "previous": 0.3,
           "link": "",
           "date": "2026-11-10"
@@ -192,7 +192,7 @@
           "hm": "21:30",
           "importance": 2,
           "actual": null,
-          "forecast": null,
+          "forecast": 0.3,
           "previous": 0.6,
           "link": "",
           "date": "2026-11-10"
