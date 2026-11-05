@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-11-04T08:30:10",
+  "generated_at": "2026-11-05T08:30:16",
   "days": [
-    {
-      "date": "2026-11-04",
-      "weekday": "三",
-      "events": [
-        {
-          "region": "中国",
-          "indicator": "PMI",
-          "subtype": "主条",
-          "event": "10月RatingDog综合PMI",
-          "datetime": "2026-11-04 09:45:00",
-          "hm": "09:45",
-          "importance": 2,
-          "actual": null,
-          "forecast": null,
-          "previous": 52.4,
-          "link": "",
-          "date": "2026-11-04"
-        }
-      ]
-    },
     {
       "date": "2026-11-05",
       "weekday": "四",
