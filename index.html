@@ -1864,6 +1864,24 @@ function sRender(){
   else renderSExpand(f);
 }
 
+// Same weighting as the daily report: sum(sales tables) / sum(tables * valid days).
+// Each store_daily row is one store-day; include numerator and denominator together.
+function sAccumulateTurnover(target,row){
+  var sales=row.daily_sales_tables, tables=row.tables;
+  if(typeof sales!=='number'||!Number.isFinite(sales)||sales<0||
+     typeof tables!=='number'||!Number.isFinite(tables)||tables<=0)return;
+  target.turnSalesTables+=sales;
+  target.turnTableDays+=tables;
+}
+function sTurnoverValue(target){
+  return target.turnTableDays>0?target.turnSalesTables/target.turnTableDays:null;
+}
+function sWeightedTurnover(rows){
+  var total={turnSalesTables:0,turnTableDays:0};
+  rows.forEach(function(row){sAccumulateTurnover(total,row);});
+  return sTurnoverValue(total);
+}
+
 function renderSCity(f){
   // Aggregate from daily data when date range is set
   var dd=sushiroDailyData.filter(function(r){
@@ -1875,7 +1893,7 @@ function renderSCity(f){
   var cg={};dd.forEach(function(r){
     if(!r.city)return;
     var nc=normCity(r.city);
-    if(!cg[nc])cg[nc]={city:nc,stores:{},dates:{},rev:0,tables:0,qh:0,q50h:0,bh:0,turnSum:0,turnN:0};
+    if(!cg[nc])cg[nc]={city:nc,stores:{},dates:{},rev:0,tables:0,qh:0,q50h:0,bh:0,turnSalesTables:0,turnTableDays:0};
     cg[nc].stores[r.store_id||r.store_name]=1;
     cg[nc].dates[r.date]=1;
     cg[nc].rev+=(r.daily_sales_revenue||0);
@@ -1883,8 +1901,7 @@ function renderSCity(f){
     cg[nc].qh+=(r.queue_hours||0);
     cg[nc].q50h+=(r.queue50_hours||0);
     cg[nc].bh+=(r.biz_hours||0);
-    cg[nc].turnSum+=(r.daily_turnover_rate||0);
-    cg[nc].turnN++;
+    sAccumulateTurnover(cg[nc],r);
   });
   var d=Object.values(cg).map(function(c){
     var nStores=Object.keys(c.stores).length;
@@ -1894,7 +1911,7 @@ function renderSCity(f){
       city:c.city,store_count:nStores,data_days:nDays,
       daily_avg_sales_tables:nStores&&nDays?c.tables/nDays/nStores:0,
       daily_avg_sales_revenue:nStores&&nDays?c.rev/nDays/nStores:0,
-      monthly_turnover_rate:c.turnN?c.turnSum/c.turnN:0,
+      monthly_turnover_rate:sTurnoverValue(c),
       queue_hour_pct:c.bh?c.qh/c.bh:0,
       queue50_hour_pct:c.bh?c.q50h/c.bh:0,
       total_sales_revenue:c.rev
@@ -1906,7 +1923,7 @@ function renderSCity(f){
   if(!d.length){el.innerHTML=dataTip+'<div class="card" style="text-align:center;padding:40px;color:#999">暂无数据</div>';return;}
   var n=d.length;
   var sumRev=d.reduce(function(s,r){return s+(r.total_sales_revenue||0);},0);
-  var avgTurn=d.reduce(function(s,r){return s+(r.monthly_turnover_rate||0);},0)/n;
+  var avgTurn=sWeightedTurnover(dd);
   var avgQueue=d.reduce(function(s,r){return s+(r.queue_hour_pct||0);},0)/n;
   var avgQ50=d.reduce(function(s,r){return s+(r.queue50_hour_pct||0);},0)/n;
   var dataStores=d.reduce(function(s,r){return s+(r.store_count||0);},0);
@@ -1926,12 +1943,12 @@ function renderSCity(f){
 
   el.innerHTML=dataTip+'<div class="kpi-row">'
     +'<div class="kpi"><div class="kl">累计不含税收入下限</div><div class="kv">¥'+(sumRev/10000).toFixed(0)+'万</div><div class="ks">'+n+' 个城市合计</div></div>'
-    +'<div class="kpi"><div class="kl">平均翻台率下限</div><div class="kv">'+avgTurn.toFixed(1)+'</div></div>'
+    +'<div class="kpi"><div class="kl">平均翻台率下限<span class="metric-note">按桌数×有效数据天数加权，与日报一致</span></div><div class="kv">'+fmtRate(avgTurn)+'</div></div>'
     +'<div class="kpi"><div class="kl">平均排号时段占比<span class="metric-note">有排号记录的小时数 ÷ 营业总小时数</span></div><div class="kv">'+(avgQueue*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">排50号以上占比<span class="metric-note">排号≥50的小时数 ÷ 营业总小时数</span></div><div class="kv">'+(avgQ50*100).toFixed(1)+'%</div></div>'
     +'<div class="kpi"><div class="kl">营业门店数</div><div class="kv">'+totalStoresAuth+'</div></div>'
     +'</div>'
-    +'<div class="g3"><div class="card"><h3>城市日均翻台率下限排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 所选月份内日均翻台率下限</div><div id="sc0"></div></div>'
+    +'<div class="g3"><div class="card"><h3>城市日均翻台率下限排行</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 所选日期范围内，按桌数×有效数据天数加权</div><div id="sc0"></div></div>'
     +'<div class="card"><h3>城市日均单店销售桌数排行（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 日均单店销售桌数（总桌数÷数据天数÷门店数）</div><div id="sc1"></div></div>'
     +'<div class="card"><h3>城市日均单店不含税收入排行（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 日均单店不含税收入（总收入÷数据天数÷门店数）</div><div id="sc2"></div></div></div>'
     +'<div class="card"><h3>城市月滚动汇总明细</h3>'
@@ -1968,15 +1985,15 @@ function renderSStore(f){
   });
   var sg={};dd.forEach(function(r){
     var key=r.store_id||r.store_name;if(!key)return;
-    if(!sg[key])sg[key]={store_name:r.store_name||r.store_id,store_id:r.store_id,city:r.city,rev:0,tables:0,qh:0,bh:0,turnSum:0,n:0,dates:{},tbls:r.tables||0,up:r.unit_price||0};
+    if(!sg[key])sg[key]={store_name:r.store_name||r.store_id,store_id:r.store_id,city:r.city,rev:0,tables:0,qh:0,bh:0,turnSalesTables:0,turnTableDays:0,n:0,dates:{},tbls:r.tables||0,up:r.unit_price||0};
     sg[key].rev+=(r.daily_sales_revenue||0);sg[key].tables+=(r.daily_sales_tables||0);
     sg[key].qh+=(r.queue_hours||0);sg[key].bh+=(r.biz_hours||0);
-    sg[key].turnSum+=(r.daily_turnover_rate||0);sg[key].n++;if(r.date)sg[key].dates[r.date]=1;
+    sAccumulateTurnover(sg[key],r);sg[key].n++;if(r.date)sg[key].dates[r.date]=1;
   });
   var d=Object.values(sg).map(function(s){
     return{month:f.dateFrom&&f.dateTo?(f.dateFrom+'~'+f.dateTo):(f.month||''),city:s.city,store_name:s.store_name,store_id:s.store_id,tables:s.tbls,unit_price:s.up,
       daily_avg_sales_tables:s.n?s.tables/s.n:0,daily_avg_sales_revenue:s.n?s.rev/s.n:0,
-      queue_hour_pct:s.bh?s.qh/s.bh:0,monthly_turnover_rate:s.n?s.turnSum/s.n:0,data_days:Object.keys(s.dates).length};
+      queue_hour_pct:s.bh?s.qh/s.bh:0,monthly_turnover_rate:sTurnoverValue(s),data_days:Object.keys(s.dates).length};
   });
   document.getElementById('sDataCount').textContent='门店: '+d.length+' 家 ('+dd.length+' 条日数据)';
   var el=document.getElementById('sp-s_store');
@@ -1985,7 +2002,7 @@ function renderSStore(f){
   el.innerHTML=dataTip+'<div class="g3"><div class="card"><h3>门店日均翻台率下限 TOP20</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 所选日期范围内日均翻台率下限</div><div id="ss0"></div></div>'
     +'<div class="card"><h3>门店日均销售桌数 TOP20（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="ss1"></div></div>'
     +'<div class="card"><h3>门店日均不含税收入 TOP20（下限）</h3><div style="font-size:11px;color:#888;margin:-4px 0 8px;padding:0 4px">📊 数据为所选日期范围内的<b>日均值</b></div><div id="ss2"></div></div></div>'
-    +'<div class="card"><h3>门店汇总明细</h3><div id="sStoreSearch" style="margin:8px 0"></div><div class="scroll-table"><table><thead><tr>'
+    +'<div class="card"><h3>门店汇总明细</h3><div style="font-size:11px;color:#888">翻台率按桌数×有效数据天数加权，与日报一致</div><div id="sStoreSearch" style="margin:8px 0"></div><div class="scroll-table"><table><thead><tr>'
     +'<th>日期范围</th><th>城市</th><th>门店</th><th>数据天数</th>'
     +'<th>日均销售桌数</th><th>日均不含税收入</th><th>排号时段占比<br><span style="font-size:10px;color:#999;font-weight:400">排号小时÷营业小时</span></th><th>翻台率下限</th>'
     +'</tr></thead><tbody id="sStoreTbl"></tbody></table></div></div>';
@@ -2002,7 +2019,7 @@ function renderSStore(f){
   var sortedD=d.sort(function(a,b){return(b.monthly_turnover_rate||0)-(a.monthly_turnover_rate||0);});
   window._sStoreRows=sortedD;
   // Compute average turnover rate for badge coloring
-  var sAvgTurn=sortedD.length?sortedD.reduce(function(s,r){return s+(r.monthly_turnover_rate||0);},0)/sortedD.length:0;
+  var sAvgTurn=sWeightedTurnover(dd);
   var tbody=document.getElementById('sStoreTbl');
   sortedD.slice(0,200).forEach(function(r){
     var diff=(r.monthly_turnover_rate||0)-sAvgTurn;
@@ -2042,16 +2059,14 @@ function renderSTrend(f){
   });
   var fullDates=coverage.fullDates;
   var trend=fullDates.map(function(ds){var o=g[ds];if(o)return{_label:ds.slice(5),avgRev:o.n?o.rev/o.n:0,avgTables:o.n?o.tables/o.n:0,queuePct:o.bh?(o.qh/o.bh)*100:0,totalRev:o.rev,_hasData:true};return{_label:ds.slice(5),avgRev:null,avgTables:null,queuePct:null,totalRev:null,_hasData:false};});
-  // Compute daily avg turnover rate from daily data
+  // Apply the daily report's table-weighted turnover to each date.
   var turnG={};d.forEach(function(r){
-    if(!turnG[r.date])turnG[r.date]={sum:0,n:0};
-    // Zero is a valid queue-based lower bound; missing/invalid rates are not zero.
-    var rate=r.daily_turnover_rate;
-    if(typeof rate==='number'&&Number.isFinite(rate)&&rate>=0){turnG[r.date].sum+=rate;turnG[r.date].n++;}
+    if(!turnG[r.date])turnG[r.date]={turnSalesTables:0,turnTableDays:0};
+    sAccumulateTurnover(turnG[r.date],r);
   });
   var turnTrendData=fullDates.map(function(ds){
     var o=turnG[ds];
-    return{_label:ds.slice(5),avgTurn:o&&o.n?o.sum/o.n:null};
+    return{_label:ds.slice(5),avgTurn:o?sTurnoverValue(o):null};
   });
 
   el.innerHTML=dataTip+'<div class="g2">'
@@ -2059,7 +2074,7 @@ function renderSTrend(f){
     +'<div class="card"><h3>日均单店不含税收入趋势</h3><div id="st2"></div></div></div>'
     +'<div class="g2">'
     +'<div class="card"><h3>排号时段占比趋势</h3><div id="st3"></div></div>'
-    +'<div class="card"><h3>日均翻台率下限趋势</h3><div id="st5"></div></div></div>'
+    +'<div class="card"><h3>日均翻台率下限趋势</h3><div style="font-size:11px;color:#888">按当日有效门店桌数加权，与日报一致</div><div id="st5"></div></div></div>'
     +'<div class="card"><h3>当月累计不含税收入</h3><div id="st4"></div></div>';
   drawLineChart(document.getElementById('st1'),trend,['avgTables'],[S_COLORS[0]],['日均单店销售桌数'],{connectNulls:false,tipFmt:function(v){return v.toFixed(0)+'桌';},yFmt:function(v){return Math.round(v);}});
   drawLineChart(document.getElementById('st2'),trend,['avgRev'],[S_COLORS[1]],['日均单店不含税收入'],{connectNulls:false,tipFmt:fmtMoney,yFmt:function(v){return(v/10000).toFixed(0)+'万';}});
